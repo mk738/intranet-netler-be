@@ -72,6 +72,12 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- Actuator — /actuator/health for Railway healthcheck -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+
     <!-- Test -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

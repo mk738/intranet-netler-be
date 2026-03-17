@@ -53,6 +53,15 @@ firebase:
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
 logging:
   level:
     com.company.intranet: DEBUG
