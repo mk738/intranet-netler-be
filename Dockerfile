@@ -3,19 +3,15 @@ FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 COPY pom.xml .
-# Download dependencies first (cached layer unless pom.xml changes)
-RUN --mount=type=cache,target=/root/.m2 \
-    mvn dependency:go-offline -B 2>/dev/null || true
+RUN mvn dependency:go-offline -B
 
 COPY src ./src
-RUN --mount=type=cache,target=/root/.m2 \
-    mvn clean package -DskipTests -B
+RUN mvn clean package -DskipTests -B
 
 # ── Stage 2: run ──────────────────────────────────────────────────────────────
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-# Non-root user
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring
 
