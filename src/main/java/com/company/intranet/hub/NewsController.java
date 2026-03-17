@@ -1,0 +1,73 @@
+package com.company.intranet.hub;
+
+import com.company.intranet.common.response.ApiResponse;
+import com.company.intranet.employee.Employee;
+import com.company.intranet.hub.dto.*;
+import com.company.intranet.security.CurrentUser;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/news")
+@RequiredArgsConstructor
+public class NewsController {
+
+    private final HubService hubService;
+
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<NewsListDto>> getNews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @CurrentUser Employee me) {
+        boolean isAdmin = me.getRole() == Employee.Role.ADMIN;
+        return ResponseEntity.ok(ApiResponse.success(hubService.getNews(page, size, isAdmin)));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<NewsPostDetailDto>> getNewsById(
+            @PathVariable UUID id,
+            @CurrentUser Employee me) {
+        boolean isAdmin = me.getRole() == Employee.Role.ADMIN;
+        return ResponseEntity.ok(ApiResponse.success(hubService.getNewsById(id, isAdmin)));
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<NewsPostDetailDto>> createNews(
+            @RequestBody @Valid CreateNewsRequest request,
+            @CurrentUser Employee me) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(hubService.createNews(request, me)));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<NewsPostDetailDto>> updateNews(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateNewsRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(hubService.updateNews(id, request)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteNews(@PathVariable UUID id) {
+        hubService.deleteNews(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/publish")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<NewsPostDetailDto>> publishNews(
+            @PathVariable UUID id,
+            @RequestBody PublishNewsRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(hubService.publishNews(id, request.publish())));
+    }
+}

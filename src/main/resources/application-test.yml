@@ -1,0 +1,44 @@
+# Spring profile: test
+# Used in Railway test environment
+# Schema managed by Hibernate ddl-auto=update
+# All secrets injected via Railway environment variables
+# Activate with: SPRING_PROFILES_ACTIVE=test
+
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  flyway:
+    enabled: false
+
+  jpa:
+    # Hibernate must run first so tables exist before the seed SQL runs
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  sql:
+    init:
+      # Run on every startup — the script DELETEs then re-INSERTs, so it is idempotent
+      mode: always
+      data-locations: classpath:db/seed/dev-data.sql
+
+cors:
+  allowed-origins: ${CORS_ORIGINS}
+
+logging:
+  level:
+    com.company.intranet: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
