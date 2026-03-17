@@ -1,9 +1,7 @@
 [build]
-builder = "nixpacks"
-buildCommand = "mvn clean package -DskipTests"
+builder = "dockerfile"
 
 [deploy]
-startCommand = "java -jar target/intranet-0.1.0.jar"
 healthcheckPath = "/actuator/health"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
