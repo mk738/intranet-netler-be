@@ -117,6 +117,25 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success(null, "Contract uploaded"));
     }
 
+    // ── CV ────────────────────────────────────────────────────────────────────
+
+    @GetMapping("/{id}/cv")
+    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    public ResponseEntity<ApiResponse<ContractDto>> getCv(
+            @PathVariable UUID id,
+            @CurrentUser Employee me) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.getCv(id)));
+    }
+
+    @PostMapping(value = "/{id}/cv", consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> uploadCv(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+        employeeService.uploadCv(id, file);
+        return ResponseEntity.ok(ApiResponse.success(null, "CV uploaded"));
+    }
+
     // ── Benefits ──────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/benefits")
