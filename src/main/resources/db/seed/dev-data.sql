@@ -23,6 +23,7 @@
 DELETE FROM education;
 DELETE FROM bank_info;
 DELETE FROM employee_contract;
+DELETE FROM employee_cv;
 DELETE FROM employee_benefit;
 DELETE FROM vacation_requests;
 DELETE FROM event_rsvp;

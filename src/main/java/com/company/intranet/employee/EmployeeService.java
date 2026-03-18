@@ -28,6 +28,7 @@ public class EmployeeService {
     private final EducationRepository        educationRepository;
     private final BankInfoRepository         bankInfoRepository;
     private final EmployeeContractRepository contractRepository;
+    private final EmployeeCvRepository       cvRepository;
     private final EmployeeBenefitRepository  benefitRepository;
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
@@ -209,6 +210,35 @@ public class EmployeeService {
             contract.setContentType(file.getContentType());
             contract.setData(file.getBytes());
             contractRepository.save(contract);
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to read uploaded file");
+        }
+    }
+
+    // ── CV ────────────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public ContractDto getCv(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        EmployeeCv cv = cvRepository.findByEmployee(employee)
+                .orElseThrow(() -> new ResourceNotFoundException("No CV found"));
+        return new ContractDto(
+                Base64.getEncoder().encodeToString(cv.getData()),
+                cv.getContentType()
+        );
+    }
+
+    @Transactional
+    public void uploadCv(UUID employeeId, MultipartFile file) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        try {
+            EmployeeCv cv = cvRepository.findByEmployee(employee)
+                    .orElseGet(() -> EmployeeCv.builder().employee(employee).build());
+            cv.setContentType(file.getContentType());
+            cv.setData(file.getBytes());
+            cvRepository.save(cv);
         } catch (IOException e) {
             throw new BadRequestException("Failed to read uploaded file");
         }

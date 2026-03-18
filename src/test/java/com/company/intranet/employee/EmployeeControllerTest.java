@@ -240,6 +240,63 @@ class EmployeeControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    // ── GET /api/employees/{id}/cv ────────────────────────────────────────────
+
+    @Test
+    void getCv_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        ContractDto dto = new ContractDto("cvbase64==", "application/pdf");
+
+        when(employeeService.getCv(EMP_ID)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/employees/" + EMP_ID + "/cv")
+                        .with(authentication(auth(admin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.contentType").value("application/pdf"))
+                .andExpect(jsonPath("$.data.data").value("cvbase64=="));
+    }
+
+    @Test
+    void getCv_asOwner_returns200() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        ContractDto dto = new ContractDto("cvbase64==", "application/pdf");
+
+        when(employeeService.getCv(EMP_ID)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/employees/" + EMP_ID + "/cv")
+                        .with(authentication(auth(emp))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void uploadCv_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "cv.pdf", "application/pdf", "pdf-bytes".getBytes());
+
+        doNothing().when(employeeService).uploadCv(eq(EMP_ID), any());
+
+        mockMvc.perform(multipart("/api/employees/" + EMP_ID + "/cv")
+                        .file(file)
+                        .with(authentication(auth(admin)))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void uploadCv_asEmployee_returns403() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "cv.pdf", "application/pdf", "pdf-bytes".getBytes());
+
+        mockMvc.perform(multipart("/api/employees/" + EMP_ID + "/cv")
+                        .file(file)
+                        .with(authentication(auth(emp)))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
     // ── GET /api/employees/{id}/benefits ─────────────────────────────────────
 
     @Test
