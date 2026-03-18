@@ -12,7 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,12 +24,14 @@ import java.util.UUID;
 @Slf4j
 public class EmployeeService {
 
-    private final EmployeeRepository       employeeRepository;
-    private final EducationRepository      educationRepository;
-    private final BankInfoRepository       bankInfoRepository;
-    private final FirebaseAuth             firebaseAuth;
-    private final ApplicationEventPublisher eventPublisher;
-    private final EmployeeMapper           employeeMapper;
+    private final EmployeeRepository         employeeRepository;
+    private final EducationRepository        educationRepository;
+    private final BankInfoRepository         bankInfoRepository;
+    private final EmployeeContractRepository contractRepository;
+    private final EmployeeBenefitRepository  benefitRepository;
+    private final FirebaseAuth               firebaseAuth;
+    private final ApplicationEventPublisher  eventPublisher;
+    private final EmployeeMapper             employeeMapper;
 
     // ── Admin ─────────────────────────────────────────────────────────────────
 
@@ -178,6 +183,67 @@ public class EmployeeService {
                 .filter(e -> e.getEmployee().getId().equals(me.getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Education entry not found"));
         educationRepository.delete(education);
+    }
+
+    // ── Contract ──────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public ContractDto getContract(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        EmployeeContract contract = contractRepository.findByEmployee(employee)
+                .orElseThrow(() -> new ResourceNotFoundException("No contract found"));
+        return new ContractDto(
+                Base64.getEncoder().encodeToString(contract.getData()),
+                contract.getContentType()
+        );
+    }
+
+    @Transactional
+    public void uploadContract(UUID employeeId, MultipartFile file) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        try {
+            EmployeeContract contract = contractRepository.findByEmployee(employee)
+                    .orElseGet(() -> EmployeeContract.builder().employee(employee).build());
+            contract.setContentType(file.getContentType());
+            contract.setData(file.getBytes());
+            contractRepository.save(contract);
+        } catch (IOException e) {
+            throw new BadRequestException("Failed to read uploaded file");
+        }
+    }
+
+    // ── Benefits ──────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<BenefitDto> getBenefits(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        return benefitRepository.findByEmployeeOrderBySortOrderAsc(employee).stream()
+                .map(b -> new BenefitDto(b.getId(), b.getName(), b.getDescription()))
+                .toList();
+    }
+
+    @Transactional
+    public List<BenefitDto> replaceBenefits(UUID employeeId, List<BenefitRequest> requests) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        benefitRepository.deleteByEmployee(employee);
+        benefitRepository.flush();
+        List<EmployeeBenefit> saved = new java.util.ArrayList<>();
+        for (int i = 0; i < requests.size(); i++) {
+            BenefitRequest req = requests.get(i);
+            saved.add(benefitRepository.save(EmployeeBenefit.builder()
+                    .employee(employee)
+                    .name(req.name())
+                    .description(req.description())
+                    .sortOrder(i)
+                    .build()));
+        }
+        return saved.stream()
+                .map(b -> new BenefitDto(b.getId(), b.getName(), b.getDescription()))
+                .toList();
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────

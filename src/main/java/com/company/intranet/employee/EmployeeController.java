@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -95,5 +96,42 @@ public class EmployeeController {
             @PathVariable UUID id,
             @RequestBody @Valid UpdateProfileRequest request) {
         return ResponseEntity.ok(ApiResponse.success(employeeService.updateEmployeeProfile(id, request)));
+    }
+
+    // ── Contract ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/{id}/contract")
+    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    public ResponseEntity<ApiResponse<ContractDto>> getContract(
+            @PathVariable UUID id,
+            @CurrentUser Employee me) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.getContract(id)));
+    }
+
+    @PostMapping(value = "/{id}/contract", consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> uploadContract(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file) {
+        employeeService.uploadContract(id, file);
+        return ResponseEntity.ok(ApiResponse.success(null, "Contract uploaded"));
+    }
+
+    // ── Benefits ──────────────────────────────────────────────────────────────
+
+    @GetMapping("/{id}/benefits")
+    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    public ResponseEntity<ApiResponse<List<BenefitDto>>> getBenefits(
+            @PathVariable UUID id,
+            @CurrentUser Employee me) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.getBenefits(id)));
+    }
+
+    @PutMapping("/{id}/benefits")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<BenefitDto>>> replaceBenefits(
+            @PathVariable UUID id,
+            @RequestBody @Valid List<BenefitRequest> requests) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.replaceBenefits(id, requests)));
     }
 }
