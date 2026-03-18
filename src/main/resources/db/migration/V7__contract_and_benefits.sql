@@ -2,7 +2,7 @@
 
 -- ── Employment Contract ────────────────────────────────────────────────────────
 CREATE TABLE employee_contract (
-    id           UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     employee_id  UUID        NOT NULL UNIQUE REFERENCES employees(id) ON DELETE CASCADE,
     content_type VARCHAR(100) NOT NULL,
     data         BYTEA       NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE employee_contract (
 
 -- ── Employee Benefits ──────────────────────────────────────────────────────────
 CREATE TABLE employee_benefit (
-    id           UUID        PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     employee_id  UUID        NOT NULL REFERENCES employees(id) ON DELETE CASCADE,
     name         VARCHAR(255) NOT NULL,
     description  TEXT,
