@@ -28,7 +28,7 @@ public interface EventRsvpRepository extends JpaRepository<EventRsvp, UUID> {
     @Modifying
     @Query(value = """
             INSERT INTO event_rsvp (id, event_id, employee_id, status, created_at, updated_at)
-            VALUES (uuid_generate_v4(), :eventId, :employeeId, :status, NOW(), NOW())
+            VALUES (gen_random_uuid(), :eventId, :employeeId, :status, NOW(), NOW())
             ON CONFLICT ON CONSTRAINT uq_rsvp_event_employee
             DO UPDATE SET status = :status, updated_at = NOW()
             """, nativeQuery = true)
