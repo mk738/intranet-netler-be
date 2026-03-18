@@ -19,12 +19,14 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.mock.web.MockMultipartFile;
 
 @WebMvcTest(EmployeeController.class)
 class EmployeeControllerTest {
@@ -179,6 +181,110 @@ class EmployeeControllerTest {
                         .with(authentication(auth(emp)))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
+    }
+
+    // ── GET /api/employees/{id}/contract ─────────────────────────────────────
+
+    @Test
+    void getContract_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        ContractDto dto = new ContractDto("base64data==", "application/pdf");
+
+        when(employeeService.getContract(EMP_ID)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/employees/" + EMP_ID + "/contract")
+                        .with(authentication(auth(admin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.contentType").value("application/pdf"))
+                .andExpect(jsonPath("$.data.data").value("base64data=="));
+    }
+
+    @Test
+    void getContract_asOwner_returns200() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        ContractDto dto = new ContractDto("base64data==", "application/pdf");
+
+        when(employeeService.getContract(EMP_ID)).thenReturn(dto);
+
+        mockMvc.perform(get("/api/employees/" + EMP_ID + "/contract")
+                        .with(authentication(auth(emp))))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void uploadContract_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "contract.pdf", "application/pdf", "pdf-bytes".getBytes());
+
+        doNothing().when(employeeService).uploadContract(eq(EMP_ID), any());
+
+        mockMvc.perform(multipart("/api/employees/" + EMP_ID + "/contract")
+                        .file(file)
+                        .with(authentication(auth(admin)))
+                        .with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+    }
+
+    @Test
+    void uploadContract_asEmployee_returns403() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "contract.pdf", "application/pdf", "pdf-bytes".getBytes());
+
+        mockMvc.perform(multipart("/api/employees/" + EMP_ID + "/contract")
+                        .file(file)
+                        .with(authentication(auth(emp)))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    // ── GET /api/employees/{id}/benefits ─────────────────────────────────────
+
+    @Test
+    void getBenefits_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        UUID benefitId = UUID.randomUUID();
+        List<BenefitDto> dtos = List.of(new BenefitDto(benefitId, "Health Insurance", "Full coverage"));
+
+        when(employeeService.getBenefits(EMP_ID)).thenReturn(dtos);
+
+        mockMvc.perform(get("/api/employees/" + EMP_ID + "/benefits")
+                        .with(authentication(auth(admin))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("Health Insurance"));
+    }
+
+    @Test
+    void replaceBenefits_asAdmin_returns200() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        List<BenefitRequest> requests = List.of(new BenefitRequest("Pension", "ITP1"));
+        UUID benefitId = UUID.randomUUID();
+        List<BenefitDto> dtos = List.of(new BenefitDto(benefitId, "Pension", "ITP1"));
+
+        when(employeeService.replaceBenefits(eq(EMP_ID), anyList())).thenReturn(dtos);
+
+        mockMvc.perform(put("/api/employees/" + EMP_ID + "/benefits")
+                        .with(authentication(auth(admin)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requests)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("Pension"));
+    }
+
+    @Test
+    void replaceBenefits_asEmployee_returns403() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        List<BenefitRequest> requests = List.of(new BenefitRequest("Pension", "ITP1"));
+
+        mockMvc.perform(put("/api/employees/" + EMP_ID + "/benefits")
+                        .with(authentication(auth(emp)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requests)))
+                .andExpect(status().isForbidden());
     }
 
     // ── GET /api/employees/{id} ───────────────────────────────────────────────
