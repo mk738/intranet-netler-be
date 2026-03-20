@@ -8,6 +8,7 @@ public record EmployeeProfileDto(
         String jobTitle,
         String phone,
         String address,
+        String emergencyContact,
         String avatarUrl,
         LocalDate startDate,
         LocalDate birthDate
