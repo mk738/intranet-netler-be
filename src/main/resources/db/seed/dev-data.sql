@@ -52,7 +52,8 @@ VALUES
     ('00000000-0000-0000-0000-000000000005', 'lina-netler-uid',               'lina.eriksson@netler.com',    'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',             'mikael.svensson@netler.com',  'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',               'anna.johansson@netler.com',   'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000008', 'test-employee-uid-placeholder', 'test.employee@netler.com',    'EMPLOYEE', TRUE);
+    ('00000000-0000-0000-0000-000000000008', 'test-employee-uid-placeholder', 'test.employee@netler.com',    'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000009', 'sq3ezUDBzSZ6RV16FJG68OOuC7t2',  'norling.fre@gmail.com',        'EMPLOYEE', TRUE);
 
 
 -- =============================================================================
@@ -138,7 +139,17 @@ VALUES
      'Test', 'Employee',
      'Test User',
      NULL, NULL, NULL,
-     '2026-01-01', NULL);
+     '2026-01-01', NULL),
+
+    -- Fredrik Norling
+    ('00000000-0000-0000-0002-000000000009',
+     '00000000-0000-0000-0000-000000000009',
+     'Fredrik', 'Norling',
+     'Backend Developer',
+     '+46 73 456 78 90',
+     'Pilgatan 9, 413 13 Göteborg',
+     'Lisa Norling – +46 70 234 56 78',
+     '2025-01-15', '1995-08-22');
 
 
 -- =============================================================================
@@ -297,7 +308,21 @@ VALUES
      'Örebro University',
      'M.Sc.', 'Software Engineering',
      2021, 2023,
-     'Thesis on containerised microservice deployments with Kubernetes.');
+     'Thesis on containerised microservice deployments with Kubernetes.'),
+
+    -- ── Fredrik Norling ───────────────────────────────────────────────────────
+    ('00000000-0000-0000-0004-000000000017',
+     '00000000-0000-0000-0000-000000000009',
+     'Chalmers University of Technology',
+     'B.Sc.', 'Software Engineering',
+     2014, 2017, NULL),
+
+    ('00000000-0000-0000-0004-000000000018',
+     '00000000-0000-0000-0000-000000000009',
+     'Chalmers University of Technology',
+     'M.Sc.', 'Computer Science',
+     2017, 2019,
+     'Specialisation in backend systems and distributed architecture.');
 
 
 -- =============================================================================
@@ -436,7 +461,21 @@ VALUES
      '00000000-0000-0000-0000-000000000008',
      '00000000-0000-0000-0001-000000000003',
      'Product Catalogue API',
-     '2024-07-01', '2025-06-30', 'ENDED');
+     '2024-07-01', '2025-06-30', 'ENDED'),
+
+    -- Fredrik Norling @ H&M (historical)
+    ('00000000-0000-0000-0005-000000000014',
+     '00000000-0000-0000-0000-000000000009',
+     '00000000-0000-0000-0001-000000000005',
+     'E-commerce Backend Rebuild',
+     '2025-01-15', '2025-09-30', 'ENDED'),
+
+    -- Fredrik Norling @ Klarna (active)
+    ('00000000-0000-0000-0005-000000000015',
+     '00000000-0000-0000-0000-000000000009',
+     '00000000-0000-0000-0001-000000000002',
+     'Checkout Flow Optimisation',
+     '2025-10-15', '2026-10-14', 'ACTIVE');
 
 
 -- =============================================================================
@@ -735,4 +774,16 @@ VALUES
     ('00000000-0000-0000-000b-000000000034', '00000000-0000-0000-0000-000000000008',
      'Health Insurance', 'Full private health insurance via Bliwa.',                1),
     ('00000000-0000-0000-000b-000000000035', '00000000-0000-0000-0000-000000000008',
-     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2);
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+
+    -- ── Fredrik Norling ───────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000036', '00000000-0000-0000-0000-000000000009',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000037', '00000000-0000-0000-0000-000000000009',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000038', '00000000-0000-0000-0000-000000000009',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000039', '00000000-0000-0000-0000-000000000009',
+     'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
+    ('00000000-0000-0000-000b-000000000040', '00000000-0000-0000-0000-000000000009',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               4);
