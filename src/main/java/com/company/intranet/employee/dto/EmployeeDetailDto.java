@@ -1,5 +1,7 @@
 package com.company.intranet.employee.dto;
 
+import com.company.intranet.crm.dto.AssignmentDto;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -11,5 +13,6 @@ public record EmployeeDetailDto(
         String createdAt,
         EmployeeProfileDto profile,
         BankInfoDto bankInfo,
-        List<EducationDto> education
+        List<EducationDto> education,
+        List<AssignmentDto> assignments
 ) {}

@@ -2,6 +2,8 @@ package com.company.intranet.employee;
 
 import com.company.intranet.common.exception.BadRequestException;
 import com.company.intranet.common.exception.ResourceNotFoundException;
+import com.company.intranet.crm.AssignmentRepository;
+import com.company.intranet.crm.CrmMapper;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,6 +32,8 @@ public class EmployeeService {
     private final EmployeeContractRepository contractRepository;
     private final EmployeeCvRepository       cvRepository;
     private final EmployeeBenefitRepository  benefitRepository;
+    private final AssignmentRepository       assignmentRepository;
+    private final CrmMapper                  crmMapper;
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
@@ -55,7 +59,10 @@ public class EmployeeService {
                 .map(employeeMapper::toBankInfoDto)
                 .orElse(null);
 
-        return employeeMapper.toDetailDto(employee, bankInfo, education);
+        List<com.company.intranet.crm.dto.AssignmentDto> assignments = crmMapper.toAssignmentDtos(
+                assignmentRepository.findByEmployeeOrderByStartDateDesc(employee));
+
+        return employeeMapper.toDetailDto(employee, bankInfo, education, assignments);
     }
 
     /**
