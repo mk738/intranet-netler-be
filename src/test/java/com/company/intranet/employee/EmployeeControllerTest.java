@@ -1,5 +1,7 @@
 package com.company.intranet.employee;
 
+import com.company.intranet.crm.AssignmentRepository;
+import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.employee.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,6 +39,7 @@ class EmployeeControllerTest {
     @MockBean EmployeeService    employeeService;
     @MockBean FirebaseAuth       firebaseAuth;                    // needed by FirebaseTokenFilter
     @MockBean EmployeeRepository employeeRepository;              // needed by FirebaseTokenFilter
+    @MockBean AssignmentRepository assignmentRepository;          // needed by EmployeeService
     @MockBean JpaMetamodelMappingContext jpaMetamodelMappingContext; // needed by @EnableJpaAuditing
 
     // ── helpers ───────────────────────────────────────────────────────────────
@@ -72,6 +75,7 @@ class EmployeeControllerTest {
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 3, 1), null),
                 null,
+                List.of(),
                 List.of());
     }
 
@@ -114,7 +118,8 @@ class EmployeeControllerTest {
                 .andExpect(jsonPath("$.data.role").value("EMPLOYEE"))
                 .andExpect(jsonPath("$.data.isActive").value(true))
                 .andExpect(jsonPath("$.data.profile.firstName").value("Erik"))
-                .andExpect(jsonPath("$.data.education").isArray());
+                .andExpect(jsonPath("$.data.education").isArray())
+                .andExpect(jsonPath("$.data.assignments").isArray());
     }
 
     // ── POST /api/employees ───────────────────────────────────────────────────
@@ -356,6 +361,7 @@ class EmployeeControllerTest {
                 new EmployeeProfileDto("Sara", "Berg", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 6, 1), null),
                 new BankInfoDto("Swedbank", "••••7890", "8102"),
+                List.of(),
                 List.of());
 
         when(employeeService.getEmployeeById(targetId)).thenReturn(detail);

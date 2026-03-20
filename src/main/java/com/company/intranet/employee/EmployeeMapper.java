@@ -1,5 +1,6 @@
 package com.company.intranet.employee;
 
+import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.employee.dto.*;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,8 @@ public class EmployeeMapper {
 
     public EmployeeDetailDto toDetailDto(Employee employee,
                                          BankInfoDto bankInfo,
-                                         List<EducationDto> education) {
+                                         List<EducationDto> education,
+                                         List<AssignmentDto> assignments) {
         return new EmployeeDetailDto(
                 employee.getId(),
                 employee.getEmail(),
@@ -44,7 +46,8 @@ public class EmployeeMapper {
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
                 toProfileDto(employee.getProfile()),
                 bankInfo,
-                education
+                education,
+                assignments
         );
     }
 
