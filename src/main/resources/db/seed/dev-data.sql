@@ -283,7 +283,21 @@ VALUES
      'Coursera / Stanford University',
      'Certificate', 'Machine Learning',
      2016, 2016,
-     'Andrew Ng''s Machine Learning specialisation.');
+     'Andrew Ng''s Machine Learning specialisation.'),
+
+    -- ── Test Employee ─────────────────────────────────────────────────────────
+    ('00000000-0000-0000-0004-000000000015',
+     '00000000-0000-0000-0000-000000000008',
+     'Örebro University',
+     'B.Sc.', 'Computer Science',
+     2018, 2021, NULL),
+
+    ('00000000-0000-0000-0004-000000000016',
+     '00000000-0000-0000-0000-000000000008',
+     'Örebro University',
+     'M.Sc.', 'Software Engineering',
+     2021, 2023,
+     'Thesis on containerised microservice deployments with Kubernetes.');
 
 
 -- =============================================================================
@@ -380,7 +394,49 @@ VALUES
      '00000000-0000-0000-0000-000000000007',
      '00000000-0000-0000-0001-000000000005',
      'Supply Chain Analytics',
-     '2024-09-15', '2026-09-14', 'ACTIVE');
+     '2024-09-15', '2026-09-14', 'ACTIVE'),
+
+    -- Sara @ Spotify (historical — before Klarna)
+    ('00000000-0000-0000-0005-000000000008',
+     '00000000-0000-0000-0000-000000000003',
+     '00000000-0000-0000-0001-000000000001',
+     'Personalisation Engine',
+     '2023-03-15', '2024-02-29', 'ENDED'),
+
+    -- Johan @ Volvo Cars (historical — before IKEA)
+    ('00000000-0000-0000-0005-000000000009',
+     '00000000-0000-0000-0000-000000000004',
+     '00000000-0000-0000-0001-000000000004',
+     'Fleet Management Portal',
+     '2023-06-01', '2024-01-14', 'ENDED'),
+
+    -- Mikael @ Klarna (historical — before Volvo)
+    ('00000000-0000-0000-0005-000000000010',
+     '00000000-0000-0000-0000-000000000006',
+     '00000000-0000-0000-0001-000000000002',
+     'Risk & Fraud Detection Dashboard',
+     '2024-01-10', '2025-01-31', 'ENDED'),
+
+    -- Anna @ Spotify (historical — before H&M)
+    ('00000000-0000-0000-0005-000000000011',
+     '00000000-0000-0000-0000-000000000007',
+     '00000000-0000-0000-0001-000000000001',
+     'Creator Analytics Platform',
+     '2023-09-01', '2024-09-14', 'ENDED'),
+
+    -- Test Employee @ Ericsson (historical)
+    ('00000000-0000-0000-0005-000000000012',
+     '00000000-0000-0000-0000-000000000008',
+     '00000000-0000-0000-0001-000000000006',
+     'OSS/BSS Modernisation',
+     '2023-06-01', '2024-05-31', 'ENDED'),
+
+    -- Test Employee @ IKEA Digital (historical)
+    ('00000000-0000-0000-0005-000000000013',
+     '00000000-0000-0000-0000-000000000008',
+     '00000000-0000-0000-0001-000000000003',
+     'Product Catalogue API',
+     '2024-07-01', '2025-06-30', 'ENDED');
 
 
 -- =============================================================================
@@ -584,3 +640,99 @@ INSERT INTO event_rsvp (id, event_id, employee_id, status) VALUES
      '00000000-0000-0000-0008-000000000001', '00000000-0000-0000-0000-000000000004', 'MAYBE'),
     ('00000000-0000-0000-000a-000000000005',
      '00000000-0000-0000-0008-000000000001', '00000000-0000-0000-0000-000000000005', 'NOT_GOING');
+
+
+-- =============================================================================
+-- EMPLOYEE BENEFITS
+-- =============================================================================
+-- Each employee gets a realistic set of Swedish IT-consultant benefits.
+-- Benefits are admin-managed and only visible to admins (and the employee via
+-- the admin view). sort_order determines display order.
+
+INSERT INTO employee_benefit (id, employee_id, name, description, sort_order)
+VALUES
+    -- ── Marcus Karlsson ──────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000001', '00000000-0000-0000-0000-000000000001',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000002', '00000000-0000-0000-0000-000000000001',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000003', '00000000-0000-0000-0000-000000000001',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000004', '00000000-0000-0000-0000-000000000001',
+     'Company Car', 'Electric company car — Tesla Model Y.',                        3),
+    ('00000000-0000-0000-000b-000000000005', '00000000-0000-0000-0000-000000000001',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               4),
+
+    -- ── Erik Lindqvist ───────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000006', '00000000-0000-0000-0000-000000000002',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000007', '00000000-0000-0000-0000-000000000002',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000008', '00000000-0000-0000-0000-000000000002',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000009', '00000000-0000-0000-0000-000000000002',
+     'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
+    ('00000000-0000-0000-000b-000000000010', '00000000-0000-0000-0000-000000000002',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               4),
+
+    -- ── Sara Berg ────────────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000011', '00000000-0000-0000-0000-000000000003',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000012', '00000000-0000-0000-0000-000000000003',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000013', '00000000-0000-0000-0000-000000000003',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000014', '00000000-0000-0000-0000-000000000003',
+     'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
+
+    -- ── Johan Petersson ──────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000015', '00000000-0000-0000-0000-000000000004',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000016', '00000000-0000-0000-0000-000000000004',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000017', '00000000-0000-0000-0000-000000000004',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000018', '00000000-0000-0000-0000-000000000004',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               3),
+
+    -- ── Lina Eriksson ────────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000019', '00000000-0000-0000-0000-000000000005',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000020', '00000000-0000-0000-0000-000000000005',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000021', '00000000-0000-0000-0000-000000000005',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000022', '00000000-0000-0000-0000-000000000005',
+     'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
+    ('00000000-0000-0000-000b-000000000023', '00000000-0000-0000-0000-000000000005',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               4),
+
+    -- ── Mikael Svensson ──────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000024', '00000000-0000-0000-0000-000000000006',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000025', '00000000-0000-0000-0000-000000000006',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000026', '00000000-0000-0000-0000-000000000006',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000027', '00000000-0000-0000-0000-000000000006',
+     'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
+
+    -- ── Anna Johansson ───────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000028', '00000000-0000-0000-0000-000000000007',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000029', '00000000-0000-0000-0000-000000000007',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000030', '00000000-0000-0000-0000-000000000007',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2),
+    ('00000000-0000-0000-000b-000000000031', '00000000-0000-0000-0000-000000000007',
+     'Conference Budget', '20 000 SEK/year for tech conferences and training.',     3),
+    ('00000000-0000-0000-000b-000000000032', '00000000-0000-0000-0000-000000000007',
+     'Phone Allowance', '500 SEK/month towards mobile subscription.',               4),
+
+    -- ── Test Employee ─────────────────────────────────────────────────────────
+    ('00000000-0000-0000-000b-000000000033', '00000000-0000-0000-0000-000000000008',
+     'ITP1 Pension', 'Defined-contribution pension via Collectum.',                 0),
+    ('00000000-0000-0000-000b-000000000034', '00000000-0000-0000-0000-000000000008',
+     'Health Insurance', 'Full private health insurance via Bliwa.',                1),
+    ('00000000-0000-0000-000b-000000000035', '00000000-0000-0000-0000-000000000008',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',                      2);
