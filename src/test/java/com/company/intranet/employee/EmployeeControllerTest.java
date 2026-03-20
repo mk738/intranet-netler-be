@@ -62,7 +62,7 @@ class EmployeeControllerTest {
         return new EmployeeDto(
                 employee.getId(), employee.getEmail(), employee.getRole(), true,
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
-                        null, null, null, LocalDate.of(2023, 3, 1), null));
+                        null, null, null, null, LocalDate.of(2023, 3, 1), null));
     }
 
     private EmployeeDetailDto sampleDetailDto(Employee employee) {
@@ -70,7 +70,7 @@ class EmployeeControllerTest {
                 employee.getId(), employee.getEmail(), employee.getRole().name(),
                 true, "2023-01-01T00:00:00Z",
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
-                        null, null, null, LocalDate.of(2023, 3, 1), null),
+                        null, null, null, null, LocalDate.of(2023, 3, 1), null),
                 null,
                 List.of());
     }
@@ -354,7 +354,7 @@ class EmployeeControllerTest {
         EmployeeDetailDto detail = new EmployeeDetailDto(
                 targetId, "sara@company.com", "EMPLOYEE", true, "2023-06-01T00:00:00Z",
                 new EmployeeProfileDto("Sara", "Berg", "Backend Dev",
-                        null, null, null, LocalDate.of(2023, 6, 1), null),
+                        null, null, null, null, LocalDate.of(2023, 6, 1), null),
                 new BankInfoDto("Swedbank", "••••7890", "8102"),
                 List.of());
 

@@ -40,7 +40,7 @@ class AuthServiceTest {
                 true,
                 new EmployeeProfileDto(
                         "Erik", "Lindqvist", "Senior Backend Dev",
-                        null, null, null,
+                        null, null, null, null,
                         LocalDate.of(2023, 3, 1), null
                 )
         );

@@ -26,6 +26,7 @@ public class EmployeeMapper {
                 profile.getJobTitle(),
                 profile.getPhone(),
                 profile.getAddress(),
+                profile.getEmergencyContact(),
                 profile.getAvatarUrl(),
                 profile.getStartDate(),
                 profile.getBirthDate()
