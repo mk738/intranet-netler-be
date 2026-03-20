@@ -1,10 +1,5 @@
 -- V10__fix_seed_users.sql
 
--- ── Fix Marcus's Firebase UID to match the real production account ────────────
-UPDATE employees
-SET    firebase_uid = 'UqhXiWJBfZYSlGZyj34PPaj8jJY2'
-WHERE  email = 'marcus.karlsson@netler.com';
-
 -- ── Add test employee (email/password auth) ───────────────────────────────────
 -- firebase_uid is a placeholder — update after first login:
 --   UPDATE employees SET firebase_uid = '<real-uid>'
