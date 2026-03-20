@@ -1,11 +1,13 @@
 package com.company.intranet.crm;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.dto.*;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +33,6 @@ public class CrmService {
         List<Employee> unplacedEmployees =
                 employeeRepository.findAllWithNoActiveAssignment();
 
-        // Group active assignments by client id, preserve the client reference
         Map<UUID, List<Assignment>> byClientId = activeAssignments.stream()
                 .collect(Collectors.groupingBy(a -> a.getClient().getId()));
 
@@ -90,10 +91,19 @@ public class CrmService {
         boolean hasNewClient = request.newClient()  != null;
 
         if (!hasClientId && !hasNewClient) {
-            throw new BadRequestException("Either clientId or newClient must be provided");
+            throw new AppException(ErrorCode.BAD_REQUEST,
+                    "Either clientId or newClient must be provided.", HttpStatus.BAD_REQUEST);
         }
         if (hasClientId && hasNewClient) {
-            throw new BadRequestException("Provide either clientId or newClient, not both");
+            throw new AppException(ErrorCode.BAD_REQUEST,
+                    "Provide either clientId or newClient, not both.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (request.endDate() != null && request.endDate().isBefore(request.startDate())) {
+            throw new AppException(
+                    ErrorCode.ASSIGNMENT_DATE_INVALID,
+                    "End date cannot be before start date.",
+                    HttpStatus.BAD_REQUEST);
         }
 
         Employee employee = employeeRepository.findById(request.employeeId())
@@ -101,7 +111,10 @@ public class CrmService {
 
         if (assignmentRepository.existsByEmployeeAndStatus(
                 employee, Assignment.AssignmentStatus.ACTIVE)) {
-            throw new BadRequestException("Employee already has an active assignment");
+            throw new AppException(
+                    ErrorCode.ASSIGNMENT_ALREADY_ACTIVE,
+                    "This employee already has an active assignment.",
+                    HttpStatus.CONFLICT);
         }
 
         Client client = hasClientId
@@ -127,7 +140,8 @@ public class CrmService {
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
 
         if (assignment.getStatus() == Assignment.AssignmentStatus.ENDED) {
-            throw new BadRequestException("Assignment is already ended");
+            throw new AppException(ErrorCode.BAD_REQUEST,
+                    "Assignment is already ended.", HttpStatus.BAD_REQUEST);
         }
 
         assignment.setStatus(Assignment.AssignmentStatus.ENDED);
@@ -154,6 +168,13 @@ public class CrmService {
 
     @Transactional
     public ClientDto createClient(NewClientDto request) {
+        if (request.orgNumber() != null && !request.orgNumber().isBlank()
+                && clientRepository.existsByOrgNumber(request.orgNumber())) {
+            throw new AppException(
+                    ErrorCode.CLIENT_ORG_NUMBER_TAKEN,
+                    "A client with that organisation number already exists.",
+                    HttpStatus.CONFLICT);
+        }
         return crmMapper.toClientDto(clientRepository.save(crmMapper.toClient(request)));
     }
 
@@ -161,6 +182,14 @@ public class CrmService {
     public ClientDto updateClient(UUID id, UpdateClientRequest request) {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+
+        if (request.orgNumber() != null && !request.orgNumber().isBlank()
+                && clientRepository.existsByOrgNumberAndIdNot(request.orgNumber(), id)) {
+            throw new AppException(
+                    ErrorCode.CLIENT_ORG_NUMBER_TAKEN,
+                    "A client with that organisation number already exists.",
+                    HttpStatus.CONFLICT);
+        }
 
         client.setCompanyName(request.companyName());
         client.setContactName(request.contactName());

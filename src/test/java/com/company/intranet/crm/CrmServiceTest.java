@@ -1,6 +1,7 @@
 package com.company.intranet.crm;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.dto.*;
 import com.company.intranet.employee.Employee;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,22 +43,40 @@ class CrmServiceTest {
                 "Project X", LocalDate.now(), null);
 
         assertThatThrownBy(() -> crmService.createAssignment(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("Either clientId or newClient must be provided");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.BAD_REQUEST));
     }
 
     @Test
     void createAssignment_bothClientIdAndNewClient_throwsBadRequest() {
         NewClientDto newClient = new NewClientDto(
-                "ACME", null, null, null, Client.ClientStatus.ACTIVE);
+                "ACME", null, null, null, null);
 
         CreateAssignmentRequest request = new CreateAssignmentRequest(
                 UUID.randomUUID(), UUID.randomUUID(), newClient,
                 "Project X", LocalDate.now(), null);
 
         assertThatThrownBy(() -> crmService.createAssignment(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("not both");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.BAD_REQUEST));
+    }
+
+    @Test
+    void createAssignment_endDateBeforeStartDate_throwsAssignmentDateInvalid() {
+        LocalDate start = LocalDate.now().plusDays(5);
+        CreateAssignmentRequest request = new CreateAssignmentRequest(
+                UUID.randomUUID(), UUID.randomUUID(), null,
+                "Project X", start, start.minusDays(1));
+
+        assertThatThrownBy(() -> crmService.createAssignment(request))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.ASSIGNMENT_DATE_INVALID);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
+                });
     }
 
     @Test
@@ -74,7 +94,7 @@ class CrmServiceTest {
     }
 
     @Test
-    void createAssignment_employeeAlreadyActive_throwsBadRequest() {
+    void createAssignment_employeeAlreadyActive_throwsAssignmentAlreadyActive() {
         UUID empId = UUID.randomUUID();
         Employee employee = Employee.builder().id(empId).build();
 
@@ -87,8 +107,12 @@ class CrmServiceTest {
                 employee, Assignment.AssignmentStatus.ACTIVE)).thenReturn(true);
 
         assertThatThrownBy(() -> crmService.createAssignment(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Employee already has an active assignment");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.ASSIGNMENT_ALREADY_ACTIVE);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                });
     }
 
     // ── endAssignment ─────────────────────────────────────────────────────────
@@ -104,8 +128,9 @@ class CrmServiceTest {
         when(assignmentRepository.findById(id)).thenReturn(Optional.of(ended));
 
         assertThatThrownBy(() -> crmService.endAssignment(id))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Assignment is already ended");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.BAD_REQUEST));
     }
 
     @Test
@@ -145,6 +170,24 @@ class CrmServiceTest {
 
         assertThat(assignment.getEndDate()).isEqualTo(LocalDate.now());
         assertThat(assignment.getStatus()).isEqualTo(Assignment.AssignmentStatus.ENDED);
+    }
+
+    // ── createClient ──────────────────────────────────────────────────────────
+
+    @Test
+    void createClient_duplicateOrgNumber_throwsClientOrgNumberTaken() {
+        NewClientDto request = new NewClientDto(
+                "New Corp", "556123-4567", null, null, Client.ClientStatus.ACTIVE);
+
+        when(clientRepository.existsByOrgNumber("556123-4567")).thenReturn(true);
+
+        assertThatThrownBy(() -> crmService.createClient(request))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.CLIENT_ORG_NUMBER_TAKEN);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                });
     }
 
     // ── getPlacementView ──────────────────────────────────────────────────────

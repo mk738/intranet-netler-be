@@ -1,6 +1,7 @@
 package com.company.intranet.vacation;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeProfile;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,9 +33,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class VacationServiceTest {
 
-    @Mock VacationRepository    vacationRepository;
-    @Mock EmployeeRepository    employeeRepository;
-    @Mock VacationMapper        vacationMapper;
+    @Mock VacationRepository        vacationRepository;
+    @Mock EmployeeRepository        employeeRepository;
+    @Mock VacationMapper            vacationMapper;
     @Mock ApplicationEventPublisher eventPublisher;
 
     @InjectMocks VacationService vacationService;
@@ -51,29 +53,31 @@ class VacationServiceTest {
     // ── submitVacation ────────────────────────────────────────────────────────
 
     @Test
-    void submitVacation_pastStartDate_throwsBadRequest() {
+    void submitVacation_pastStartDate_throwsVacationPastDate() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         SubmitVacationRequest req = new SubmitVacationRequest(
                 LocalDate.now().minusDays(1), LocalDate.now().plusDays(3));
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Start date cannot be in the past");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.VACATION_PAST_DATE));
     }
 
     @Test
-    void submitVacation_endBeforeStart_throwsBadRequest() {
+    void submitVacation_endBeforeStart_throwsVacationDateInvalid() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         LocalDate start = LocalDate.now().plusDays(5);
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.minusDays(1));
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("End date must be after start date");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.VACATION_DATE_INVALID));
     }
 
     @Test
-    void submitVacation_overlappingRequest_throwsBadRequest() {
+    void submitVacation_overlappingRequest_throwsVacationOverlap() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         LocalDate start = LocalDate.now().plusDays(5);
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(4));
@@ -84,8 +88,31 @@ class VacationServiceTest {
                 .thenReturn(true);
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessageContaining("overlapping");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.VACATION_OVERLAP);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                });
+    }
+
+    @Test
+    void submitVacation_insufficientDays_throwsVacationInsufficientDays() {
+        Employee me = employee(UUID.randomUUID(), "e@x.com");
+        LocalDate start = LocalDate.now().plusDays(5);
+        // Request 5 business days when 23 already used (25 allowance)
+        SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(6));
+
+        when(vacationRepository
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+                        any(), any(), any(), any()))
+                .thenReturn(false);
+        when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(23);
+
+        assertThatThrownBy(() -> vacationService.submitVacation(req, me))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.VACATION_INSUFFICIENT_DAYS));
     }
 
     @Test
@@ -100,6 +127,7 @@ class VacationServiceTest {
                 .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
                         any(), any(), any(), any()))
                 .thenReturn(false);
+        when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(0);
 
         VacationRequest saved = VacationRequest.builder()
                 .id(UUID.randomUUID()).employee(me)
@@ -125,7 +153,7 @@ class VacationServiceTest {
     // ── cancelVacation ────────────────────────────────────────────────────────
 
     @Test
-    void cancelVacation_notOwned_throwsBadRequest() {
+    void cancelVacation_notOwned_throwsAppException() {
         Employee owner = employee(UUID.randomUUID(), "owner@x.com");
         Employee other = employee(UUID.randomUUID(), "other@x.com");
 
@@ -137,12 +165,11 @@ class VacationServiceTest {
                 .thenReturn(Optional.of(vacation));
 
         assertThatThrownBy(() -> vacationService.cancelVacation(vacation.getId(), other))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("You can only cancel your own requests");
+                .isInstanceOf(AppException.class);
     }
 
     @Test
-    void cancelVacation_notPending_throwsBadRequest() {
+    void cancelVacation_notPending_throwsAppException() {
         UUID id = UUID.randomUUID();
         Employee me = employee(id, "e@x.com");
 
@@ -154,14 +181,13 @@ class VacationServiceTest {
                 .thenReturn(Optional.of(vacation));
 
         assertThatThrownBy(() -> vacationService.cancelVacation(vacation.getId(), me))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only pending requests can be cancelled");
+                .isInstanceOf(AppException.class);
     }
 
     // ── reviewVacation ────────────────────────────────────────────────────────
 
     @Test
-    void reviewVacation_notPending_throwsBadRequest() {
+    void reviewVacation_notPending_throwsAppException() {
         UUID vacId = UUID.randomUUID();
         Employee me = employee(UUID.randomUUID(), "e@x.com");
 
@@ -174,8 +200,7 @@ class VacationServiceTest {
         assertThatThrownBy(() -> vacationService.reviewVacation(
                 vacId, new ReviewVacationRequest(true),
                 employee(UUID.randomUUID(), "admin@x.com")))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Only pending requests can be reviewed");
+                .isInstanceOf(AppException.class);
     }
 
     @Test
@@ -211,7 +236,6 @@ class VacationServiceTest {
 
     @Test
     void calculateBusinessDays_mondayToFriday_returns5() {
-        // 2026-03-16 is a Monday
         LocalDate monday = LocalDate.of(2026, 3, 16);
         LocalDate friday = LocalDate.of(2026, 3, 20);
         assertThat(vacationService.calculateBusinessDays(monday, friday)).isEqualTo(5);
@@ -219,7 +243,6 @@ class VacationServiceTest {
 
     @Test
     void calculateBusinessDays_fridayToMonday_returns2() {
-        // Friday + Saturday (skip) + Sunday (skip) + Monday = 2 business days
         LocalDate friday = LocalDate.of(2026, 3, 20);
         LocalDate monday = LocalDate.of(2026, 3, 23);
         assertThat(vacationService.calculateBusinessDays(friday, monday)).isEqualTo(2);

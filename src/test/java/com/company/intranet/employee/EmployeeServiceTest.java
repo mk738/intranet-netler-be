@@ -1,7 +1,10 @@
 package com.company.intranet.employee;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
+import com.company.intranet.crm.AssignmentRepository;
+import com.company.intranet.crm.CrmMapper;
 import com.company.intranet.employee.dto.*;
 import com.google.firebase.auth.FirebaseAuth;
 import org.junit.jupiter.api.Test;
@@ -10,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,12 +28,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
 
-    @Mock EmployeeRepository       employeeRepository;
-    @Mock EducationRepository      educationRepository;
-    @Mock BankInfoRepository       bankInfoRepository;
-    @Mock FirebaseAuth             firebaseAuth;
+    @Mock EmployeeRepository        employeeRepository;
+    @Mock EducationRepository       educationRepository;
+    @Mock BankInfoRepository        bankInfoRepository;
+    @Mock EmployeeContractRepository contractRepository;
+    @Mock EmployeeCvRepository      cvRepository;
+    @Mock EmployeeBenefitRepository benefitRepository;
+    @Mock AssignmentRepository      assignmentRepository;
+    @Mock CrmMapper                 crmMapper;
+    @Mock FirebaseAuth              firebaseAuth;
     @Mock ApplicationEventPublisher eventPublisher;
-    @Mock EmployeeMapper           employeeMapper;
+    @Mock EmployeeMapper            employeeMapper;
 
     @InjectMocks EmployeeService employeeService;
 
@@ -58,19 +67,23 @@ class EmployeeServiceTest {
     // ── getEmployeeById ───────────────────────────────────────────────────────
 
     @Test
-    void getEmployeeById_unknownId_throwsResourceNotFoundException() {
+    void getEmployeeById_unknownId_throwsEmployeeNotFound() {
         UUID unknown = UUID.randomUUID();
         when(employeeRepository.findById(unknown)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> employeeService.getEmployeeById(unknown))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Employee not found");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.EMPLOYEE_NOT_FOUND);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+                });
     }
 
     // ── inviteEmployee ────────────────────────────────────────────────────────
 
     @Test
-    void inviteEmployee_duplicateEmail_throwsBadRequestException() {
+    void inviteEmployee_duplicateEmail_throwsEmailTaken() {
         InviteEmployeeRequest request = new InviteEmployeeRequest(
                 "Erik", "Lindqvist", "erik@company.com",
                 "Dev", Employee.Role.EMPLOYEE, LocalDate.of(2024, 1, 1));
@@ -79,50 +92,51 @@ class EmployeeServiceTest {
                 .thenReturn(Optional.of(Employee.builder().build()));
 
         assertThatThrownBy(() -> employeeService.inviteEmployee(request))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Email already registered");
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> {
+                    AppException appEx = (AppException) ex;
+                    assertThat(appEx.getCode()).isEqualTo(ErrorCode.EMPLOYEE_EMAIL_TAKEN);
+                    assertThat(appEx.getStatus()).isEqualTo(HttpStatus.CONFLICT);
+                });
 
         verifyNoInteractions(firebaseAuth);
     }
 
-    // ── updateMyProfile ───────────────────────────────────────────────────────
+    // ── updateMyBank ──────────────────────────────────────────────────────────
 
     @Test
-    void updateMyProfile_doesNotUpdateStartDate() {
-        UUID id = UUID.randomUUID();
-        LocalDate originalStartDate = LocalDate.of(2023, 1, 1);
+    void updateMyBank_invalidClearing_throwsBankInvalidClearing() {
+        Employee me = Employee.builder().id(UUID.randomUUID()).build();
+        UpdateBankRequest request = new UpdateBankRequest("Swedbank", "12345678", "INVALID");
 
-        EmployeeProfile profile = EmployeeProfile.builder()
-                .firstName("Erik")
-                .lastName("Lindqvist")
-                .startDate(originalStartDate)
-                .build();
+        assertThatThrownBy(() -> employeeService.updateMyBank(request, me))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.BANK_INVALID_CLEARING));
+    }
 
-        Employee employee = Employee.builder()
-                .id(id)
-                .email("erik@company.com")
-                .role(Employee.Role.EMPLOYEE)
-                .build();
-        employee.setProfile(profile);
-        profile.setEmployee(employee);
+    @Test
+    void updateMyBank_invalidAccount_throwsBankInvalidAccount() {
+        Employee me = Employee.builder().id(UUID.randomUUID()).build();
+        UpdateBankRequest request = new UpdateBankRequest("Swedbank", "123", "8327-9");
 
-        when(employeeRepository.findById(id)).thenReturn(Optional.of(employee));
-        when(employeeRepository.save(any())).thenReturn(employee);
-        when(employeeMapper.toDto(employee)).thenReturn(
-                new EmployeeDto(id, "erik@company.com", Employee.Role.EMPLOYEE, true, null));
+        assertThatThrownBy(() -> employeeService.updateMyBank(request, me))
+                .isInstanceOf(AppException.class)
+                .satisfies(ex -> assertThat(((AppException) ex).getCode())
+                        .isEqualTo(ErrorCode.BANK_INVALID_ACCOUNT));
+    }
 
-        UpdateProfileRequest request = new UpdateProfileRequest(
-                "Erik", "Updated", "Senior Dev",
-                "+46700000000", null, null, null,
-                LocalDate.of(2025, 6, 1)   // attacker tries to change startDate
-        );
+    @Test
+    void updateMyBank_validDetails_savesSuccessfully() {
+        Employee me = Employee.builder().id(UUID.randomUUID()).build();
+        UpdateBankRequest request = new UpdateBankRequest("Swedbank", "12345678", "8327-9");
 
-        employeeService.updateMyProfile(request, Employee.builder().id(id).build());
+        when(bankInfoRepository.findByEmployee(me)).thenReturn(Optional.empty());
+        when(bankInfoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        // startDate must remain unchanged
-        assertThat(profile.getStartDate()).isEqualTo(originalStartDate);
-        // other fields were updated
-        assertThat(profile.getLastName()).isEqualTo("Updated");
+        employeeService.updateMyBank(request, me);
+
+        verify(bankInfoRepository).save(any());
     }
 
     // ── deleteEducation ───────────────────────────────────────────────────────

@@ -13,4 +13,8 @@ public interface ClientRepository extends JpaRepository<Client, UUID> {
     List<Client> findByStatusOrderByCompanyNameAsc(Client.ClientStatus status);
 
     Optional<Client> findByCompanyNameIgnoreCase(String companyName);
+
+    boolean existsByOrgNumberAndIdNot(String orgNumber, java.util.UUID excludeId);
+
+    boolean existsByOrgNumber(String orgNumber);
 }
