@@ -45,13 +45,14 @@ DELETE FROM employees;
 
 INSERT INTO employees (id, firebase_uid, email, role, is_active)
 VALUES
-    ('00000000-0000-0000-0000-000000000001', 'marcus-netler-uid',  'marcus.karlsson@netler.com', 'ADMIN',    TRUE),
-    ('00000000-0000-0000-0000-000000000002', 'erik-netler-uid',    'erik.lindqvist@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000003', 'sara-netler-uid',    'sara.berg@netler.com',        'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000004', 'johan-netler-uid',   'johan.petersson@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000005', 'lina-netler-uid',    'lina.eriksson@netler.com',    'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',  'mikael.svensson@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',    'anna.johansson@netler.com',   'EMPLOYEE', TRUE);
+    ('00000000-0000-0000-0000-000000000001', 'UqhXiWJBfZYSlGZyj34PPaj8jJY2', 'marcus.karlsson@netler.com', 'ADMIN',    TRUE),
+    ('00000000-0000-0000-0000-000000000002', 'erik-netler-uid',               'erik.lindqvist@netler.com',  'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000003', 'sara-netler-uid',               'sara.berg@netler.com',        'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000004', 'johan-netler-uid',              'johan.petersson@netler.com',  'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000005', 'lina-netler-uid',               'lina.eriksson@netler.com',    'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',             'mikael.svensson@netler.com',  'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',               'anna.johansson@netler.com',   'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000008', 'test-employee-uid-placeholder', 'test.employee@netler.com',    'EMPLOYEE', TRUE);
 
 
 -- =============================================================================
@@ -129,7 +130,15 @@ VALUES
      '+46 70 789 01 23',
      'Sveavägen 22, 113 59 Stockholm',
      'Björn Johansson – +46 73 321 09 87',
-     '2023-09-01', '1992-12-11');
+     '2023-09-01', '1992-12-11'),
+
+    -- Test Employee (firebase_uid updated separately once known)
+    ('00000000-0000-0000-0002-000000000008',
+     '00000000-0000-0000-0000-000000000008',
+     'Test', 'Employee',
+     'Test User',
+     NULL, NULL, NULL,
+     '2026-01-01', NULL);
 
 
 -- =============================================================================
