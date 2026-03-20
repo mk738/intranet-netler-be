@@ -1,6 +1,7 @@
 package com.company.intranet.employee;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
@@ -12,6 +13,7 @@ import com.google.firebase.auth.UserRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,11 +22,17 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EmployeeService {
+
+    private static final long    MAX_FILE_BYTES    = 10 * 1024 * 1024; // 10 MB
+    private static final String  ALLOWED_MIME_TYPE = "application/pdf";
+    private static final Pattern CLEARING_PATTERN  = Pattern.compile("^\\d{4}(-\\d{1,2})?$");
+    private static final Pattern ACCOUNT_PATTERN   = Pattern.compile("^\\d{7,10}$");
 
     private final EmployeeRepository         employeeRepository;
     private final EducationRepository        educationRepository;
@@ -50,7 +58,10 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public EmployeeDetailDto getEmployeeById(UUID id) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
 
         List<EducationDto> education = employeeMapper.toEducationDtos(
                 educationRepository.findByEmployeeOrderByStartYearDesc(employee));
@@ -67,22 +78,21 @@ public class EmployeeService {
 
     /**
      * Invite flow:
-     * 1. Validate email uniqueness (no transaction needed).
+     * 1. Validate email uniqueness.
      * 2. Create Firebase user — happens BEFORE the DB transaction so a DB failure
      *    does not leave a partial record without a matching Firebase account.
      * 3. Persist Employee + EmployeeProfile inside the @Transactional boundary.
      * 4. Generate the invite link and publish the event (fires after commit).
-     *
-     * If step 3 fails after step 2 succeeded, the orphaned Firebase UID is logged
-     * for manual cleanup.
      */
     @Transactional
     public EmployeeDto inviteEmployee(InviteEmployeeRequest request) {
         if (employeeRepository.findByEmail(request.email()).isPresent()) {
-            throw new BadRequestException("Email already registered");
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_EMAIL_TAKEN,
+                    "An employee with that email address already exists.",
+                    HttpStatus.CONFLICT);
         }
 
-        // Step 2 — create Firebase user before opening the DB transaction window
         UserRecord userRecord;
         try {
             UserRecord.CreateRequest createReq = new UserRecord.CreateRequest()
@@ -91,10 +101,12 @@ public class EmployeeService {
                     .setDisplayName(request.firstName() + " " + request.lastName());
             userRecord = firebaseAuth.createUser(createReq);
         } catch (FirebaseAuthException e) {
-            throw new BadRequestException("Failed to create Firebase user: " + e.getMessage());
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_EMAIL_TAKEN,
+                    "Failed to create Firebase user: " + e.getMessage(),
+                    HttpStatus.CONFLICT);
         }
 
-        // Step 3 — persist; if this throws, log the orphaned Firebase UID
         Employee savedEmployee;
         try {
             Employee employee = Employee.builder()
@@ -104,7 +116,6 @@ public class EmployeeService {
                     .isActive(true)
                     .build();
 
-            // Save first to obtain the generated id
             employee = employeeRepository.save(employee);
 
             EmployeeProfile profile = EmployeeProfile.builder()
@@ -115,7 +126,6 @@ public class EmployeeService {
                     .startDate(request.startDate())
                     .build();
 
-            // Employee.profile has CascadeType.ALL — set both sides then re-save
             employee.setProfile(profile);
             savedEmployee = employeeRepository.save(employee);
 
@@ -125,7 +135,6 @@ public class EmployeeService {
             throw e;
         }
 
-        // Step 4 — generate invite link (best-effort; employee already created)
         String inviteLink = "";
         try {
             inviteLink = firebaseAuth.generatePasswordResetLink(request.email());
@@ -144,7 +153,10 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto updateEmployeeProfile(UUID id, UpdateProfileRequest request) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
 
         applyProfileUpdate(employee.getProfile(), request, true);
         return employeeMapper.toDto(employeeRepository.save(employee));
@@ -160,15 +172,30 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto updateMyProfile(UpdateProfileRequest request, Employee me) {
         Employee employee = employeeRepository.findById(me.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
 
-        // startDate is intentionally excluded — employees cannot change their own start date
         applyProfileUpdate(employee.getProfile(), request, false);
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
     @Transactional
     public void updateMyBank(UpdateBankRequest request, Employee me) {
+        if (!CLEARING_PATTERN.matcher(request.clearingNumber()).matches()) {
+            throw new AppException(
+                    ErrorCode.BANK_INVALID_CLEARING,
+                    "Invalid clearing number format. Expected 4 digits, optionally followed by a hyphen and 1–2 digits (e.g. 8327-9).",
+                    HttpStatus.BAD_REQUEST);
+        }
+        if (!ACCOUNT_PATTERN.matcher(request.accountNumber()).matches()) {
+            throw new AppException(
+                    ErrorCode.BANK_INVALID_ACCOUNT,
+                    "Invalid account number format. Expected 7–10 digits.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
         BankInfo bankInfo = bankInfoRepository.findByEmployee(me)
                 .orElseGet(() -> BankInfo.builder().employee(me).build());
 
@@ -198,7 +225,10 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public ContractDto getContract(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         EmployeeContract contract = contractRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No contract found"));
         return new ContractDto(
@@ -209,8 +239,12 @@ public class EmployeeService {
 
     @Transactional
     public void uploadContract(UUID employeeId, MultipartFile file) {
+        validateFile(file);
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         try {
             EmployeeContract contract = contractRepository.findByEmployee(employee)
                     .orElseGet(() -> EmployeeContract.builder().employee(employee).build());
@@ -218,7 +252,7 @@ public class EmployeeService {
             contract.setData(file.getBytes());
             contractRepository.save(contract);
         } catch (IOException e) {
-            throw new BadRequestException("Failed to read uploaded file");
+            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -227,7 +261,10 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public ContractDto getCv(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         EmployeeCv cv = cvRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No CV found"));
         return new ContractDto(
@@ -238,8 +275,12 @@ public class EmployeeService {
 
     @Transactional
     public void uploadCv(UUID employeeId, MultipartFile file) {
+        validateFile(file);
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         try {
             EmployeeCv cv = cvRepository.findByEmployee(employee)
                     .orElseGet(() -> EmployeeCv.builder().employee(employee).build());
@@ -247,7 +288,7 @@ public class EmployeeService {
             cv.setData(file.getBytes());
             cvRepository.save(cv);
         } catch (IOException e) {
-            throw new BadRequestException("Failed to read uploaded file");
+            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -256,7 +297,10 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public List<BenefitDto> getBenefits(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         return benefitRepository.findByEmployeeOrderBySortOrderAsc(employee).stream()
                 .map(b -> new BenefitDto(b.getId(), b.getName(), b.getDescription()))
                 .toList();
@@ -265,7 +309,10 @@ public class EmployeeService {
     @Transactional
     public List<BenefitDto> replaceBenefits(UUID employeeId, List<BenefitRequest> requests) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
         benefitRepository.deleteByEmployee(employee);
         benefitRepository.flush();
         List<EmployeeBenefit> saved = new java.util.ArrayList<>();
@@ -284,6 +331,21 @@ public class EmployeeService {
     }
 
     // ── Shared helpers ────────────────────────────────────────────────────────
+
+    private void validateFile(MultipartFile file) {
+        if (file.getSize() > MAX_FILE_BYTES) {
+            throw new AppException(
+                    ErrorCode.FILE_TOO_LARGE,
+                    "File exceeds the maximum allowed size of 10 MB.",
+                    HttpStatus.BAD_REQUEST);
+        }
+        if (!ALLOWED_MIME_TYPE.equals(file.getContentType())) {
+            throw new AppException(
+                    ErrorCode.FILE_INVALID_TYPE,
+                    "Only PDF files are accepted (application/pdf).",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
 
     private void applyProfileUpdate(EmployeeProfile profile,
                                     UpdateProfileRequest request,

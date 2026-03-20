@@ -30,4 +30,14 @@ public interface VacationRepository extends JpaRepository<VacationRequest, UUID>
             VacationRequest.VacationStatus status);
 
     long countByStatus(VacationRequest.VacationStatus status);
+
+    @Query("""
+        SELECT COALESCE(SUM(v.daysCount), 0)
+        FROM VacationRequest v
+        WHERE v.employee = :employee
+          AND v.status   = com.company.intranet.vacation.VacationRequest.VacationStatus.APPROVED
+          AND YEAR(v.startDate) = :year
+    """)
+    int sumApprovedDaysForYear(@Param("employee") Employee employee,
+                               @Param("year")     int year);
 }

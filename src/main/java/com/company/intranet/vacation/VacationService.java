@@ -1,6 +1,7 @@
 package com.company.intranet.vacation;
 
-import com.company.intranet.common.exception.BadRequestException;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
@@ -9,6 +10,7 @@ import com.company.intranet.notification.events.VacationReviewedEvent;
 import com.company.intranet.vacation.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +26,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VacationService {
 
-    private final VacationRepository    vacationRepository;
-    private final EmployeeRepository    employeeRepository;
-    private final VacationMapper        vacationMapper;
+    private static final int ANNUAL_ALLOWANCE = 25;
+
+    private final VacationRepository        vacationRepository;
+    private final EmployeeRepository        employeeRepository;
+    private final VacationMapper            vacationMapper;
     private final ApplicationEventPublisher eventPublisher;
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -63,25 +67,44 @@ public class VacationService {
         LocalDate endDate   = request.endDate();
 
         if (startDate.isBefore(LocalDate.now())) {
-            throw new BadRequestException("Start date cannot be in the past");
+            throw new AppException(
+                    ErrorCode.VACATION_PAST_DATE,
+                    "Start date cannot be in the past.",
+                    HttpStatus.BAD_REQUEST);
         }
         if (endDate.isBefore(startDate)) {
-            throw new BadRequestException("End date must be after start date");
+            throw new AppException(
+                    ErrorCode.VACATION_DATE_INVALID,
+                    "End date must be on or after start date.",
+                    HttpStatus.BAD_REQUEST);
         }
 
         boolean overlaps = vacationRepository
                 .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
                         me, endDate, startDate, VacationRequest.VacationStatus.REJECTED);
         if (overlaps) {
-            throw new BadRequestException(
-                    "You already have a vacation request overlapping these dates");
+            throw new AppException(
+                    ErrorCode.VACATION_OVERLAP,
+                    "You already have a vacation request overlapping these dates.",
+                    HttpStatus.CONFLICT);
+        }
+
+        int requestedDays = calculateBusinessDays(startDate, endDate);
+        int usedDays      = vacationRepository.sumApprovedDaysForYear(me, startDate.getYear());
+        if (usedDays + requestedDays > ANNUAL_ALLOWANCE) {
+            throw new AppException(
+                    ErrorCode.VACATION_INSUFFICIENT_DAYS,
+                    "Insufficient vacation days. Allowance: " + ANNUAL_ALLOWANCE
+                            + ", used: " + usedDays
+                            + ", requested: " + requestedDays + ".",
+                    HttpStatus.BAD_REQUEST);
         }
 
         VacationRequest vacation = VacationRequest.builder()
                 .employee(me)
                 .startDate(startDate)
                 .endDate(endDate)
-                .daysCount(calculateBusinessDays(startDate, endDate))
+                .daysCount(requestedDays)
                 .status(VacationRequest.VacationStatus.PENDING)
                 .build();
 
@@ -103,10 +126,16 @@ public class VacationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Vacation request not found"));
 
         if (!vacation.getEmployee().getId().equals(me.getId())) {
-            throw new BadRequestException("You can only cancel your own requests");
+            throw new AppException(
+                    ErrorCode.BAD_REQUEST,
+                    "You can only cancel your own requests.",
+                    HttpStatus.BAD_REQUEST);
         }
         if (vacation.getStatus() != VacationRequest.VacationStatus.PENDING) {
-            throw new BadRequestException("Only pending requests can be cancelled");
+            throw new AppException(
+                    ErrorCode.BAD_REQUEST,
+                    "Only pending requests can be cancelled.",
+                    HttpStatus.BAD_REQUEST);
         }
 
         vacationRepository.delete(vacation);
@@ -122,7 +151,10 @@ public class VacationService {
             try {
                 status = VacationRequest.VacationStatus.valueOf(statusFilter.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid status filter: " + statusFilter);
+                throw new AppException(
+                        ErrorCode.BAD_REQUEST,
+                        "Invalid status filter: " + statusFilter,
+                        HttpStatus.BAD_REQUEST);
             }
         }
 
@@ -144,7 +176,10 @@ public class VacationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Vacation request not found"));
 
         if (vacation.getStatus() != VacationRequest.VacationStatus.PENDING) {
-            throw new BadRequestException("Only pending requests can be reviewed");
+            throw new AppException(
+                    ErrorCode.BAD_REQUEST,
+                    "Only pending requests can be reviewed.",
+                    HttpStatus.BAD_REQUEST);
         }
 
         vacation.setStatus(review.approved()
