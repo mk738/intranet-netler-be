@@ -300,7 +300,10 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto updateSkills(UUID id, UpdateSkillsRequest request) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
 
         List<String> names = request.skills().stream()
                 .map(String::trim)
@@ -308,11 +311,17 @@ public class EmployeeService {
                 .toList();
 
         if (names.size() > 50) {
-            throw new BadRequestException("An employee may have at most 50 skills.");
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_SKILLS_TOO_MANY,
+                    "An employee may have at most 50 skills.",
+                    HttpStatus.BAD_REQUEST);
         }
         names.forEach(name -> {
             if (name.length() > 60) {
-                throw new BadRequestException("Each skill may be at most 60 characters.");
+                throw new AppException(
+                        ErrorCode.EMPLOYEE_SKILL_TOO_LONG,
+                        "Each skill may be at most 60 characters.",
+                        HttpStatus.BAD_REQUEST);
             }
         });
 
