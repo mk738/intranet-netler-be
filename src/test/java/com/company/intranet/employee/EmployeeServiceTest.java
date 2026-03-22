@@ -6,6 +6,7 @@ import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
 import com.company.intranet.employee.dto.*;
+import com.company.intranet.skill.SkillService;
 import com.google.firebase.auth.FirebaseAuth;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,7 @@ class EmployeeServiceTest {
     @Mock EmployeeBenefitRepository benefitRepository;
     @Mock AssignmentRepository      assignmentRepository;
     @Mock CrmMapper                 crmMapper;
+    @Mock SkillService              skillService;
     @Mock FirebaseAuth              firebaseAuth;
     @Mock ApplicationEventPublisher eventPublisher;
     @Mock EmployeeMapper            employeeMapper;
@@ -52,8 +54,8 @@ class EmployeeServiceTest {
         Employee e1 = Employee.builder().id(id1).email("a@x.com").role(Employee.Role.EMPLOYEE).build();
         Employee e2 = Employee.builder().id(id2).email("b@x.com").role(Employee.Role.ADMIN).build();
 
-        EmployeeDto dto1 = new EmployeeDto(id1, "a@x.com", Employee.Role.EMPLOYEE, true, null);
-        EmployeeDto dto2 = new EmployeeDto(id2, "b@x.com", Employee.Role.ADMIN,    true, null);
+        EmployeeDto dto1 = new EmployeeDto(id1, "a@x.com", Employee.Role.EMPLOYEE, true, List.of(), null);
+        EmployeeDto dto2 = new EmployeeDto(id2, "b@x.com", Employee.Role.ADMIN,    true, List.of(), null);
 
         when(employeeRepository.findAllActiveWithProfile()).thenReturn(List.of(e1, e2));
         when(employeeMapper.toDto(e1)).thenReturn(dto1);
