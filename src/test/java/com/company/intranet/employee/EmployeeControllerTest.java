@@ -134,7 +134,7 @@ class EmployeeControllerTest {
 
         UUID newId = UUID.randomUUID();
         EmployeeDto created = new EmployeeDto(newId, "new@company.com",
-                Employee.Role.EMPLOYEE, true, Collections.emptyList(), null);
+                Employee.Role.EMPLOYEE, true, null, Collections.emptyList(), null);
 
         when(employeeService.inviteEmployee(any(InviteEmployeeRequest.class)))
                 .thenReturn(created);
