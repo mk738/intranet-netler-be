@@ -32,7 +32,7 @@ Spring Boot 3 REST API for the company intranet platform. Handles authentication
 
 ### 1. Start PostgreSQL
 
-From the repo root:
+From the `intranet/` directory:
 
 ```bash
 docker compose up -d postgres
@@ -176,7 +176,7 @@ All responses use a standard envelope:
 
 | Variable | Default | Description |
 |---|---|---|
-| `DB_URL` | `jdbc:postgresql://localhost:5433/intranet` | PostgreSQL JDBC URL |
+| `DB_URL` | `jdbc:postgresql://localhost:5432/intranet` | PostgreSQL JDBC URL |
 | `DB_USERNAME` | `intranet` | Database username |
 | `DB_PASSWORD` | `intranet` | Database password |
 | `JASYPT_PASSWORD` | — | Encryption key for bank info — **never change after first deploy** |
