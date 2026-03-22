@@ -41,9 +41,6 @@ spring:
 resend:
   base-url: https://intranet-netler-fe-test.up.railway.app/login
 
-mailersend:
-  login-url: https://intranet-netler-fe-test.up.railway.app/login
-
 cors:
   allowed-origins: ${CORS_ORIGINS}
 
