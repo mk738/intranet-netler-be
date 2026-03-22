@@ -165,6 +165,26 @@ public class EmployeeService {
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
+    @Transactional
+    public EmployeeDto terminateEmployee(UUID id, TerminateEmployeeRequest request) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (!employee.isActive()) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_ALREADY_INACTIVE,
+                    "Employee is already inactive",
+                    HttpStatus.CONFLICT);
+        }
+
+        employee.setActive(false);
+        employee.setTerminationDate(request.terminationDate());
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
     // ── Self-service ──────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)

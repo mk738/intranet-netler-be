@@ -5,6 +5,7 @@ import com.company.intranet.skill.Skill;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -34,6 +35,9 @@ public class Employee extends Auditable {
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
+
+    @Column(name = "termination_date")
+    private LocalDate terminationDate;
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private EmployeeProfile profile;

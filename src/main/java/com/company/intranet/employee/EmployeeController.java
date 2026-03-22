@@ -98,6 +98,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success(employeeService.updateEmployeeProfile(id, request)));
     }
 
+    @PutMapping("/{id}/terminate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> terminateEmployee(
+            @PathVariable UUID id,
+            @RequestBody @Valid TerminateEmployeeRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.terminateEmployee(id, request)));
+    }
+
     @PutMapping("/{id}/skills")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDto>> updateSkills(
