@@ -72,6 +72,13 @@
       <optional>true</optional>
     </dependency>
 
+    <!-- MailerSend — transactional email via templates -->
+    <dependency>
+      <groupId>com.mailersend</groupId>
+      <artifactId>java-sdk</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+
     <!-- Actuator — /actuator/health for Railway healthcheck -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

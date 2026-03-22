@@ -93,7 +93,7 @@ public class EmployeeService {
      * 4. Generate the invite link and publish the event (fires after commit).
      */
     @Transactional
-    public EmployeeDto inviteEmployee(InviteEmployeeRequest request) {
+    public EmployeeDto inviteEmployee(InviteEmployeeRequest request, Employee invitedBy) {
         if (employeeRepository.findByEmail(request.email()).isPresent()) {
             throw new AppException(
                     ErrorCode.EMPLOYEE_EMAIL_TAKEN,
@@ -153,7 +153,8 @@ public class EmployeeService {
         eventPublisher.publishEvent(new EmployeeInvitedEvent(
                 request.email(),
                 request.firstName() + " " + request.lastName(),
-                inviteLink));
+                inviteLink,
+                invitedBy.getFullName()));
 
         return employeeMapper.toDto(savedEmployee);
     }

@@ -34,9 +34,10 @@ public class EmployeeController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDto>> inviteEmployee(
-            @RequestBody @Valid InviteEmployeeRequest request) {
+            @RequestBody @Valid InviteEmployeeRequest request,
+            @CurrentUser Employee me) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(employeeService.inviteEmployee(request)));
+                .body(ApiResponse.success(employeeService.inviteEmployee(request, me)));
     }
 
     // ── Self-service — MUST come before /{id} to avoid "me" being parsed as UUID ──

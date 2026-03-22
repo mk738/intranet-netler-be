@@ -136,7 +136,7 @@ class EmployeeControllerTest {
         EmployeeDto created = new EmployeeDto(newId, "new@company.com",
                 Employee.Role.EMPLOYEE, true, null, Collections.emptyList(), null);
 
-        when(employeeService.inviteEmployee(any(InviteEmployeeRequest.class)))
+        when(employeeService.inviteEmployee(any(InviteEmployeeRequest.class), any(Employee.class)))
                 .thenReturn(created);
 
         mockMvc.perform(post("/api/employees")
