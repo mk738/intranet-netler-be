@@ -1,25 +1,27 @@
 package com.company.intranet.notification;
 
-import com.mailersend.sdk.Email;
-import com.mailersend.sdk.MailerSend;
-import com.mailersend.sdk.Recipient;
-import com.mailersend.sdk.exceptions.MailerSendException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.time.Year;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class MailerSendService {
 
     private static final String INVITE_TEMPLATE_ID = "vywj2lpy71jl7oqz";
+    private static final String MAILERSEND_API_URL  = "https://api.mailersend.com/v1";
 
     private final String apiToken;
     private final String fromEmail;
     private final String fromName;
     private final String loginBaseUrl;
+    private final RestClient restClient;
 
     public MailerSendService(
             @Value("${mailersend.api-token}") String apiToken,
@@ -30,33 +32,37 @@ public class MailerSendService {
         this.fromEmail    = fromEmail;
         this.fromName     = fromName;
         this.loginBaseUrl = loginBaseUrl;
+        this.restClient   = RestClient.builder()
+                .baseUrl(MAILERSEND_API_URL)
+                .build();
     }
 
     public void sendInvite(String recipientEmail, String recipientName,
                            String inviteLink, String invitedByName) {
-        Email email = new Email();
-        email.setFrom(fromName, fromEmail);
+        var payload = Map.of(
+                "from",            Map.of("email", fromEmail, "name", fromName),
+                "to",              List.of(Map.of("email", recipientEmail, "name", recipientName)),
+                "template_id",     INVITE_TEMPLATE_ID,
+                "personalization", List.of(Map.of(
+                        "email", recipientEmail,
+                        "data",  Map.of(
+                                "year",           String.valueOf(Year.now().getValue()),
+                                "login_url",      inviteLink.isBlank() ? loginBaseUrl : inviteLink,
+                                "invited_by",     invitedByName,
+                                "employee_name",  recipientName,
+                                "employee_email", recipientEmail
+                        )
+                ))
+        );
 
-        Recipient recipient = new Recipient(recipientName, recipientEmail);
-        email.addRecipient(recipient);
+        restClient.post()
+                .uri("/email")
+                .header("Authorization", "Bearer " + apiToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
 
-        email.setTemplateId(INVITE_TEMPLATE_ID);
-
-        email.addPersonalization(recipient, "year",           String.valueOf(Year.now().getValue()));
-        email.addPersonalization(recipient, "login_url",      inviteLink.isBlank() ? loginBaseUrl : inviteLink);
-        email.addPersonalization(recipient, "invited_by",     invitedByName);
-        email.addPersonalization(recipient, "employee_name",  recipientName);
-        email.addPersonalization(recipient, "employee_email", recipientEmail);
-
-        MailerSend ms = new MailerSend();
-        ms.setToken(apiToken);
-
-        try {
-            var response = ms.send(email);
-            log.info("Invite email sent via MailerSend to={} messageId={}", recipientEmail, response.messageId);
-        } catch (MailerSendException e) {
-            log.error("MailerSend failed to send invite to={}: {}", recipientEmail, e.getMessage(), e);
-            throw new RuntimeException("Failed to send invite email", e);
-        }
+        log.info("Invite email sent via MailerSend to={}", recipientEmail);
     }
 }
