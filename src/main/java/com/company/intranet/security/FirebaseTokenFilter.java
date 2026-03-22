@@ -56,6 +56,17 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             Optional<Employee> employeeOpt =
                     employeeRepository.findByFirebaseUid(decoded.getUid());
 
+            // Fallback: user may have signed in with a different provider (e.g. Google)
+            // than the one used when they were invited — look up by email and re-link the UID.
+            if (employeeOpt.isEmpty() && decoded.getEmail() != null) {
+                employeeOpt = employeeRepository.findByEmail(decoded.getEmail());
+                employeeOpt.ifPresent(emp -> {
+                    emp.setFirebaseUid(decoded.getUid());
+                    employeeRepository.save(emp);
+                    log.info("Linked new Firebase UID to existing employee email={}", decoded.getEmail());
+                });
+            }
+
             if (employeeOpt.isEmpty()) {
                 writeError(response, HttpServletResponse.SC_NOT_FOUND,
                         ErrorCode.AUTH_ACCOUNT_NOT_FOUND,
