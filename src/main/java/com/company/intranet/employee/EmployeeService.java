@@ -305,7 +305,7 @@ public class EmployeeService {
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
 
-        List<String> names = request.skills().stream()
+        List<String> names = request.names().stream()
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList();

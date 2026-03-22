@@ -37,7 +37,7 @@ public class SkillService {
      */
     @Transactional
     public List<SkillDto> addSkills(AddSkillsRequest request) {
-        List<String> normalized = normalize(request.skills());
+        List<String> normalized = normalize(request.names());
 
         Map<String, Skill> existing = skillRepository.findByNameIn(normalized).stream()
                 .collect(Collectors.toMap(Skill::getName, s -> s));
@@ -64,7 +64,7 @@ public class SkillService {
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
 
-        List<Skill> resolved = resolveSkills(request.skills());
+        List<Skill> resolved = resolveSkills(request.names());
         employee.getSkills().clear();
         employee.getSkills().addAll(resolved);
         employeeRepository.save(employee);
