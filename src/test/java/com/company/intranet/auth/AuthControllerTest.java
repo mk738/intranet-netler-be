@@ -16,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +59,7 @@ class AuthControllerTest {
                 "erik@company.com",
                 Employee.Role.EMPLOYEE,
                 true,
+                Collections.emptyList(),
                 new EmployeeProfileDto(
                         "Erik", "Lindqvist", "Senior Backend Dev",
                         null, null, null, null,
