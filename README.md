@@ -58,6 +58,7 @@ DB_USERNAME=intranet
 DB_PASSWORD=intranet
 JASYPT_PASSWORD=any-local-secret
 RESEND_API_KEY=re_placeholder
+MAILERSEND_API_TOKEN=your-mailersend-token
 CORS_ORIGINS=http://localhost:3000
 ```
 
@@ -180,9 +181,13 @@ All responses use a standard envelope:
 | `DB_USERNAME` | `intranet` | Database username |
 | `DB_PASSWORD` | `intranet` | Database password |
 | `JASYPT_PASSWORD` | — | Encryption key for bank info — **never change after first deploy** |
-| `RESEND_API_KEY` | — | Resend API key |
-| `RESEND_FROM` | `Intranet <no-reply@yourcompany.com>` | Email sender address |
+| `RESEND_API_KEY` | — | Resend API key (news, events, vacation emails) |
+| `RESEND_FROM` | `Intranet <no-reply@yourcompany.com>` | Email sender address for Resend |
 | `RESEND_BASE_URL` | `https://intranet.yourcompany.com` | Public app URL used in email links |
+| `MAILERSEND_API_TOKEN` | — | MailerSend API token (employee invite emails) |
+| `MAILERSEND_FROM_EMAIL` | `no-reply@yourcompany.com` | Sender email for MailerSend |
+| `MAILERSEND_FROM_NAME` | `Intranet` | Sender display name for MailerSend |
+| `MAILERSEND_LOGIN_URL` | `https://intranet.yourcompany.com/login` | Frontend login URL included in invite emails |
 | `FIREBASE_CREDENTIALS_JSON` | _(falls back to file)_ | Full service account JSON as a string |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed frontend origins |
 | `PORT` | `8080` | Server port |

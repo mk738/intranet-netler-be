@@ -37,9 +37,10 @@ public class EmployeeController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDto>> inviteEmployee(
-            @RequestBody @Valid InviteEmployeeRequest request) {
+            @RequestBody @Valid InviteEmployeeRequest request,
+            @CurrentUser Employee me) {
         log.info("POST /api/employees email={}", request.email());
-        EmployeeDto result = employeeService.inviteEmployee(request);
+        EmployeeDto result = employeeService.inviteEmployee(request, me);
         log.info("Employee invited id={} email={}", result.id(), result.email());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(result));

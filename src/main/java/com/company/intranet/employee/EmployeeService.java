@@ -9,11 +9,13 @@ import com.company.intranet.skill.Skill;
 import com.company.intranet.skill.SkillService;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,9 @@ public class EmployeeService {
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
 
+    @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
+    private String loginUrl;
+
     // ── Admin ─────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
@@ -93,7 +98,7 @@ public class EmployeeService {
      * 4. Generate the invite link and publish the event (fires after commit).
      */
     @Transactional
-    public EmployeeDto inviteEmployee(InviteEmployeeRequest request) {
+    public EmployeeDto inviteEmployee(InviteEmployeeRequest request, Employee invitedBy) {
         if (employeeRepository.findByEmail(request.email()).isPresent()) {
             throw new AppException(
                     ErrorCode.EMPLOYEE_EMAIL_TAKEN,
@@ -145,7 +150,10 @@ public class EmployeeService {
 
         String inviteLink = "";
         try {
-            inviteLink = firebaseAuth.generatePasswordResetLink(request.email());
+            ActionCodeSettings actionCodeSettings = ActionCodeSettings.builder()
+                    .setUrl(loginUrl)
+                    .build();
+            inviteLink = firebaseAuth.generatePasswordResetLink(request.email(), actionCodeSettings);
         } catch (FirebaseAuthException e) {
             log.warn("Failed to generate invite link for {}: {}", request.email(), e.getMessage());
         }
@@ -153,7 +161,8 @@ public class EmployeeService {
         eventPublisher.publishEvent(new EmployeeInvitedEvent(
                 request.email(),
                 request.firstName() + " " + request.lastName(),
-                inviteLink));
+                inviteLink,
+                invitedBy.getFullName()));
 
         return employeeMapper.toDto(savedEmployee);
     }

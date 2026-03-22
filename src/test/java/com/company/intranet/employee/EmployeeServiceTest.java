@@ -91,10 +91,13 @@ class EmployeeServiceTest {
                 "Erik", "Lindqvist", "erik@company.com",
                 "Dev", Employee.Role.EMPLOYEE, LocalDate.of(2024, 1, 1));
 
+        Employee admin = Employee.builder().id(UUID.randomUUID()).email("admin@company.com")
+                .role(Employee.Role.ADMIN).build();
+
         when(employeeRepository.findByEmail("erik@company.com"))
                 .thenReturn(Optional.of(Employee.builder().build()));
 
-        assertThatThrownBy(() -> employeeService.inviteEmployee(request))
+        assertThatThrownBy(() -> employeeService.inviteEmployee(request, admin))
                 .isInstanceOf(AppException.class)
                 .satisfies(ex -> {
                     AppException appEx = (AppException) ex;

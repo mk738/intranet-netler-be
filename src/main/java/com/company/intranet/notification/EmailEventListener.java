@@ -17,13 +17,15 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class EmailEventListener {
 
-    private final EmailService emailService;
+    private final EmailService      emailService;
+    private final MailerSendService mailerSendService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(EmployeeInvitedEvent e) {
         try {
-            emailService.sendInvite(e.recipientEmail(), e.recipientName(), e.inviteLink());
+            mailerSendService.sendInvite(
+                    e.recipientEmail(), e.recipientName(), e.inviteLink(), e.invitedByName());
         } catch (Exception ex) {
             log.error("Failed to send invite email to {}: {}", e.recipientEmail(), ex.getMessage(), ex);
         }
