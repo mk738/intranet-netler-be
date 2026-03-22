@@ -34,6 +34,7 @@ class EmployeeServiceTest {
     @Mock BankInfoRepository        bankInfoRepository;
     @Mock EmployeeContractRepository contractRepository;
     @Mock EmployeeCvRepository      cvRepository;
+    @Mock EmployeeAvatarRepository  avatarRepository;
     @Mock EmployeeBenefitRepository benefitRepository;
     @Mock AssignmentRepository      assignmentRepository;
     @Mock CrmMapper                 crmMapper;
