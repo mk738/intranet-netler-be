@@ -6,6 +6,7 @@ import com.company.intranet.hub.dto.*;
 import com.company.intranet.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/news")
 @RequiredArgsConstructor
+@Slf4j
 public class NewsController {
 
     private final HubService hubService;
@@ -27,6 +29,7 @@ public class NewsController {
             @RequestParam(defaultValue = "10") int size,
             @CurrentUser Employee me) {
         boolean isAdmin = me.getRole() == Employee.Role.ADMIN;
+        log.info("GET /api/news page={} size={} isAdmin={}", page, size, isAdmin);
         return ResponseEntity.ok(ApiResponse.success(hubService.getNews(page, size, isAdmin)));
     }
 
@@ -36,6 +39,7 @@ public class NewsController {
             @PathVariable UUID id,
             @CurrentUser Employee me) {
         boolean isAdmin = me.getRole() == Employee.Role.ADMIN;
+        log.info("GET /api/news/{} isAdmin={}", id, isAdmin);
         return ResponseEntity.ok(ApiResponse.success(hubService.getNewsById(id, isAdmin)));
     }
 
@@ -44,8 +48,11 @@ public class NewsController {
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> createNews(
             @RequestBody @Valid CreateNewsRequest request,
             @CurrentUser Employee me) {
+        log.info("POST /api/news employeeId={}", me.getId());
+        NewsPostDetailDto result = hubService.createNews(request, me);
+        log.info("News created id={}", result.id());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(hubService.createNews(request, me)));
+                .body(ApiResponse.success(result));
     }
 
     @PutMapping("/{id}")
@@ -53,13 +60,18 @@ public class NewsController {
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> updateNews(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateNewsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(hubService.updateNews(id, request)));
+        log.info("PUT /api/news/{}", id);
+        NewsPostDetailDto result = hubService.updateNews(id, request);
+        log.info("News updated id={}", id);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteNews(@PathVariable UUID id) {
+        log.info("DELETE /api/news/{}", id);
         hubService.deleteNews(id);
+        log.info("News deleted id={}", id);
         return ResponseEntity.noContent().build();
     }
 
@@ -68,6 +80,9 @@ public class NewsController {
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> publishNews(
             @PathVariable UUID id,
             @RequestBody PublishNewsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(hubService.publishNews(id, request.publish())));
+        log.info("PUT /api/news/{}/publish publish={}", id, request.publish());
+        NewsPostDetailDto result = hubService.publishNews(id, request.publish());
+        log.info("News publish status updated id={} publish={}", id, request.publish());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
