@@ -53,12 +53,15 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
         try {
             FirebaseToken decoded = firebaseAuth.verifyIdToken(token);
 
+            log.debug("Firebase token verified uid={} email={}", decoded.getUid(), decoded.getEmail());
+
             Optional<Employee> employeeOpt =
                     employeeRepository.findByFirebaseUid(decoded.getUid());
 
             // Fallback: user may have signed in with a different provider (e.g. Google)
             // than the one used when they were invited — look up by email and re-link the UID.
             if (employeeOpt.isEmpty() && decoded.getEmail() != null) {
+                log.debug("No match by UID, trying email fallback email={}", decoded.getEmail());
                 employeeOpt = employeeRepository.findByEmail(decoded.getEmail());
                 employeeOpt.ifPresent(emp -> {
                     emp.setFirebaseUid(decoded.getUid());
@@ -68,6 +71,7 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             }
 
             if (employeeOpt.isEmpty()) {
+                log.warn("No employee found for uid={} email={}", decoded.getUid(), decoded.getEmail());
                 writeError(response, HttpServletResponse.SC_NOT_FOUND,
                         ErrorCode.AUTH_ACCOUNT_NOT_FOUND,
                         "No account found for this Firebase user.");
