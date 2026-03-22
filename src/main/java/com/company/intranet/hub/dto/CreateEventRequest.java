@@ -11,5 +11,7 @@ public record CreateEventRequest(
         String              location,
         @NotNull LocalDate  eventDate,
         LocalDate           endDate,
-        boolean             allDay
+        boolean             allDay,
+        String              startTime,
+        String              endTime
 ) {}

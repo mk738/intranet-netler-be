@@ -58,7 +58,7 @@ class EventControllerTest {
 
     private EventDto sampleEvent(UUID id) {
         return new EventDto(id, "Team Meeting", "Quarterly sync", "HQ",
-                LocalDate.now().plusDays(7), null, true, "Anna Admin", "2026-01-01T00:00:00Z");
+                LocalDate.now().plusDays(7), null, true, null, null, "Anna Admin", "2026-01-01T00:00:00Z");
     }
 
     // ── GET /api/events ───────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ class EventControllerTest {
         UUID id = UUID.randomUUID();
         LocalDate eventDate = LocalDate.now().plusDays(7);
         CreateEventRequest req = new CreateEventRequest(
-                "Team Meeting", "Quarterly sync", "HQ", eventDate, null, true);
+                "Team Meeting", "Quarterly sync", "HQ", eventDate, null, true, null, null);
 
         when(hubService.createEvent(any(CreateEventRequest.class), eq(admin)))
                 .thenReturn(sampleEvent(id));
@@ -121,7 +121,7 @@ class EventControllerTest {
         Employee emp = regularEmployee();
         LocalDate eventDate = LocalDate.now().plusDays(7);
         CreateEventRequest req = new CreateEventRequest(
-                "Team Meeting", null, null, eventDate, null, true);
+                "Team Meeting", null, null, eventDate, null, true, null, null);
 
         mockMvc.perform(post("/api/events")
                         .with(authentication(auth(emp)))
@@ -139,7 +139,7 @@ class EventControllerTest {
         UUID id = UUID.randomUUID();
         LocalDate eventDate = LocalDate.now().plusDays(10);
         UpdateEventRequest req = new UpdateEventRequest(
-                "Updated Meeting", "New description", "Remote", eventDate, null, true);
+                "Updated Meeting", "New description", "Remote", eventDate, null, true, null, null);
 
         when(hubService.updateEvent(eq(id), any(UpdateEventRequest.class)))
                 .thenReturn(sampleEvent(id));

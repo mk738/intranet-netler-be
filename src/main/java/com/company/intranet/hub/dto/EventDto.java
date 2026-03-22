@@ -11,6 +11,8 @@ public record EventDto(
         LocalDate eventDate,
         LocalDate endDate,
         boolean   allDay,
+        String    startTime,
+        String    endTime,
         String    authorName,
         String    createdAt
 ) {}

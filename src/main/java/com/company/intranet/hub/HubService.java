@@ -152,6 +152,8 @@ public class HubService {
                 .eventDate(request.eventDate())
                 .endDate(request.endDate())
                 .allDay(request.allDay())
+                .startTime(request.allDay() ? null : request.startTime())
+                .endTime(request.allDay() ? null : request.endTime())
                 .author(author)
                 .build();
 
@@ -179,6 +181,8 @@ public class HubService {
         event.setEventDate(request.eventDate());
         event.setEndDate(request.endDate());
         event.setAllDay(request.allDay());
+        event.setStartTime(request.allDay() ? null : request.startTime());
+        event.setEndTime(request.allDay() ? null : request.endTime());
 
         return hubMapper.toEventDto(eventRepository.save(event));
     }

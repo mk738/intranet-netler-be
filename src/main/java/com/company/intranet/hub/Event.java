@@ -39,6 +39,12 @@ public class Event extends Auditable {
     @Builder.Default
     private boolean allDay = true;
 
+    @Column(name = "start_time", length = 5)
+    private String startTime;
+
+    @Column(name = "end_time", length = 5)
+    private String endTime;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private Employee author;

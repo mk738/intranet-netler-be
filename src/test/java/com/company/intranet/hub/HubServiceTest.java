@@ -197,7 +197,7 @@ class HubServiceTest {
         Employee author = admin();
         LocalDate start = LocalDate.now().plusDays(5);
         CreateEventRequest req = new CreateEventRequest(
-                "Conference", null, null, start, start.minusDays(1), true);
+                "Conference", null, null, start, start.minusDays(1), true, null, null);
 
         assertThatThrownBy(() -> hubService.createEvent(req, author))
                 .isInstanceOf(BadRequestException.class)
@@ -209,7 +209,7 @@ class HubServiceTest {
         Employee author = admin();
         LocalDate start = LocalDate.now().plusDays(7);
         CreateEventRequest req = new CreateEventRequest(
-                "Team Meeting", "Quarterly sync", "HQ", start, null, true);
+                "Team Meeting", "Quarterly sync", "HQ", start, null, true, null, null);
 
         Event saved = Event.builder()
                 .id(UUID.randomUUID()).title("Team Meeting").description("Quarterly sync")
@@ -218,7 +218,7 @@ class HubServiceTest {
         when(eventRepository.save(any())).thenReturn(saved);
         when(hubMapper.toEventDto(saved)).thenReturn(
                 new EventDto(saved.getId(), "Team Meeting", "Quarterly sync",
-                        "HQ", start, null, true, "Anna Admin", null));
+                        "HQ", start, null, true, null, null, "Anna Admin", null));
 
         EventDto result = hubService.createEvent(req, author);
 
