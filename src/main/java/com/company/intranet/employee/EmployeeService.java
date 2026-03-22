@@ -5,6 +5,8 @@ import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
+import com.company.intranet.skill.Skill;
+import com.company.intranet.skill.SkillService;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +44,7 @@ public class EmployeeService {
     private final EmployeeBenefitRepository  benefitRepository;
     private final AssignmentRepository       assignmentRepository;
     private final CrmMapper                  crmMapper;
+    private final SkillService               skillService;
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
@@ -299,23 +302,23 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 
-        List<String> normalized = request.skills().stream()
+        List<String> names = request.skills().stream()
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(String::toLowerCase)
                 .toList();
 
-        if (normalized.size() > 50) {
+        if (names.size() > 50) {
             throw new BadRequestException("An employee may have at most 50 skills.");
         }
-        normalized.forEach(skill -> {
-            if (skill.length() > 60) {
+        names.forEach(name -> {
+            if (name.length() > 60) {
                 throw new BadRequestException("Each skill may be at most 60 characters.");
             }
         });
 
+        List<Skill> resolved = skillService.resolveSkills(names);
         employee.getSkills().clear();
-        employee.getSkills().addAll(normalized);
+        employee.getSkills().addAll(resolved);
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
