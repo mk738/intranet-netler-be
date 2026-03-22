@@ -27,7 +27,7 @@ public class MailerSendService {
             @Value("${mailersend.api-token}") String apiToken,
             @Value("${mailersend.from-email}") String fromEmail,
             @Value("${mailersend.from-name:Intranet}") String fromName,
-            @Value("${resend.base-url:https://intranet.yourcompany.com}") String loginBaseUrl) {
+            @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}") String loginBaseUrl) {
         this.apiToken     = apiToken;
         this.fromEmail    = fromEmail;
         this.fromName     = fromName;

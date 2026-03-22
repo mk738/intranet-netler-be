@@ -187,6 +187,7 @@ All responses use a standard envelope:
 | `MAILERSEND_API_TOKEN` | — | MailerSend API token (employee invite emails) |
 | `MAILERSEND_FROM_EMAIL` | `no-reply@yourcompany.com` | Sender email for MailerSend |
 | `MAILERSEND_FROM_NAME` | `Intranet` | Sender display name for MailerSend |
+| `MAILERSEND_LOGIN_URL` | `https://intranet.yourcompany.com/login` | Frontend login URL included in invite emails |
 | `FIREBASE_CREDENTIALS_JSON` | _(falls back to file)_ | Full service account JSON as a string |
 | `CORS_ORIGINS` | `http://localhost:3000` | Comma-separated allowed frontend origins |
 | `PORT` | `8080` | Server port |

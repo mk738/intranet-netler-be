@@ -53,6 +53,7 @@ mailersend:
   api-token: ${MAILERSEND_API_TOKEN}
   from-email: ${MAILERSEND_FROM_EMAIL:no-reply@yourcompany.com}
   from-name: ${MAILERSEND_FROM_NAME:Intranet}
+  login-url: ${MAILERSEND_LOGIN_URL:https://intranet.yourcompany.com/login}
 
 firebase:
   credentials:
