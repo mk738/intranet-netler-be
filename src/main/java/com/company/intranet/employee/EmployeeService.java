@@ -9,11 +9,13 @@ import com.company.intranet.skill.Skill;
 import com.company.intranet.skill.SkillService;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,9 @@ public class EmployeeService {
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
+
+    @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
+    private String loginUrl;
 
     // ── Admin ─────────────────────────────────────────────────────────────────
 
@@ -145,7 +150,10 @@ public class EmployeeService {
 
         String inviteLink = "";
         try {
-            inviteLink = firebaseAuth.generatePasswordResetLink(request.email());
+            ActionCodeSettings actionCodeSettings = ActionCodeSettings.builder()
+                    .setUrl(loginUrl)
+                    .build();
+            inviteLink = firebaseAuth.generatePasswordResetLink(request.email(), actionCodeSettings);
         } catch (FirebaseAuthException e) {
             log.warn("Failed to generate invite link for {}: {}", request.email(), e.getMessage());
         }
