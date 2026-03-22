@@ -40,8 +40,9 @@ public class MailerSendService {
     public void sendInvite(String recipientEmail, String recipientName,
                            String inviteLink, String invitedByName) {
         var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
+                "from",            Map.of("email", "MS_T205qq@test-dnvo4d9kqm9g5r86.mlsender.net", "name", fromName),
                 "to",              List.of(Map.of("email", recipientEmail, "name", recipientName)),
+                "subject",         "You've been invited to the intranet",
                 "template_id",     INVITE_TEMPLATE_ID,
                 "personalization", List.of(Map.of(
                         "email", recipientEmail,
