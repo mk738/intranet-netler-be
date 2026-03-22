@@ -54,8 +54,8 @@ class EmployeeServiceTest {
         Employee e1 = Employee.builder().id(id1).email("a@x.com").role(Employee.Role.EMPLOYEE).build();
         Employee e2 = Employee.builder().id(id2).email("b@x.com").role(Employee.Role.ADMIN).build();
 
-        EmployeeDto dto1 = new EmployeeDto(id1, "a@x.com", Employee.Role.EMPLOYEE, true, List.of(), null);
-        EmployeeDto dto2 = new EmployeeDto(id2, "b@x.com", Employee.Role.ADMIN,    true, List.of(), null);
+        EmployeeDto dto1 = new EmployeeDto(id1, "a@x.com", Employee.Role.EMPLOYEE, true, null, List.of(), null);
+        EmployeeDto dto2 = new EmployeeDto(id2, "b@x.com", Employee.Role.ADMIN,    true, null, List.of(), null);
 
         when(employeeRepository.findAllActiveWithProfile()).thenReturn(List.of(e1, e2));
         when(employeeMapper.toDto(e1)).thenReturn(dto1);

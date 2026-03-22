@@ -9,6 +9,7 @@ public enum ErrorCode {
     // ── Employee ──────────────────────────────────────────────────────────────
     EMPLOYEE_NOT_FOUND,
     EMPLOYEE_EMAIL_TAKEN,
+    EMPLOYEE_ALREADY_INACTIVE,
     EMPLOYEE_SKILLS_TOO_MANY,
     EMPLOYEE_SKILL_TOO_LONG,
 

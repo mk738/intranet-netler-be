@@ -3,6 +3,7 @@ package com.company.intranet.employee.dto;
 import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.skill.dto.SkillDto;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ public record EmployeeDetailDto(
         String email,
         String role,
         boolean isActive,
+        LocalDate terminationDate,
         String createdAt,
         List<SkillDto> skills,
         EmployeeProfileDto profile,

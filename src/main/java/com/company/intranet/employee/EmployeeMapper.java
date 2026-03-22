@@ -21,6 +21,7 @@ public class EmployeeMapper {
                 employee.getEmail(),
                 employee.getRole(),
                 employee.isActive(),
+                employee.getTerminationDate(),
                 toSkillDtos(employee),
                 toProfileDto(employee.getProfile())
         );
@@ -50,6 +51,7 @@ public class EmployeeMapper {
                 employee.getEmail(),
                 employee.getRole().name(),
                 employee.isActive(),
+                employee.getTerminationDate(),
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
                 toSkillDtos(employee),
                 toProfileDto(employee.getProfile()),

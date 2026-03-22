@@ -64,7 +64,7 @@ class EmployeeControllerTest {
 
     private EmployeeDto sampleDto(Employee employee) {
         return new EmployeeDto(
-                employee.getId(), employee.getEmail(), employee.getRole(), true, Collections.emptyList(),
+                employee.getId(), employee.getEmail(), employee.getRole(), true, null, Collections.emptyList(),
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 3, 1), null));
     }
@@ -72,7 +72,7 @@ class EmployeeControllerTest {
     private EmployeeDetailDto sampleDetailDto(Employee employee) {
         return new EmployeeDetailDto(
                 employee.getId(), employee.getEmail(), employee.getRole().name(),
-                true, "2023-01-01T00:00:00Z", Collections.emptyList(),
+                true, null, "2023-01-01T00:00:00Z", Collections.emptyList(),
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 3, 1), null),
                 null,
@@ -134,7 +134,7 @@ class EmployeeControllerTest {
 
         UUID newId = UUID.randomUUID();
         EmployeeDto created = new EmployeeDto(newId, "new@company.com",
-                Employee.Role.EMPLOYEE, true, Collections.emptyList(), null);
+                Employee.Role.EMPLOYEE, true, null, Collections.emptyList(), null);
 
         when(employeeService.inviteEmployee(any(InviteEmployeeRequest.class)))
                 .thenReturn(created);
@@ -358,7 +358,7 @@ class EmployeeControllerTest {
         UUID targetId = UUID.randomUUID();
 
         EmployeeDetailDto detail = new EmployeeDetailDto(
-                targetId, "sara@company.com", "EMPLOYEE", true, "2023-06-01T00:00:00Z",
+                targetId, "sara@company.com", "EMPLOYEE", true, null, "2023-06-01T00:00:00Z",
                 List.of(),
                 new EmployeeProfileDto("Sara", "Berg", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 6, 1), null),

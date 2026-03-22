@@ -59,6 +59,7 @@ class AuthControllerTest {
                 "erik@company.com",
                 Employee.Role.EMPLOYEE,
                 true,
+                null,
                 Collections.emptyList(),
                 new EmployeeProfileDto(
                         "Erik", "Lindqvist", "Senior Backend Dev",

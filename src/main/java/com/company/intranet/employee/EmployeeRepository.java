@@ -13,7 +13,12 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     Optional<Employee> findByEmail(String email);
 
-    @Query("SELECT e FROM Employee e JOIN FETCH e.profile WHERE e.isActive = true ORDER BY e.profile.lastName")
+    @Query("""
+        SELECT e FROM Employee e JOIN FETCH e.profile
+        WHERE e.isActive = true
+           OR (e.isActive = false AND e.terminationDate >= CURRENT_DATE)
+        ORDER BY e.profile.lastName
+    """)
     List<Employee> findAllActiveWithProfile();
 
     @Query("SELECT e.email FROM Employee e WHERE e.role = 'ADMIN' AND e.isActive = true")
