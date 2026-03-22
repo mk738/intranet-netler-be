@@ -2,6 +2,8 @@ package com.company.intranet.employee;
 
 import com.company.intranet.common.response.ApiResponse;
 import com.company.intranet.employee.dto.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import com.company.intranet.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -112,6 +114,27 @@ public class EmployeeController {
             @PathVariable UUID id,
             @RequestBody @Valid UpdateSkillsRequest request) {
         return ResponseEntity.ok(ApiResponse.success(employeeService.updateSkills(id, request)));
+    }
+
+    // ── Avatar ────────────────────────────────────────────────────────────────
+
+    @PostMapping(value = "/{id}/avatar", consumes = "multipart/form-data")
+    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    public ResponseEntity<ApiResponse<EmployeeDto>> uploadAvatar(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file,
+            @CurrentUser Employee me) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.uploadAvatar(id, file)));
+    }
+
+    @GetMapping("/{id}/avatar")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID id) {
+        EmployeeAvatar avatar = employeeService.getAvatar(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, avatar.getContentType())
+                .header(HttpHeaders.CACHE_CONTROL, "max-age=86400")
+                .body(avatar.getData());
     }
 
     // ── Contract ──────────────────────────────────────────────────────────────

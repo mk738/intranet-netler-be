@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,9 @@ public class EmployeeService {
 
     private static final long    MAX_FILE_BYTES    = 10 * 1024 * 1024; // 10 MB
     private static final String  ALLOWED_MIME_TYPE = "application/pdf";
+    private static final long    MAX_AVATAR_BYTES  = 2 * 1024 * 1024;  // 2 MB
+    private static final Set<String> ALLOWED_IMAGE_TYPES =
+            Set.of("image/jpeg", "image/png", "image/webp");
     private static final Pattern CLEARING_PATTERN  = Pattern.compile("^\\d{4}(-\\d{1,2})?$");
     private static final Pattern ACCOUNT_PATTERN   = Pattern.compile("^\\d{7,10}$");
 
@@ -41,6 +45,7 @@ public class EmployeeService {
     private final BankInfoRepository         bankInfoRepository;
     private final EmployeeContractRepository contractRepository;
     private final EmployeeCvRepository       cvRepository;
+    private final EmployeeAvatarRepository   avatarRepository;
     private final EmployeeBenefitRepository  benefitRepository;
     private final AssignmentRepository       assignmentRepository;
     private final CrmMapper                  crmMapper;
@@ -313,6 +318,58 @@ public class EmployeeService {
         } catch (IOException e) {
             throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    // ── Avatar ────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public EmployeeDto uploadAvatar(UUID employeeId, MultipartFile file) {
+        if (file.getSize() > MAX_AVATAR_BYTES) {
+            throw new AppException(
+                    ErrorCode.FILE_TOO_LARGE,
+                    "Avatar exceeds the maximum allowed size of 2 MB.",
+                    HttpStatus.PAYLOAD_TOO_LARGE);
+        }
+        if (!ALLOWED_IMAGE_TYPES.contains(file.getContentType())) {
+            throw new AppException(
+                    ErrorCode.FILE_INVALID_TYPE,
+                    "Only JPEG, PNG and WebP images are accepted.",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        try {
+            EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
+                    .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());
+            avatar.setContentType(file.getContentType());
+            avatar.setData(file.getBytes());
+            avatarRepository.save(avatar);
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
+        }
+
+        employee.getProfile().setAvatarUrl("/api/employees/" + employeeId + "/avatar");
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
+    @Transactional(readOnly = true)
+    public EmployeeAvatar getAvatar(UUID employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        return avatarRepository.findByEmployee(employee)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.NOT_FOUND,
+                        "No avatar found for this employee",
+                        HttpStatus.NOT_FOUND));
     }
 
     // ── Skills ────────────────────────────────────────────────────────────────
