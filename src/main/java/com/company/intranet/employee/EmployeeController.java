@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import com.company.intranet.security.CurrentUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/employees")
 @RequiredArgsConstructor
+@Slf4j
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -28,6 +30,7 @@ public class EmployeeController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<EmployeeDto>>> getAllEmployees() {
+        log.info("GET /api/employees");
         return ResponseEntity.ok(ApiResponse.success(employeeService.getAllEmployees()));
     }
 
@@ -36,8 +39,11 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> inviteEmployee(
             @RequestBody @Valid InviteEmployeeRequest request,
             @CurrentUser Employee me) {
+        log.info("POST /api/employees email={}", request.email());
+        EmployeeDto result = employeeService.inviteEmployee(request, me);
+        log.info("Employee invited id={} email={}", result.id(), result.email());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(employeeService.inviteEmployee(request, me)));
+                .body(ApiResponse.success(result));
     }
 
     // ── Self-service — MUST come before /{id} to avoid "me" being parsed as UUID ──
@@ -46,6 +52,7 @@ public class EmployeeController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<EmployeeDetailDto>> getMyProfile(
             @CurrentUser Employee me) {
+        log.info("GET /api/employees/me employeeId={}", me.getId());
         return ResponseEntity.ok(ApiResponse.success(employeeService.getMyProfile(me)));
     }
 
@@ -54,7 +61,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> updateMyProfile(
             @RequestBody @Valid UpdateProfileRequest request,
             @CurrentUser Employee me) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.updateMyProfile(request, me)));
+        log.info("PUT /api/employees/me/profile employeeId={}", me.getId());
+        EmployeeDto result = employeeService.updateMyProfile(request, me);
+        log.info("Profile updated employeeId={}", me.getId());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PutMapping("/me/bank")
@@ -62,7 +72,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Void>> updateMyBank(
             @RequestBody @Valid UpdateBankRequest request,
             @CurrentUser Employee me) {
+        log.info("PUT /api/employees/me/bank employeeId={}", me.getId());
         employeeService.updateMyBank(request, me);
+        log.info("Bank info updated employeeId={}", me.getId());
         return ResponseEntity.ok(ApiResponse.success(null, "Bank info updated"));
     }
 
@@ -71,8 +83,11 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EducationDto>> addEducation(
             @RequestBody @Valid AddEducationRequest request,
             @CurrentUser Employee me) {
+        log.info("POST /api/employees/me/education employeeId={} institution={}", me.getId(), request.institution());
+        EducationDto result = employeeService.addEducation(request, me);
+        log.info("Education added id={} employeeId={}", result.id(), me.getId());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(employeeService.addEducation(request, me)));
+                .body(ApiResponse.success(result));
     }
 
     @DeleteMapping("/me/education/{educationId}")
@@ -80,7 +95,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Void>> deleteEducation(
             @PathVariable UUID educationId,
             @CurrentUser Employee me) {
+        log.info("DELETE /api/employees/me/education/{} employeeId={}", educationId, me.getId());
         employeeService.deleteEducation(educationId, me);
+        log.info("Education deleted id={} employeeId={}", educationId, me.getId());
         return ResponseEntity.noContent().build();
     }
 
@@ -90,6 +107,7 @@ public class EmployeeController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDetailDto>> getEmployeeById(
             @PathVariable UUID id) {
+        log.info("GET /api/employees/{}", id);
         return ResponseEntity.ok(ApiResponse.success(employeeService.getEmployeeById(id)));
     }
 
@@ -98,7 +116,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> updateEmployeeProfile(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateProfileRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.updateEmployeeProfile(id, request)));
+        log.info("PUT /api/employees/{}/profile", id);
+        EmployeeDto result = employeeService.updateEmployeeProfile(id, request);
+        log.info("Employee profile updated id={}", id);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PutMapping("/{id}/terminate")
@@ -106,7 +127,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> terminateEmployee(
             @PathVariable UUID id,
             @RequestBody @Valid TerminateEmployeeRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.terminateEmployee(id, request)));
+        log.info("PUT /api/employees/{}/terminate terminationDate={}", id, request.terminationDate());
+        EmployeeDto result = employeeService.terminateEmployee(id, request);
+        log.info("Employee terminated id={} terminationDate={}", id, request.terminationDate());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PutMapping("/{id}/skills")
@@ -114,7 +138,10 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<EmployeeDto>> updateSkills(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateSkillsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.updateSkills(id, request)));
+        log.info("PUT /api/employees/{}/skills count={}", id, request.names().size());
+        EmployeeDto result = employeeService.updateSkills(id, request);
+        log.info("Employee skills updated id={}", id);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     // ── Avatar ────────────────────────────────────────────────────────────────
@@ -125,12 +152,16 @@ public class EmployeeController {
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file,
             @CurrentUser Employee me) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.uploadAvatar(id, file)));
+        log.info("POST /api/employees/{}/avatar contentType={} size={}", id, file.getContentType(), file.getSize());
+        EmployeeDto result = employeeService.uploadAvatar(id, file);
+        log.info("Avatar uploaded employeeId={}", id);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @GetMapping("/{id}/avatar")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<byte[]> getAvatar(@PathVariable UUID id) {
+        log.info("GET /api/employees/{}/avatar", id);
         EmployeeAvatar avatar = employeeService.getAvatar(id);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, avatar.getContentType())
@@ -145,6 +176,7 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<ContractDto>> getContract(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
+        log.info("GET /api/employees/{}/contract", id);
         return ResponseEntity.ok(ApiResponse.success(employeeService.getContract(id)));
     }
 
@@ -153,7 +185,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Void>> uploadContract(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
+        log.info("POST /api/employees/{}/contract contentType={} size={}", id, file.getContentType(), file.getSize());
         employeeService.uploadContract(id, file);
+        log.info("Contract uploaded employeeId={}", id);
         return ResponseEntity.ok(ApiResponse.success(null, "Contract uploaded"));
     }
 
@@ -164,6 +198,7 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<ContractDto>> getCv(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
+        log.info("GET /api/employees/{}/cv", id);
         return ResponseEntity.ok(ApiResponse.success(employeeService.getCv(id)));
     }
 
@@ -172,7 +207,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<Void>> uploadCv(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
+        log.info("POST /api/employees/{}/cv contentType={} size={}", id, file.getContentType(), file.getSize());
         employeeService.uploadCv(id, file);
+        log.info("CV uploaded employeeId={}", id);
         return ResponseEntity.ok(ApiResponse.success(null, "CV uploaded"));
     }
 
@@ -183,6 +220,7 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<List<BenefitDto>>> getBenefits(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
+        log.info("GET /api/employees/{}/benefits", id);
         return ResponseEntity.ok(ApiResponse.success(employeeService.getBenefits(id)));
     }
 
@@ -191,6 +229,9 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<List<BenefitDto>>> replaceBenefits(
             @PathVariable UUID id,
             @RequestBody @Valid List<BenefitRequest> requests) {
-        return ResponseEntity.ok(ApiResponse.success(employeeService.replaceBenefits(id, requests)));
+        log.info("PUT /api/employees/{}/benefits count={}", id, requests.size());
+        List<BenefitDto> result = employeeService.replaceBenefits(id, requests);
+        log.info("Benefits replaced employeeId={} count={}", id, result.size());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

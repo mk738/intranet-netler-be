@@ -7,6 +7,7 @@ import com.company.intranet.skill.dto.AddSkillsRequest;
 import com.company.intranet.skill.dto.SkillDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/skills")
 @RequiredArgsConstructor
+@Slf4j
 public class SkillController {
 
     private final SkillService skillService;
@@ -26,6 +28,7 @@ public class SkillController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<SkillDto>>> getAllSkills() {
+        log.info("GET /api/skills");
         return ResponseEntity.ok(ApiResponse.success(skillService.getAllSkills()));
     }
 
@@ -33,13 +36,18 @@ public class SkillController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<SkillDto>>> addSkills(
             @RequestBody @Valid AddSkillsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(skillService.addSkills(request)));
+        log.info("POST /api/skills count={}", request.names().size());
+        List<SkillDto> result = skillService.addSkills(request);
+        log.info("Skills upserted count={}", result.size());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSkill(@PathVariable UUID id) {
+        log.info("DELETE /api/skills/{}", id);
         skillService.deleteSkill(id);
+        log.info("Skill deleted id={}", id);
         return ResponseEntity.noContent().build();
     }
 
@@ -50,6 +58,7 @@ public class SkillController {
     public ResponseEntity<ApiResponse<List<SkillDto>>> getEmployeeSkills(
             @PathVariable UUID employeeId,
             @CurrentUser Employee me) {
+        log.info("GET /api/skills/employees/{}", employeeId);
         return ResponseEntity.ok(ApiResponse.success(skillService.getEmployeeSkills(employeeId)));
     }
 
@@ -58,6 +67,9 @@ public class SkillController {
     public ResponseEntity<ApiResponse<List<SkillDto>>> setEmployeeSkills(
             @PathVariable UUID employeeId,
             @RequestBody @Valid AddSkillsRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(skillService.setEmployeeSkills(employeeId, request)));
+        log.info("POST /api/skills/employees/{} count={}", employeeId, request.names().size());
+        List<SkillDto> result = skillService.setEmployeeSkills(employeeId, request);
+        log.info("Employee skills set employeeId={} count={}", employeeId, result.size());
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
