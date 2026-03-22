@@ -4,7 +4,6 @@ import com.company.intranet.common.audit.Auditable;
 import com.company.intranet.skill.Skill;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -42,13 +41,13 @@ public class Employee extends Auditable {
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BankInfo bankInfo;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "employee_skills",
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "skill_id")
     )
-    @BatchSize(size = 50)
+    @Builder.Default
     private Set<Skill> skills = new LinkedHashSet<>();
 
     // Helper for display
