@@ -11,6 +11,7 @@ public record EmployeeDetailDto(
         String role,
         boolean isActive,
         String createdAt,
+        List<String> skills,
         EmployeeProfileDto profile,
         BankInfoDto bankInfo,
         List<EducationDto> education,

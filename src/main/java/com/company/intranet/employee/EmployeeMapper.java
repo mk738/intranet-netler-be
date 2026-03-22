@@ -15,6 +15,7 @@ public class EmployeeMapper {
                 employee.getEmail(),
                 employee.getRole(),
                 employee.isActive(),
+                List.copyOf(employee.getSkills()),
                 toProfileDto(employee.getProfile())
         );
     }
@@ -44,6 +45,7 @@ public class EmployeeMapper {
                 employee.getRole().name(),
                 employee.isActive(),
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
+                List.copyOf(employee.getSkills()),
                 toProfileDto(employee.getProfile()),
                 bankInfo,
                 education,

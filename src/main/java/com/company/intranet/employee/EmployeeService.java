@@ -292,6 +292,33 @@ public class EmployeeService {
         }
     }
 
+    // ── Skills ────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public EmployeeDto updateSkills(UUID id, UpdateSkillsRequest request) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        List<String> normalized = request.skills().stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .toList();
+
+        if (normalized.size() > 50) {
+            throw new BadRequestException("An employee may have at most 50 skills.");
+        }
+        normalized.forEach(skill -> {
+            if (skill.length() > 60) {
+                throw new BadRequestException("Each skill may be at most 60 characters.");
+            }
+        });
+
+        employee.getSkills().clear();
+        employee.getSkills().addAll(normalized);
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
     // ── Benefits ──────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)

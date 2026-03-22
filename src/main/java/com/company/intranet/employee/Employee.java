@@ -4,6 +4,8 @@ import com.company.intranet.common.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +39,11 @@ public class Employee extends Auditable {
 
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private BankInfo bankInfo;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "employee_skills", joinColumns = @JoinColumn(name = "employee_id"))
+    @Column(name = "skill")
+    private List<String> skills = new ArrayList<>();
 
     // Helper for display
     public String getFullName() {
