@@ -58,6 +58,7 @@ DB_USERNAME=intranet
 DB_PASSWORD=intranet
 JASYPT_PASSWORD=any-local-secret
 RESEND_API_KEY=re_placeholder
+MAILERSEND_API_TOKEN=your-mailersend-token
 CORS_ORIGINS=http://localhost:3000
 ```
 
