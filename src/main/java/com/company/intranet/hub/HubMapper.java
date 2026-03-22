@@ -49,6 +49,8 @@ public class HubMapper {
                 event.getEventDate(),
                 event.getEndDate(),
                 event.isAllDay(),
+                event.getStartTime(),
+                event.getEndTime(),
                 event.getAuthor().getFullName(),
                 event.getCreatedAt() != null ? event.getCreatedAt().toString() : null
         );
