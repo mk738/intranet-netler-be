@@ -5,6 +5,8 @@ import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
+import com.company.intranet.skill.Skill;
+import com.company.intranet.skill.SkillService;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
 import com.google.firebase.auth.FirebaseAuth;
@@ -42,6 +44,7 @@ public class EmployeeService {
     private final EmployeeBenefitRepository  benefitRepository;
     private final AssignmentRepository       assignmentRepository;
     private final CrmMapper                  crmMapper;
+    private final SkillService               skillService;
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
@@ -290,6 +293,42 @@ public class EmployeeService {
         } catch (IOException e) {
             throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
         }
+    }
+
+    // ── Skills ────────────────────────────────────────────────────────────────
+
+    @Transactional
+    public EmployeeDto updateSkills(UUID id, UpdateSkillsRequest request) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        List<String> names = request.names().stream()
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+
+        if (names.size() > 50) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_SKILLS_TOO_MANY,
+                    "An employee may have at most 50 skills.",
+                    HttpStatus.BAD_REQUEST);
+        }
+        names.forEach(name -> {
+            if (name.length() > 60) {
+                throw new AppException(
+                        ErrorCode.EMPLOYEE_SKILL_TOO_LONG,
+                        "Each skill may be at most 60 characters.",
+                        HttpStatus.BAD_REQUEST);
+            }
+        });
+
+        List<Skill> resolved = skillService.resolveSkills(names);
+        employee.getSkills().clear();
+        employee.getSkills().addAll(resolved);
+        return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
     // ── Benefits ──────────────────────────────────────────────────────────────

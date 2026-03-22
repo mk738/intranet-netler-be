@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,6 +39,7 @@ class AuthServiceTest {
                 "erik@company.com",
                 Employee.Role.EMPLOYEE,
                 true,
+                Collections.emptyList(),
                 new EmployeeProfileDto(
                         "Erik", "Lindqvist", "Senior Backend Dev",
                         null, null, null, null,

@@ -2,12 +2,18 @@ package com.company.intranet.employee;
 
 import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.employee.dto.*;
+import com.company.intranet.skill.SkillService;
+import com.company.intranet.skill.dto.SkillDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class EmployeeMapper {
+
+    private final SkillService skillService;
 
     public EmployeeDto toDto(Employee employee) {
         return new EmployeeDto(
@@ -15,6 +21,7 @@ public class EmployeeMapper {
                 employee.getEmail(),
                 employee.getRole(),
                 employee.isActive(),
+                toSkillDtos(employee),
                 toProfileDto(employee.getProfile())
         );
     }
@@ -44,6 +51,7 @@ public class EmployeeMapper {
                 employee.getRole().name(),
                 employee.isActive(),
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
+                toSkillDtos(employee),
                 toProfileDto(employee.getProfile()),
                 bankInfo,
                 education,
@@ -93,5 +101,12 @@ public class EmployeeMapper {
                 .endYear(request.endYear())
                 .description(request.description())
                 .build();
+    }
+
+    private List<SkillDto> toSkillDtos(Employee employee) {
+        return employee.getSkills().stream()
+                .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                .map(skillService::toDto)
+                .toList();
     }
 }

@@ -98,6 +98,14 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success(employeeService.updateEmployeeProfile(id, request)));
     }
 
+    @PutMapping("/{id}/skills")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> updateSkills(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateSkillsRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(employeeService.updateSkills(id, request)));
+    }
+
     // ── Contract ──────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/contract")

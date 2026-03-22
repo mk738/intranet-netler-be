@@ -7,6 +7,10 @@ spring:
     username: ${DB_USERNAME:intranet}
     password: ${DB_PASSWORD:intranet}
     driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
   jpa:
     hibernate:
