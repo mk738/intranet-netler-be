@@ -99,12 +99,16 @@ public class MailerSendService {
                 "category",       ""
         );
 
+        var recipients = List.of(newsNotifyEmail, "mackke90@gmail.com");
+
         var payload = Map.of(
                 "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              List.of(Map.of("email", newsNotifyEmail)),
+                "to",              recipients.stream().map(e -> Map.of("email", e)).toList(),
                 "subject",         postTitle,
                 "template_id",     NEWS_TEMPLATE_ID,
-                "personalization", List.of(Map.of("email", newsNotifyEmail, "data", personalizationData))
+                "personalization", recipients.stream()
+                        .map(e -> Map.of("email", e, "data", personalizationData))
+                        .toList()
         );
 
         restClient.post()
@@ -115,8 +119,8 @@ public class MailerSendService {
                 .retrieve()
                 .toBodilessEntity();
 
-        log.info("News published email sent via MailerSend to {} for post '{}'",
-                newsNotifyEmail, postTitle);
+        log.info("News published email sent via MailerSend to {} recipients for post '{}'",
+                recipients.size(), postTitle);
     }
 
     public void sendVacationRequested(String employeeName, String jobTitle,
