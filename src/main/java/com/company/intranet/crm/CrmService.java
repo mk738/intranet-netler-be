@@ -122,6 +122,11 @@ public class CrmService {
                         .orElseThrow(() -> new ResourceNotFoundException("Client not found"))
                 : clientRepository.save(crmMapper.toClient(request.newClient()));
 
+        if (client.getStatus() != Client.ClientStatus.ACTIVE) {
+            client.setStatus(Client.ClientStatus.ACTIVE);
+            clientRepository.save(client);
+        }
+
         Assignment assignment = Assignment.builder()
                 .employee(employee)
                 .client(client)
@@ -154,6 +159,17 @@ public class CrmService {
         if (!endDate.isAfter(LocalDate.now())) {
             // Date is today or in the past — end the assignment immediately
             assignment.setStatus(Assignment.AssignmentStatus.ENDED);
+            assignmentRepository.save(assignment);
+
+            // If the client has no remaining active assignments, mark them inactive
+            Client client = assignment.getClient();
+            boolean hasOtherActive = assignmentRepository
+                    .existsByClientAndStatus(client, Assignment.AssignmentStatus.ACTIVE);
+            if (!hasOtherActive) {
+                client.setStatus(Client.ClientStatus.INACTIVE);
+                clientRepository.save(client);
+            }
+            return crmMapper.toAssignmentDto(assignment);
         }
         // Date is in the future — keep status ACTIVE; computeStatus() will derive
         // ENDING_SOON automatically when the date falls within the 30-day window

@@ -22,6 +22,10 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
 
     boolean existsByEmployeeAndStatus(Employee employee, Assignment.AssignmentStatus status);
 
+    boolean existsByClientAndStatus(Client client, Assignment.AssignmentStatus status);
+
+    List<Assignment> findByStatusAndEndDateLessThan(Assignment.AssignmentStatus status, java.time.LocalDate date);
+
     @Query("""
         SELECT a FROM Assignment a
         JOIN FETCH a.client
