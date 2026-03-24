@@ -997,3 +997,104 @@ VALUES
      '<p>Annual salary reviews are coming up in April. All employees should book a 30-minute slot with Marcus before April 15th.</p><p>To prepare, think about your contributions over the past year, any skills you have developed, and your goals for the next 12 months. The review is a two-way conversation — come with questions.</p><p>Slots can be booked directly via the calendar link Marcus will send over Slack. The deadline for completing all reviews is April 30th.</p>',
      '00000000-0000-0000-0000-000000000001',
      '2026-03-10 08:00:00+00', FALSE);
+
+
+-- =============================================================================
+-- DEMO USERS — Philip Olsson (admin) & Philip Schill (employee)
+-- =============================================================================
+
+INSERT INTO employees (id, firebase_uid, email, role, is_active) VALUES
+    ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'ADMIN',    TRUE),
+    ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'EMPLOYEE', TRUE);
+
+INSERT INTO employee_profiles
+    (id, employee_id, first_name, last_name, job_title, phone, address, emergency_contact, start_date, birth_date)
+VALUES
+    ('00000000-0000-0000-0002-000000000010',
+     '00000000-0000-0000-0000-000000000010',
+     'Philip', 'Olsson', 'Account Manager',
+     '+46 70 111 22 33',
+     'Birger Jarlsgatan 8, 114 34 Stockholm',
+     'Anna Olsson – +46 73 111 22 44',
+     '2023-05-01', '1990-06-15'),
+
+    ('00000000-0000-0000-0002-000000000011',
+     '00000000-0000-0000-0000-000000000011',
+     'Philip', 'Schill', 'Frontend Developer',
+     '+46 70 222 33 44',
+     'Linnégatan 14, 413 04 Göteborg',
+     'Sofia Schill – +46 73 222 33 55',
+     '2024-04-01', '1997-03-08');
+
+INSERT INTO bank_info (id, employee_id, bank_name, account_number, clearing_number) VALUES
+    ('00000000-0000-0000-0003-000000000010',
+     '00000000-0000-0000-0000-000000000010',
+     'Swedbank', '91234567', '8327-9'),
+
+    ('00000000-0000-0000-0003-000000000011',
+     '00000000-0000-0000-0000-000000000011',
+     'Nordea', '82345678', '3300-3');
+
+INSERT INTO education (id, employee_id, institution, degree, field, start_year, end_year, description) VALUES
+    ('00000000-0000-0000-0004-000000000019',
+     '00000000-0000-0000-0000-000000000010',
+     'Stockholm School of Economics',
+     'B.Sc.', 'Business Administration',
+     2009, 2012,
+     'Focus on sales, marketing, and business development.'),
+
+    ('00000000-0000-0000-0004-000000000020',
+     '00000000-0000-0000-0000-000000000010',
+     'Stockholm School of Economics',
+     'M.Sc.', 'Management',
+     2012, 2014,
+     'Specialisation in technology business and client relations.'),
+
+    ('00000000-0000-0000-0004-000000000021',
+     '00000000-0000-0000-0000-000000000011',
+     'Chalmers University of Technology',
+     'B.Sc.', 'Computer Science',
+     2016, 2019,
+     'Focus on web technologies and user interface development.'),
+
+    ('00000000-0000-0000-0004-000000000022',
+     '00000000-0000-0000-0000-000000000011',
+     'Chalmers University of Technology',
+     'M.Sc.', 'Interaction Design & Technologies',
+     2019, 2021,
+     'Thesis on component-driven design systems for large-scale web applications.');
+
+-- Philip Schill: active assignment at Spotify alongside Erik
+INSERT INTO assignments (id, employee_id, client_id, project_name, start_date, end_date, status) VALUES
+    ('00000000-0000-0000-0005-000000000016',
+     '00000000-0000-0000-0000-000000000011',
+     '00000000-0000-0000-0001-000000000001',
+     'Creator Dashboard Redesign',
+     '2024-04-01', '2026-12-31', 'ACTIVE');
+
+INSERT INTO employee_benefit (id, employee_id, name, description, sort_order) VALUES
+    ('00000000-0000-0000-000b-000000000041', '00000000-0000-0000-0000-000000000010',
+     'ITP1 Pension',       'Defined-contribution pension via Collectum.',    0),
+    ('00000000-0000-0000-000b-000000000042', '00000000-0000-0000-0000-000000000010',
+     'Health Insurance',   'Full private health insurance via Bliwa.',       1),
+    ('00000000-0000-0000-000b-000000000043', '00000000-0000-0000-0000-000000000010',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',               2),
+    ('00000000-0000-0000-000b-000000000044', '00000000-0000-0000-0000-000000000010',
+     'Company Car',        'Electric company car — Volvo EX40.',             3),
+
+    ('00000000-0000-0000-000b-000000000045', '00000000-0000-0000-0000-000000000011',
+     'ITP1 Pension',       'Defined-contribution pension via Collectum.',    0),
+    ('00000000-0000-0000-000b-000000000046', '00000000-0000-0000-0000-000000000011',
+     'Health Insurance',   'Full private health insurance via Bliwa.',       1),
+    ('00000000-0000-0000-000b-000000000047', '00000000-0000-0000-0000-000000000011',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',               2),
+    ('00000000-0000-0000-000b-000000000048', '00000000-0000-0000-0000-000000000011',
+     'Phone Allowance',    '500 SEK/month towards mobile subscription.',     3);
+
+INSERT INTO employee_skills (employee_id, skill_id) VALUES
+    -- Philip Schill (Frontend): React, TypeScript, Node.js, GraphQL, Docker
+    ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000007'),
+    ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000008'),
+    ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000009'),
+    ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000010'),
+    ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000004');
