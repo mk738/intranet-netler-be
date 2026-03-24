@@ -188,7 +188,7 @@ class NewsControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    // ── PUT /api/news/{id}/publish ────────────────────────────────────────────
+    // ── PUT /api/news/{id}/published ────────────────────────────────────────────
 
     @Test
     void publishNews_asAdmin_returns200() throws Exception {
@@ -198,7 +198,7 @@ class NewsControllerTest {
 
         when(hubService.publishNews(eq(id), eq(true))).thenReturn(sampleDetail(id));
 
-        mockMvc.perform(put("/api/news/" + id + "/publish")
+        mockMvc.perform(put("/api/news/" + id + "/published")
                         .with(authentication(auth(admin)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

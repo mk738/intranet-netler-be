@@ -75,14 +75,14 @@ public class NewsController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}/publish")
+    @PutMapping("/{id}/published")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> publishNews(
             @PathVariable UUID id,
             @RequestBody PublishNewsRequest request) {
-        log.info("PUT /api/news/{}/publish publish={}", id, request.publish());
+        log.info("PUT /api/news/{}/published published={}", id, request.publish());
         NewsPostDetailDto result = hubService.publishNews(id, request.publish());
-        log.info("News publish status updated id={} publish={}", id, request.publish());
+        log.info("News published status updated id={} published={}", id, request.publish());
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

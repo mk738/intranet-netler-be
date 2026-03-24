@@ -71,7 +71,7 @@ public class HubService {
     public NewsPostDetailDto createNews(CreateNewsRequest request, Employee author) {
         validateImage(request.coverImageData(), request.coverImageType());
 
-        Instant publishedAt = request.publish() ? Instant.now() : null;
+        Instant publishedAt = request.published() ? Instant.now() : null;
 
         NewsPost post = NewsPost.builder()
                 .title(request.title())
@@ -85,7 +85,7 @@ public class HubService {
 
         NewsPost saved = newsPostRepository.save(post);
 
-        if (request.publish()) {
+        if (request.published()) {
             String publishedDate = saved.getPublishedAt()
                     .atZone(ZoneOffset.UTC)
                     .format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));

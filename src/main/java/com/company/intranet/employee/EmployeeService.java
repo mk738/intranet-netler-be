@@ -100,7 +100,7 @@ public class EmployeeService {
      * 2. Create Firebase user — happens BEFORE the DB transaction so a DB failure
      *    does not leave a partial record without a matching Firebase account.
      * 3. Persist Employee + EmployeeProfile inside the @Transactional boundary.
-     * 4. Generate the invite link and publish the event (fires after commit).
+     * 4. Generate the invite link and published the event (fires after commit).
      */
     @Transactional
     public EmployeeDto inviteEmployee(InviteEmployeeRequest request, Employee invitedBy) {
