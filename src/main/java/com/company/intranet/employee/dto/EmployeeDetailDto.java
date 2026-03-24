@@ -18,5 +18,7 @@ public record EmployeeDetailDto(
         EmployeeProfileDto profile,
         BankInfoDto bankInfo,
         List<EducationDto> education,
+        List<BenefitDto> benefits,
+        AssignmentDto currentAssignment,
         List<AssignmentDto> assignments
 ) {}

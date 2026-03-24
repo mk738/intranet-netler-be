@@ -83,10 +83,15 @@ public class EmployeeService {
                 .map(employeeMapper::toBankInfoDto)
                 .orElse(null);
 
-        List<com.company.intranet.crm.dto.AssignmentDto> assignments = crmMapper.toAssignmentDtos(
-                assignmentRepository.findByEmployeeOrderByStartDateDesc(employee));
+        List<BenefitDto> benefits = benefitRepository
+                .findByEmployeeOrderBySortOrderAsc(employee).stream()
+                .map(b -> new BenefitDto(b.getId(), b.getName(), b.getDescription()))
+                .toList();
 
-        return employeeMapper.toDetailDto(employee, bankInfo, education, assignments);
+        List<com.company.intranet.crm.dto.AssignmentDto> assignments = crmMapper.toAssignmentDtos(
+                assignmentRepository.findByEmployeeWithClient(employee));
+
+        return employeeMapper.toDetailDto(employee, bankInfo, education, benefits, assignments);
     }
 
     /**

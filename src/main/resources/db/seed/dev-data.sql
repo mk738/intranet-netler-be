@@ -20,11 +20,14 @@
 
 
 -- ── Delete in FK-safe order (no TRUNCATE CASCADE to avoid surprises) ─────────
+DELETE FROM employee_skills;
+DELETE FROM skills;
 DELETE FROM education;
 DELETE FROM bank_info;
 DELETE FROM employee_contract;
 DELETE FROM employee_cv;
 DELETE FROM employee_benefit;
+DELETE FROM employee_avatars;
 DELETE FROM vacation_requests;
 DELETE FROM event_rsvp;
 DELETE FROM faq;
@@ -787,3 +790,210 @@ VALUES
      'Home Office Equipment', 'Annual budget of 10 000 SEK for equipment.',         3),
     ('00000000-0000-0000-000b-000000000040', '00000000-0000-0000-0000-000000000009',
      'Phone Allowance', '500 SEK/month towards mobile subscription.',               4);
+
+
+-- =============================================================================
+-- SKILLS
+-- =============================================================================
+
+INSERT INTO skills (id, name) VALUES
+    ('00000000-0000-0000-000c-000000000001', 'Java'),
+    ('00000000-0000-0000-000c-000000000002', 'Spring Boot'),
+    ('00000000-0000-0000-000c-000000000003', 'PostgreSQL'),
+    ('00000000-0000-0000-000c-000000000004', 'Docker'),
+    ('00000000-0000-0000-000c-000000000005', 'Kubernetes'),
+    ('00000000-0000-0000-000c-000000000006', 'Terraform'),
+    ('00000000-0000-0000-000c-000000000007', 'React'),
+    ('00000000-0000-0000-000c-000000000008', 'TypeScript'),
+    ('00000000-0000-0000-000c-000000000009', 'Node.js'),
+    ('00000000-0000-0000-000c-000000000010', 'GraphQL'),
+    ('00000000-0000-0000-000c-000000000011', 'Python'),
+    ('00000000-0000-0000-000c-000000000012', 'Apache Kafka'),
+    ('00000000-0000-0000-000c-000000000013', 'Redis'),
+    ('00000000-0000-0000-000c-000000000014', 'AWS'),
+    ('00000000-0000-0000-000c-000000000015', 'Azure'),
+    ('00000000-0000-0000-000c-000000000016', 'CI/CD'),
+    ('00000000-0000-0000-000c-000000000017', 'REST API Design'),
+    ('00000000-0000-0000-000c-000000000018', 'Microservices'),
+    ('00000000-0000-0000-000c-000000000019', 'Machine Learning'),
+    ('00000000-0000-0000-000c-000000000020', 'Data Engineering');
+
+
+-- =============================================================================
+-- EMPLOYEE SKILLS
+-- =============================================================================
+
+INSERT INTO employee_skills (employee_id, skill_id) VALUES
+    -- Marcus Karlsson (CTO): Java, Spring Boot, Microservices, AWS, Docker, REST API Design
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000002'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000018'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000014'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000001', '00000000-0000-0000-000c-000000000017'),
+
+    -- Erik Lindqvist (Senior Backend): Java, Spring Boot, PostgreSQL, Kafka, Microservices, Docker, REST API Design
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000002'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000003'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000012'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000018'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-000c-000000000017'),
+
+    -- Sara Berg (Backend): Java, Spring Boot, PostgreSQL, Docker, Kubernetes, REST API Design
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000002'),
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000003'),
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000005'),
+    ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-000c-000000000017'),
+
+    -- Johan Petersson (Frontend): React, TypeScript, Node.js, GraphQL, Docker
+    ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-000c-000000000007'),
+    ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-000c-000000000008'),
+    ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-000c-000000000009'),
+    ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-000c-000000000010'),
+    ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-000c-000000000004'),
+
+    -- Lina Eriksson (DevOps): Docker, Kubernetes, Terraform, AWS, Azure, CI/CD
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000005'),
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000006'),
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000014'),
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000015'),
+    ('00000000-0000-0000-0000-000000000005', '00000000-0000-0000-000c-000000000016'),
+
+    -- Mikael Svensson (Full Stack): Java, Spring Boot, React, TypeScript, Docker, PostgreSQL
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000002'),
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000007'),
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000008'),
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000006', '00000000-0000-0000-000c-000000000003'),
+
+    -- Anna Johansson (Data Engineer): Python, Kafka, Data Engineering, Machine Learning, AWS, PostgreSQL
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000011'),
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000012'),
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000020'),
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000019'),
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000014'),
+    ('00000000-0000-0000-0000-000000000007', '00000000-0000-0000-000c-000000000003'),
+
+    -- Test Employee: Java, React, Docker
+    ('00000000-0000-0000-0000-000000000008', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000008', '00000000-0000-0000-000c-000000000007'),
+    ('00000000-0000-0000-0000-000000000008', '00000000-0000-0000-000c-000000000004'),
+
+    -- Fredrik Norling (Backend): Java, Spring Boot, REST API Design, PostgreSQL, Docker, Kubernetes
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000001'),
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000002'),
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000017'),
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000003'),
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000004'),
+    ('00000000-0000-0000-0000-000000000009', '00000000-0000-0000-000c-000000000005');
+
+
+-- =============================================================================
+-- EVENT RSVP — additional events
+-- =============================================================================
+-- Q2 All-Hands (00000000-0000-0000-0008-000000000002) — attendance required
+-- Summer Party (00000000-0000-0000-0008-000000000004) — mix of responses
+
+INSERT INTO event_rsvp (id, event_id, employee_id, status) VALUES
+    -- Q2 All-Hands: everyone going
+    ('00000000-0000-0000-000a-000000000006',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000001', 'GOING'),
+    ('00000000-0000-0000-000a-000000000007',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000002', 'GOING'),
+    ('00000000-0000-0000-000a-000000000008',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000003', 'GOING'),
+    ('00000000-0000-0000-000a-000000000009',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000004', 'GOING'),
+    ('00000000-0000-0000-000a-000000000010',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000005', 'GOING'),
+    ('00000000-0000-0000-000a-000000000011',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000006', 'GOING'),
+    ('00000000-0000-0000-000a-000000000012',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000007', 'GOING'),
+    ('00000000-0000-0000-000a-000000000013',
+     '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0000-000000000009', 'MAYBE'),
+
+    -- Summer Party: mostly going, a couple of maybes
+    ('00000000-0000-0000-000a-000000000014',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000001', 'GOING'),
+    ('00000000-0000-0000-000a-000000000015',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000002', 'GOING'),
+    ('00000000-0000-0000-000a-000000000016',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000003', 'GOING'),
+    ('00000000-0000-0000-000a-000000000017',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000004', 'GOING'),
+    ('00000000-0000-0000-000a-000000000018',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000005', 'MAYBE'),
+    ('00000000-0000-0000-000a-000000000019',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000006', 'GOING'),
+    ('00000000-0000-0000-000a-000000000020',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000007', 'GOING'),
+    ('00000000-0000-0000-000a-000000000021',
+     '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0000-000000000009', 'MAYBE');
+
+
+-- =============================================================================
+-- FAQ — additional entries
+-- =============================================================================
+
+INSERT INTO faq (id, question, answer, category, sort_order, author_id) VALUES
+    ('00000000-0000-0000-0009-000000000007',
+     'How do I add or update my skills in my profile?',
+     'Go to your Profile and scroll to the Skills section. You can add skills from the list or ask Marcus to add a new skill that is missing. Skills are visible to admins and used to match consultants to upcoming client assignments.',
+     'Profile', 6, '00000000-0000-0000-0000-000000000001'),
+
+    ('00000000-0000-0000-0009-000000000008',
+     'How are assignments typically structured at Netler?',
+     'Assignments are client engagements where you work on-site or remotely for a specific client. Most run between 6 and 24 months. Your assignment details, including project name, start date, and end date, are visible in the Placements section of the intranet.',
+     'Assignments', 7, '00000000-0000-0000-0000-000000000001'),
+
+    ('00000000-0000-0000-0009-000000000009',
+     'What happens when my assignment ends?',
+     'When your assignment concludes you will appear as available in the system. Marcus will be in touch well in advance to discuss your next placement. Aim to flag any concerns about an upcoming end date at least 60 days before it happens.',
+     'Assignments', 8, '00000000-0000-0000-0000-000000000001'),
+
+    ('00000000-0000-0000-0009-000000000010',
+     'How do I RSVP to a company event?',
+     'Open the Events section from the menu and click on the event. You will see options to mark yourself as Going, Maybe, or Not Going. RSVPs help us plan catering, venue space, and logistics, so please respond as early as possible.',
+     'Events', 9, '00000000-0000-0000-0000-000000000001'),
+
+    ('00000000-0000-0000-0009-000000000011',
+     'What benefits am I entitled to?',
+     'Your benefits are listed under Profile → Benefits. Standard benefits for all Netler employees include ITP1 pension via Collectum, private health insurance via Bliwa, and a 5 000 SEK annual wellness allowance. Individual benefits such as a home office budget, conference budget, or phone allowance may also apply depending on your contract.',
+     'Benefits', 10, '00000000-0000-0000-0000-000000000001'),
+
+    ('00000000-0000-0000-0009-000000000012',
+     'Who do I contact about salary or contract questions?',
+     'Contact Marcus Karlsson directly at marcus.karlsson@netler.com or on Slack. Salary reviews are conducted annually, typically in April. Your employment contract is available under Profile → Contract.',
+     'General', 11, '00000000-0000-0000-0000-000000000001');
+
+
+-- =============================================================================
+-- NEWS POSTS — additional entries
+-- =============================================================================
+
+INSERT INTO news_posts (id, title, body, author_id, published_at, pinned)
+VALUES
+    ('00000000-0000-0000-0007-000000000006',
+     'New Client Partnership: Ericsson',
+     '<p>We are excited to share that Netler has signed a new framework agreement with Ericsson. This opens the door for multiple consultant placements within their cloud and network infrastructure teams over the coming years.</p><p>Lina Eriksson''s previous work at Ericsson was instrumental in building this relationship. A big thank you to Lina for her outstanding work and professionalism throughout that engagement.</p><p>We are actively scoping the first placement — if you have a background in cloud infrastructure, Kubernetes, or CI/CD, keep an eye out for more details soon.</p>',
+     '00000000-0000-0000-0000-000000000001',
+     '2026-01-20 09:00:00+00', FALSE),
+
+    ('00000000-0000-0000-0007-000000000007',
+     'Welcome Fredrik Norling!',
+     '<p>We are thrilled to welcome Fredrik Norling to the Netler team! Fredrik joins us as a Backend Developer with a strong focus on Java, Spring Boot, and distributed systems.</p><p>Fredrik hit the ground running and is already on assignment at Klarna working on the Checkout Flow Optimisation project. Welcome aboard, Fredrik — glad to have you with us!</p>',
+     '00000000-0000-0000-0000-000000000001',
+     '2026-01-22 10:00:00+00', FALSE),
+
+    ('00000000-0000-0000-0007-000000000008',
+     'Salary Reviews — Book Your Slot for April',
+     '<p>Annual salary reviews are coming up in April. All employees should book a 30-minute slot with Marcus before April 15th.</p><p>To prepare, think about your contributions over the past year, any skills you have developed, and your goals for the next 12 months. The review is a two-way conversation — come with questions.</p><p>Slots can be booked directly via the calendar link Marcus will send over Slack. The deadline for completing all reviews is April 30th.</p>',
+     '00000000-0000-0000-0000-000000000001',
+     '2026-03-10 08:00:00+00', FALSE);

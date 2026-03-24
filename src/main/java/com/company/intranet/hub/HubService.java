@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -70,6 +71,8 @@ public class HubService {
     public NewsPostDetailDto createNews(CreateNewsRequest request, Employee author) {
         validateImage(request.coverImageData(), request.coverImageType());
 
+        Instant publishedAt = request.publish() ? Instant.now() : null;
+
         NewsPost post = NewsPost.builder()
                 .title(request.title())
                 .body(request.body())
@@ -77,9 +80,29 @@ public class HubService {
                 .author(author)
                 .coverImageData(request.coverImageData())
                 .coverImageType(request.coverImageType())
+                .publishedAt(publishedAt)
                 .build();
 
-        return hubMapper.toDetailDto(newsPostRepository.save(post));
+        NewsPost saved = newsPostRepository.save(post);
+
+        if (request.publish()) {
+            String publishedDate = saved.getPublishedAt()
+                    .atZone(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));
+            String rawBody  = post.getBody() == null ? "" : post.getBody();
+            String stripped = rawBody.replaceAll("<[^>]*>", "").strip();
+            String excerpt  = stripped.length() > 200 ? stripped.substring(0, 200) + "…" : stripped;
+
+            eventPublisher.publishEvent(new NewsPublishedEvent(
+                    saved.getId(),
+                    saved.getTitle(),
+                    saved.getAuthor().getFullName(),
+                    publishedDate,
+                    excerpt,
+                    employeeRepository.findAll().stream().map(Employee::getEmail).toList()));
+        }
+
+        return hubMapper.toDetailDto(saved);
     }
 
     @Transactional
@@ -112,7 +135,21 @@ public class HubService {
             List<String> allEmails = employeeRepository.findAll().stream()
                     .map(Employee::getEmail)
                     .toList();
-            eventPublisher.publishEvent(new NewsPublishedEvent(post.getTitle(), allEmails));
+
+            String publishedDate = saved.getPublishedAt()
+                    .atZone(ZoneOffset.UTC)
+                    .format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));
+            String rawBody  = post.getBody() == null ? "" : post.getBody();
+            String stripped = rawBody.replaceAll("<[^>]*>", "").strip();
+            String excerpt  = stripped.length() > 200 ? stripped.substring(0, 200) + "…" : stripped;
+
+            eventPublisher.publishEvent(new NewsPublishedEvent(
+                    post.getId(),
+                    post.getTitle(),
+                    post.getAuthor().getFullName(),
+                    publishedDate,
+                    excerpt,
+                    allEmails));
         }
 
         return hubMapper.toDetailDto(saved);

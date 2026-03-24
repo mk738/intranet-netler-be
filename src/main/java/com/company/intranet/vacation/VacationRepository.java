@@ -23,7 +23,7 @@ public interface VacationRepository extends JpaRepository<VacationRequest, UUID>
     List<VacationRequest> findAllWithEmployee(
             @Param("status") VacationRequest.VacationStatus status);
 
-    boolean existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+    boolean existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
             Employee employee,
             LocalDate endDate,
             LocalDate startDate,

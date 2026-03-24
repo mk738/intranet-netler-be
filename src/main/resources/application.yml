@@ -54,6 +54,9 @@ mailersend:
   from-email: ${MAILERSEND_FROM_EMAIL:no-reply@yourcompany.com}
   from-name: ${MAILERSEND_FROM_NAME:Intranet}
   login-url: ${MAILERSEND_LOGIN_URL:https://intranet.yourcompany.com/login}
+  site-url: ${RESEND_BASE_URL:https://intranet.yourcompany.com}
+  vacation-notify-email: ${MAILERSEND_VACATION_NOTIFY_EMAIL:marcus.karlsson@netler.com}
+  news-notify-email: ${MAILERSEND_NEWS_NOTIFY_EMAIL:marcus.karlsson@netler.com}
 
 firebase:
   credentials:

@@ -45,7 +45,13 @@ public class EmployeeMapper {
     public EmployeeDetailDto toDetailDto(Employee employee,
                                          BankInfoDto bankInfo,
                                          List<EducationDto> education,
+                                         List<BenefitDto> benefits,
                                          List<AssignmentDto> assignments) {
+        AssignmentDto currentAssignment = assignments.stream()
+                .filter(a -> "ACTIVE".equals(a.status()) || "ENDING_SOON".equals(a.status()))
+                .findFirst()
+                .orElse(null);
+
         return new EmployeeDetailDto(
                 employee.getId(),
                 employee.getEmail(),
@@ -57,6 +63,8 @@ public class EmployeeMapper {
                 toProfileDto(employee.getProfile()),
                 bankInfo,
                 education,
+                benefits,
+                currentAssignment,
                 assignments
         );
     }

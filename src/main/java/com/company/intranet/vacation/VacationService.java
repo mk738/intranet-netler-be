@@ -80,8 +80,8 @@ public class VacationService {
         }
 
         boolean overlaps = vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
-                        me, endDate, startDate, VacationRequest.VacationStatus.REJECTED);
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
+                        me, endDate, startDate, VacationRequest.VacationStatus.APPROVED);
         if (overlaps) {
             throw new AppException(
                     ErrorCode.VACATION_OVERLAP,
@@ -110,10 +110,19 @@ public class VacationService {
 
         VacationRequest saved = vacationRepository.save(vacation);
 
+        DateTimeFormatter displayFmt = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
+        String jobTitle = (me.getProfile() != null && me.getProfile().getJobTitle() != null)
+                ? me.getProfile().getJobTitle() : "";
+
         List<String> adminEmails = employeeRepository.findAllAdminEmails();
         eventPublisher.publishEvent(new VacationRequestedEvent(
                 me.getFullName(),
                 me.getEmail(),
+                jobTitle,
+                startDate.format(displayFmt),
+                endDate.format(displayFmt),
+                requestedDays,
+                LocalDate.now().format(displayFmt),
                 formatDateRange(startDate, endDate),
                 adminEmails));
 

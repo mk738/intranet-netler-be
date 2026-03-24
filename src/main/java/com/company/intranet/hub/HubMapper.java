@@ -14,10 +14,10 @@ public class HubMapper {
                 post.getTitle(),
                 post.getAuthor().getFullName(),
                 post.getAuthor().getInitials(),
-                post.getPublishedAt() != null ? post.getPublishedAt().toString() : null,
+                post.getPublishedAt(),
                 post.isPinned(),
                 post.getCoverImageData() != null,
-                post.getCreatedAt() != null ? post.getCreatedAt().toString() : null
+                post.getCreatedAt()
         );
     }
 
@@ -28,11 +28,11 @@ public class HubMapper {
                 post.getBody(),
                 post.getAuthor().getFullName(),
                 post.getAuthor().getInitials(),
-                post.getPublishedAt() != null ? post.getPublishedAt().toString() : null,
+                post.getPublishedAt(),
                 post.isPinned(),
                 post.getCoverImageData(),
                 post.getCoverImageType(),
-                post.getCreatedAt() != null ? post.getCreatedAt().toString() : null
+                post.getCreatedAt()
         );
     }
 

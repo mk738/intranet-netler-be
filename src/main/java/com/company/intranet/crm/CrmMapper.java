@@ -75,6 +75,7 @@ public class CrmMapper {
                 .orgNumber(dto.orgNumber())
                 .contactName(dto.contactName())
                 .contactEmail(dto.contactEmail())
+                .phone(dto.phone())
                 .status(dto.status() != null ? dto.status() : Client.ClientStatus.ACTIVE)
                 .build();
     }
@@ -85,8 +86,12 @@ public class CrmMapper {
         if (assignment.getStatus() == Assignment.AssignmentStatus.ENDED) {
             return "ENDED";
         }
+        LocalDate today = LocalDate.now();
+        if (assignment.getEndDate() != null && !assignment.getEndDate().isAfter(today)) {
+            return "ENDED";
+        }
         if (assignment.getEndDate() != null
-                && assignment.getEndDate().isBefore(LocalDate.now().plusDays(30))) {
+                && assignment.getEndDate().isBefore(today.plusDays(30))) {
             return "ENDING_SOON";
         }
         return "ACTIVE";

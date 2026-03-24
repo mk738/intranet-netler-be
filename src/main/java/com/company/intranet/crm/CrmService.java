@@ -135,7 +135,8 @@ public class CrmService {
     }
 
     @Transactional
-    public AssignmentDto endAssignment(UUID assignmentId) {
+    public AssignmentDto endAssignment(UUID assignmentId,
+                                       com.company.intranet.crm.dto.EndAssignmentRequest request) {
         Assignment assignment = assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Assignment not found"));
 
@@ -144,10 +145,18 @@ public class CrmService {
                     "Assignment is already ended.", HttpStatus.BAD_REQUEST);
         }
 
-        assignment.setStatus(Assignment.AssignmentStatus.ENDED);
-        if (assignment.getEndDate() == null) {
-            assignment.setEndDate(LocalDate.now());
+        LocalDate endDate = (request != null && request.endDate() != null)
+                ? request.endDate()
+                : LocalDate.now();
+
+        assignment.setEndDate(endDate);
+
+        if (!endDate.isAfter(LocalDate.now())) {
+            // Date is today or in the past — end the assignment immediately
+            assignment.setStatus(Assignment.AssignmentStatus.ENDED);
         }
+        // Date is in the future — keep status ACTIVE; computeStatus() will derive
+        // ENDING_SOON automatically when the date falls within the 30-day window
 
         return crmMapper.toAssignmentDto(assignmentRepository.save(assignment));
     }
