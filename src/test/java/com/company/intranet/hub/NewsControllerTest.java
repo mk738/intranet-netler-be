@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,7 +62,7 @@ class NewsControllerTest {
 
     private NewsPostDetailDto sampleDetail(UUID id) {
         return new NewsPostDetailDto(id, "Test Title", "Body text",
-                "Anna Admin", "AA", null, false, null, null, "2026-01-01T00:00:00Z");
+                "Anna Admin", "AA", null, false, null, null, Instant.parse("2026-01-01T00:00:00Z"));
     }
 
     // ── GET /api/news ─────────────────────────────────────────────────────────
@@ -127,7 +128,7 @@ class NewsControllerTest {
     void createNews_asAdmin_returns201() throws Exception {
         Employee admin = adminEmployee();
         UUID id = UUID.randomUUID();
-        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, null, null);
+        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null);
 
         when(hubService.createNews(any(CreateNewsRequest.class), eq(admin)))
                 .thenReturn(sampleDetail(id));
@@ -144,7 +145,7 @@ class NewsControllerTest {
     @Test
     void createNews_asEmployee_returns403() throws Exception {
         Employee emp = regularEmployee();
-        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, null, null);
+        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null);
 
         mockMvc.perform(post("/api/news")
                         .with(authentication(auth(emp)))

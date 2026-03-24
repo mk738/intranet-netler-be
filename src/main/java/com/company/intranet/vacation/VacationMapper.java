@@ -9,6 +9,10 @@ import java.util.List;
 public class VacationMapper {
 
     public VacationDto toDto(VacationRequest request) {
+        String avatarUrl = request.getEmployee().getProfile() != null
+                ? request.getEmployee().getProfile().getAvatarUrl()
+                : null;
+
         return new VacationDto(
                 request.getId(),
                 request.getEmployee().getId(),
@@ -23,7 +27,8 @@ public class VacationMapper {
                 request.getReviewedAt() != null
                         ? request.getReviewedAt().toString() : null,
                 request.getCreatedAt() != null
-                        ? request.getCreatedAt().toString() : null
+                        ? request.getCreatedAt().toString() : null,
+                avatarUrl
         );
     }
 

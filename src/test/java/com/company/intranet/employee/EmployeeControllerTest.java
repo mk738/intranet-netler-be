@@ -77,6 +77,8 @@ class EmployeeControllerTest {
                         null, null, null, null, LocalDate.of(2023, 3, 1), null),
                 null,
                 List.of(),
+                List.of(),
+                null,
                 List.of());
     }
 
@@ -364,6 +366,8 @@ class EmployeeControllerTest {
                         null, null, null, null, LocalDate.of(2023, 6, 1), null),
                 new BankInfoDto("Swedbank", "••••7890", "8102"),
                 List.of(),
+                List.of(),
+                null,
                 List.of());
 
         when(employeeService.getEmployeeById(targetId)).thenReturn(detail);

@@ -35,9 +35,11 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(VacationRequestedEvent e) {
         try {
-            e.adminEmails().forEach(email ->
-                    emailService.sendVacationRequested(
-                            e.employeeName(), e.dateRange(), e.adminEmails()));
+            mailerSendService.sendVacationRequested(
+                    e.employeeName(), e.jobTitle(),
+                    e.startDate(), e.endDate(),
+                    e.daysCount(), e.submittedAt(),
+                    e.adminEmails());
         } catch (Exception ex) {
             log.error("Failed to send vacation-requested emails for {}: {}",
                     e.employeeName(), ex.getMessage(), ex);
@@ -60,7 +62,9 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(NewsPublishedEvent e) {
         try {
-            emailService.sendNewsPublished(e.newsTitle(), e.recipientEmails());
+            mailerSendService.sendNewsPublished(
+                    e.postId(), e.newsTitle(), e.authorName(),
+                    e.publishedDate(), e.excerpt(), e.recipientEmails());
         } catch (Exception ex) {
             log.error("Failed to send news-published emails for '{}': {}",
                     e.newsTitle(), ex.getMessage(), ex);

@@ -3,6 +3,7 @@ package com.company.intranet.crm;
 import com.company.intranet.employee.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,20 @@ public interface AssignmentRepository extends JpaRepository<Assignment, UUID> {
     List<Assignment> findAllActiveWithEmployeeAndClient();
 
     boolean existsByEmployeeAndStatus(Employee employee, Assignment.AssignmentStatus status);
+
+    boolean existsByClientAndStatus(Client client, Assignment.AssignmentStatus status);
+
+    List<Assignment> findByStatusAndEndDateLessThan(Assignment.AssignmentStatus status, java.time.LocalDate date);
+
+    @Query("""
+        SELECT a FROM Assignment a
+        JOIN FETCH a.client
+        JOIN FETCH a.employee e
+        LEFT JOIN FETCH e.profile
+        WHERE a.employee = :employee
+        ORDER BY a.startDate DESC
+    """)
+    List<Assignment> findByEmployeeWithClient(@Param("employee") Employee employee);
 
     List<Assignment> findByEmployeeOrderByStartDateDesc(Employee employee);
 

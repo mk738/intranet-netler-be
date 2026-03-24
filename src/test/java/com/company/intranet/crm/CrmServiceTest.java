@@ -51,7 +51,7 @@ class CrmServiceTest {
     @Test
     void createAssignment_bothClientIdAndNewClient_throwsBadRequest() {
         NewClientDto newClient = new NewClientDto(
-                "ACME", null, null, null, null);
+                "ACME", null, null, null, null, null);
 
         CreateAssignmentRequest request = new CreateAssignmentRequest(
                 UUID.randomUUID(), UUID.randomUUID(), newClient,
@@ -127,7 +127,7 @@ class CrmServiceTest {
 
         when(assignmentRepository.findById(id)).thenReturn(Optional.of(ended));
 
-        assertThatThrownBy(() -> crmService.endAssignment(id))
+        assertThatThrownBy(() -> crmService.endAssignment(id, null))
                 .isInstanceOf(AppException.class)
                 .satisfies(ex -> assertThat(((AppException) ex).getCode())
                         .isEqualTo(ErrorCode.BAD_REQUEST));
@@ -163,10 +163,10 @@ class CrmServiceTest {
 
         AssignmentDto dto = new AssignmentDto(id, employee.getId(), "Erik L", "EL",
                 null, client.getId(), "Acme", "P",
-                LocalDate.of(2024, 1, 1), LocalDate.now(), "ENDED");
+                LocalDate.of(2024, 1, 1), LocalDate.now(), "ENDED", null);
         when(crmMapper.toAssignmentDto(any())).thenReturn(dto);
 
-        crmService.endAssignment(id);
+        crmService.endAssignment(id, null);
 
         assertThat(assignment.getEndDate()).isEqualTo(LocalDate.now());
         assertThat(assignment.getStatus()).isEqualTo(Assignment.AssignmentStatus.ENDED);
@@ -177,7 +177,7 @@ class CrmServiceTest {
     @Test
     void createClient_duplicateOrgNumber_throwsClientOrgNumberTaken() {
         NewClientDto request = new NewClientDto(
-                "New Corp", "556123-4567", null, null, Client.ClientStatus.ACTIVE);
+                "New Corp", "556123-4567", null, null, null, Client.ClientStatus.ACTIVE);
 
         when(clientRepository.existsByOrgNumber("556123-4567")).thenReturn(true);
 
@@ -217,10 +217,10 @@ class CrmServiceTest {
 
         AssignmentDto assignmentDto = new AssignmentDto(active.getId(), placed.getId(),
                 "", "", null, client.getId(), "Spotify", "P",
-                LocalDate.of(2025, 1, 1), null, "ACTIVE");
+                LocalDate.of(2025, 1, 1), null, "ACTIVE", null);
         when(crmMapper.toAssignmentDtos(any())).thenReturn(List.of(assignmentDto));
         when(crmMapper.toUnplacedDto(eq(unplaced), isNull(), isNull()))
-                .thenReturn(new UnplacedDto(unplaced.getId(), "", "", null, null, null));
+                .thenReturn(new UnplacedDto(unplaced.getId(), "", "", null, null, null, null));
 
         PlacementViewDto view = crmService.getPlacementView();
 

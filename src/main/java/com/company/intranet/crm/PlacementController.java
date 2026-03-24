@@ -3,6 +3,7 @@ package com.company.intranet.crm;
 import com.company.intranet.common.response.ApiResponse;
 import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.crm.dto.CreateAssignmentRequest;
+import com.company.intranet.crm.dto.EndAssignmentRequest;
 import com.company.intranet.crm.dto.PlacementViewDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +43,12 @@ public class PlacementController {
     @PutMapping("/api/assignments/{id}/end")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<AssignmentDto>> endAssignment(
-            @PathVariable UUID id) {
-        log.info("PUT /api/assignments/{}/end", id);
-        AssignmentDto result = crmService.endAssignment(id);
-        log.info("Assignment ended id={}", id);
+            @PathVariable UUID id,
+            @RequestBody(required = false) EndAssignmentRequest request) {
+        log.info("PUT /api/assignments/{}/end endDate={}", id,
+                request != null ? request.endDate() : null);
+        AssignmentDto result = crmService.endAssignment(id, request);
+        log.info("Assignment updated id={}", id);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

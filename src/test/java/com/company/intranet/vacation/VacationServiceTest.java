@@ -83,8 +83,8 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(4));
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
-                        eq(me), any(), any(), eq(VacationRequest.VacationStatus.REJECTED)))
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
+                        eq(me), any(), any(), eq(VacationRequest.VacationStatus.APPROVED)))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
@@ -104,7 +104,7 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(6));
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
                         any(), any(), any(), any()))
                 .thenReturn(false);
         when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(23);
@@ -124,7 +124,7 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, end);
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
                         any(), any(), any(), any()))
                 .thenReturn(false);
         when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(0);
@@ -139,7 +139,7 @@ class VacationServiceTest {
                 .thenReturn(List.of("admin@company.com"));
         when(vacationMapper.toDto(saved))
                 .thenReturn(new VacationDto(saved.getId(), id, "Erik Lindqvist", "EL",
-                        start, end, 5, "PENDING", null, null, null));
+                        start, end, 5, "PENDING", null, null, null, null));
 
         vacationService.submitVacation(req, me);
 
@@ -221,7 +221,7 @@ class VacationServiceTest {
         when(vacationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vacationMapper.toDto(any())).thenReturn(
                 new VacationDto(vacId, emp.getId(), "Erik Lindqvist", "EL",
-                        start, end, 5, "APPROVED", "Admin User", null, null));
+                        start, end, 5, "APPROVED", "Admin User", null, null, null));
 
         vacationService.reviewVacation(vacId, new ReviewVacationRequest(true), admin);
 

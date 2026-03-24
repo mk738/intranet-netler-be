@@ -65,7 +65,7 @@ class HubServiceTest {
     @Test
     void createNews_noImage_savesPost() {
         Employee author = admin();
-        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, null, null);
+        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null);
 
         NewsPost saved = unpublishedPost(author);
         when(newsPostRepository.save(any())).thenReturn(saved);
@@ -83,7 +83,7 @@ class HubServiceTest {
     void createNews_invalidMimeType_throwsBadRequest() {
         Employee author = admin();
         String fakeBase64 = Base64.getEncoder().encodeToString("fake".getBytes());
-        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, fakeBase64, "application/pdf");
+        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, false, fakeBase64, "application/pdf");
 
         assertThatThrownBy(() -> hubService.createNews(req, author))
                 .isInstanceOf(BadRequestException.class)
@@ -95,7 +95,7 @@ class HubServiceTest {
         Employee author = admin();
         byte[] bigImage = new byte[6 * 1024 * 1024]; // 6 MB
         String largeBase64 = Base64.getEncoder().encodeToString(bigImage);
-        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, largeBase64, "image/jpeg");
+        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, false, largeBase64, "image/jpeg");
 
         assertThatThrownBy(() -> hubService.createNews(req, author))
                 .isInstanceOf(BadRequestException.class)
@@ -105,7 +105,7 @@ class HubServiceTest {
     @Test
     void createNews_invalidBase64_throwsBadRequest() {
         Employee author = admin();
-        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, "!!!notBase64!!!", "image/png");
+        CreateNewsRequest req = new CreateNewsRequest("T", "B", false, false, "!!!notBase64!!!", "image/png");
 
         assertThatThrownBy(() -> hubService.createNews(req, author))
                 .isInstanceOf(BadRequestException.class)
@@ -124,7 +124,7 @@ class HubServiceTest {
         when(employeeRepository.findAll()).thenReturn(List.of(author));
         when(hubMapper.toDetailDto(any())).thenReturn(
                 new NewsPostDetailDto(post.getId(), "Test Post", "Body text",
-                        "Anna Admin", "AA", Instant.now().toString(), false, null, null, null));
+                        "Anna Admin", "AA", Instant.now(), false, null, null, null));
 
         hubService.publishNews(post.getId(), true);
 
@@ -144,7 +144,7 @@ class HubServiceTest {
         when(newsPostRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(hubMapper.toDetailDto(any())).thenReturn(
                 new NewsPostDetailDto(post.getId(), "Test Post", "Body text",
-                        "Anna Admin", "AA", post.getPublishedAt().toString(), false, null, null, null));
+                        "Anna Admin", "AA", post.getPublishedAt(), false, null, null, null));
 
         hubService.publishNews(post.getId(), true);
 

@@ -1,5 +1,6 @@
 package com.company.intranet.hub.dto;
 
+import java.time.Instant;
 import java.util.UUID;
 
 public record NewsPostDto(
@@ -7,8 +8,8 @@ public record NewsPostDto(
         String  title,
         String  authorName,
         String  authorInitials,
-        String  publishedAt,
+        Instant publishedAt,
         boolean pinned,
         boolean hasImage,
-        String  createdAt
+        Instant createdAt
 ) {}

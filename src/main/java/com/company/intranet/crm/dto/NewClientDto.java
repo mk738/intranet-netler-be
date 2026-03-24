@@ -8,5 +8,6 @@ public record NewClientDto(
         String           orgNumber,
         String           contactName,
         String           contactEmail,
+        String           phone,
         Client.ClientStatus status
 ) {}
