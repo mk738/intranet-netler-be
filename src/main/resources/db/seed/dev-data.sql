@@ -1098,3 +1098,62 @@ INSERT INTO employee_skills (employee_id, skill_id) VALUES
     ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000009'),
     ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000010'),
     ('00000000-0000-0000-0000-000000000011', '00000000-0000-0000-000c-000000000004');
+
+
+-- =============================================================================
+-- TEST CASE: Emma Holmgren @ Tele2
+-- Purpose: verify that Tele2 becomes INACTIVE when her expired assignment
+--          is ended (via endAssignment API or the nightly scheduler).
+--          Tele2 has only this one consultant — so ending it should flip
+--          the client from ACTIVE → INACTIVE immediately.
+-- =============================================================================
+
+INSERT INTO employees (id, firebase_uid, email, role, is_active) VALUES
+    ('00000000-0000-0000-0000-000000000012', 'emma-netler-uid',
+     'emma.holmgren@netler.com', 'EMPLOYEE', TRUE);
+
+INSERT INTO employee_profiles
+    (id, employee_id, first_name, last_name, job_title, phone, address, emergency_contact, start_date, birth_date)
+VALUES
+    ('00000000-0000-0000-0002-000000000012',
+     '00000000-0000-0000-0000-000000000012',
+     'Emma', 'Holmgren',
+     'Frontend Developer',
+     '+46 70 555 12 34',
+     'Linnégatan 22, 413 04 Göteborg',
+     'Lars Holmgren – +46 73 555 43 21',
+     '2024-01-15', '1996-09-11');
+
+INSERT INTO clients (id, company_name, contact_name, contact_email, phone, org_number, status)
+VALUES
+    ('00000000-0000-0000-0001-000000000007',
+     'Tele2 AB', 'Sofia Lundgren', 'sofia.lundgren@tele2.com',
+     '+46 8 555 90 00', '556267-5164', 'ACTIVE');
+
+-- Assignment is ACTIVE in DB but endDate has already passed (2026-02-28).
+-- The nightly scheduler or a manual PUT /api/assignments/{id}/end call
+-- should set it to ENDED and flip Tele2 → INACTIVE.
+INSERT INTO assignments (id, employee_id, client_id, project_name, start_date, end_date, status)
+VALUES
+    ('00000000-0000-0000-0005-000000000017',
+     '00000000-0000-0000-0000-000000000012',
+     '00000000-0000-0000-0001-000000000007',
+     'My Tele2 App Redesign',
+     '2025-03-01', '2026-02-28', 'ACTIVE');
+
+INSERT INTO bank_info (id, employee_id, bank_name, account_number, clearing_number) VALUES
+    ('00000000-0000-0000-0003-000000000012',
+     '00000000-0000-0000-0000-000000000012',
+     'SEB', '52109988776', '5000');
+
+INSERT INTO employee_benefit (id, employee_id, name, description, sort_order) VALUES
+    ('00000000-0000-0000-000b-000000000049', '00000000-0000-0000-0000-000000000012',
+     'ITP1 Pension',       'Defined-contribution pension via Collectum.',  0),
+    ('00000000-0000-0000-000b-000000000050', '00000000-0000-0000-0000-000000000012',
+     'Wellness Allowance', '5 000 SEK/year friskvårdsbidrag.',             1);
+
+INSERT INTO employee_skills (employee_id, skill_id) VALUES
+    -- Emma (Frontend): React, TypeScript, GraphQL
+    ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000007'),
+    ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000008'),
+    ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000010');
