@@ -101,26 +101,25 @@ public class MailerSendService {
 
         var recipients = List.of(newsNotifyEmail, "mackke90@gmail.com");
 
-        var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              recipients.stream().map(e -> Map.of("email", e)).toList(),
-                "subject",         postTitle,
-                "template_id",     NEWS_TEMPLATE_ID,
-                "personalization", recipients.stream()
-                        .map(e -> Map.of("email", e, "data", personalizationData))
-                        .toList()
-        );
+        for (String recipient : recipients) {
+            var payload = Map.of(
+                    "from",            Map.of("email", fromEmail, "name", fromName),
+                    "to",              List.of(Map.of("email", recipient)),
+                    "subject",         postTitle,
+                    "template_id",     NEWS_TEMPLATE_ID,
+                    "personalization", List.of(Map.of("email", recipient, "data", personalizationData))
+            );
 
-        restClient.post()
-                .uri("/email")
-                .header("Authorization", "Bearer " + apiToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(payload)
-                .retrieve()
-                .toBodilessEntity();
+            restClient.post()
+                    .uri("/email")
+                    .header("Authorization", "Bearer " + apiToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
 
-        log.info("News published email sent via MailerSend to {} recipients for post '{}'",
-                recipients.size(), postTitle);
+            log.info("News published email sent via MailerSend to {} for post '{}'", recipient, postTitle);
+        }
     }
 
     public void sendVacationRequested(String employeeName, String jobTitle,
