@@ -139,7 +139,7 @@ class VacationServiceTest {
                 .thenReturn(List.of("admin@company.com"));
         when(vacationMapper.toDto(saved))
                 .thenReturn(new VacationDto(saved.getId(), id, "Erik Lindqvist", "EL",
-                        start, end, 5, "PENDING", null, null, null));
+                        start, end, 5, "PENDING", null, null, null, null));
 
         vacationService.submitVacation(req, me);
 
@@ -221,7 +221,7 @@ class VacationServiceTest {
         when(vacationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vacationMapper.toDto(any())).thenReturn(
                 new VacationDto(vacId, emp.getId(), "Erik Lindqvist", "EL",
-                        start, end, 5, "APPROVED", "Admin User", null, null));
+                        start, end, 5, "APPROVED", "Admin User", null, null, null));
 
         vacationService.reviewVacation(vacId, new ReviewVacationRequest(true), admin);
 

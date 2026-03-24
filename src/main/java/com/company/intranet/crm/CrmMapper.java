@@ -34,6 +34,10 @@ public class CrmMapper {
                 ? employee.getProfile().getJobTitle()
                 : null;
 
+        String avatarUrl = employee.getProfile() != null
+                ? employee.getProfile().getAvatarUrl()
+                : null;
+
         return new AssignmentDto(
                 assignment.getId(),
                 employee.getId(),
@@ -45,7 +49,8 @@ public class CrmMapper {
                 assignment.getProjectName(),
                 assignment.getStartDate(),
                 assignment.getEndDate(),
-                computeStatus(assignment)
+                computeStatus(assignment),
+                avatarUrl
         );
     }
 
@@ -59,13 +64,18 @@ public class CrmMapper {
         String jobTitle = employee.getProfile() != null
                 ? employee.getProfile().getJobTitle()
                 : null;
+        String avatarUrl = employee.getProfile() != null
+                ? employee.getProfile().getAvatarUrl()
+                : null;
+
         return new UnplacedDto(
                 employee.getId(),
                 employee.getFullName(),
                 employee.getInitials(),
                 jobTitle,
                 lastPlacedClient,
-                lastPlacedDate
+                lastPlacedDate,
+                avatarUrl
         );
     }
 

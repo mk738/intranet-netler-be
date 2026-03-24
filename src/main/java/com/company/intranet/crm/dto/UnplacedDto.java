@@ -8,5 +8,6 @@ public record UnplacedDto(
         String initials,
         String jobTitle,
         String lastPlacedClient,  // null if never placed
-        String lastPlacedDate     // ISO date string, null if never placed
+        String lastPlacedDate,    // ISO date string, null if never placed
+        String avatarUrl
 ) {}

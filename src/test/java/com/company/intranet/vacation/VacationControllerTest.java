@@ -61,7 +61,7 @@ class VacationControllerTest {
     private VacationDto sampleDto(UUID id) {
         return new VacationDto(id, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "PENDING", null, null, "2026-01-01T00:00:00Z");
+                5, "PENDING", null, null, "2026-01-01T00:00:00Z", null);
     }
 
     // ── GET /api/vacations/me ─────────────────────────────────────────────────
@@ -161,7 +161,7 @@ class VacationControllerTest {
         ReviewVacationRequest req = new ReviewVacationRequest(true);
         VacationDto approved = new VacationDto(vacId, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "APPROVED", admin.getEmail(), null, null);
+                5, "APPROVED", admin.getEmail(), null, null, null);
 
         when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(admin)))
                 .thenReturn(approved);

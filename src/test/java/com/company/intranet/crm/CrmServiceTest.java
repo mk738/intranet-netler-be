@@ -163,7 +163,7 @@ class CrmServiceTest {
 
         AssignmentDto dto = new AssignmentDto(id, employee.getId(), "Erik L", "EL",
                 null, client.getId(), "Acme", "P",
-                LocalDate.of(2024, 1, 1), LocalDate.now(), "ENDED");
+                LocalDate.of(2024, 1, 1), LocalDate.now(), "ENDED", null);
         when(crmMapper.toAssignmentDto(any())).thenReturn(dto);
 
         crmService.endAssignment(id, null);
@@ -217,10 +217,10 @@ class CrmServiceTest {
 
         AssignmentDto assignmentDto = new AssignmentDto(active.getId(), placed.getId(),
                 "", "", null, client.getId(), "Spotify", "P",
-                LocalDate.of(2025, 1, 1), null, "ACTIVE");
+                LocalDate.of(2025, 1, 1), null, "ACTIVE", null);
         when(crmMapper.toAssignmentDtos(any())).thenReturn(List.of(assignmentDto));
         when(crmMapper.toUnplacedDto(eq(unplaced), isNull(), isNull()))
-                .thenReturn(new UnplacedDto(unplaced.getId(), "", "", null, null, null));
+                .thenReturn(new UnplacedDto(unplaced.getId(), "", "", null, null, null, null));
 
         PlacementViewDto view = crmService.getPlacementView();
 

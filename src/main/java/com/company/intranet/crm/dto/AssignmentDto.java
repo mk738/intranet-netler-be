@@ -14,5 +14,6 @@ public record AssignmentDto(
         String    projectName,
         LocalDate startDate,
         LocalDate endDate,
-        String    status   // "ACTIVE" | "ENDING_SOON" | "ENDED" — ENDING_SOON is computed, never stored
+        String    status,  // "ACTIVE" | "ENDING_SOON" | "ENDED" — ENDING_SOON is computed, never stored
+        String    avatarUrl
 ) {}
