@@ -83,8 +83,8 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(4));
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
-                        eq(me), any(), any(), eq(VacationRequest.VacationStatus.REJECTED)))
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
+                        eq(me), any(), any(), eq(VacationRequest.VacationStatus.APPROVED)))
                 .thenReturn(true);
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
@@ -104,7 +104,7 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(6));
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
                         any(), any(), any(), any()))
                 .thenReturn(false);
         when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(23);
@@ -124,7 +124,7 @@ class VacationServiceTest {
         SubmitVacationRequest req = new SubmitVacationRequest(start, end);
 
         when(vacationRepository
-                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatusNot(
+                .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
                         any(), any(), any(), any()))
                 .thenReturn(false);
         when(vacationRepository.sumApprovedDaysForYear(eq(me), anyInt())).thenReturn(0);

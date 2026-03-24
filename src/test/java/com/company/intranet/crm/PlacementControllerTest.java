@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -135,7 +136,7 @@ class PlacementControllerTest {
                 UUID.randomUUID(), "Spotify", "Project",
                 LocalDate.of(2025, 1, 1), LocalDate.now(), "ENDED");
 
-        when(crmService.endAssignment(id)).thenReturn(dto);
+        when(crmService.endAssignment(eq(id), any())).thenReturn(dto);
 
         mockMvc.perform(put("/api/assignments/" + id + "/end")
                         .with(authentication(adminAuth()))
