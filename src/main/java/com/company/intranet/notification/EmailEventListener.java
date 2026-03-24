@@ -17,7 +17,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class EmailEventListener {
 
-    private final EmailService      emailService;
     private final MailerSendService mailerSendService;
 
     @Async
@@ -50,11 +49,23 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(VacationReviewedEvent e) {
         try {
-            emailService.sendVacationReviewed(
+            mailerSendService.sendVacationReviewed(
                     e.employeeEmail(), e.employeeName(), e.dateRange(), e.status());
         } catch (Exception ex) {
             log.error("Failed to send vacation-reviewed email to {}: {}",
                     e.employeeEmail(), ex.getMessage(), ex);
+        }
+    }
+
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void on(EventCreatedEvent e) {
+        try {
+            mailerSendService.sendEventCreated(
+                    e.eventTitle(), e.eventDate(), e.location(), e.recipientEmails());
+        } catch (Exception ex) {
+            log.error("Failed to send event-created emails for '{}': {}",
+                    e.eventTitle(), ex.getMessage(), ex);
         }
     }
 
@@ -68,18 +79,6 @@ public class EmailEventListener {
         } catch (Exception ex) {
             log.error("Failed to send news-published emails for '{}': {}",
                     e.newsTitle(), ex.getMessage(), ex);
-        }
-    }
-
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void on(EventCreatedEvent e) {
-        try {
-            emailService.sendEventCreated(
-                    e.eventTitle(), e.eventDate(), e.location(), e.recipientEmails());
-        } catch (Exception ex) {
-            log.error("Failed to send event-created emails for '{}': {}",
-                    e.eventTitle(), ex.getMessage(), ex);
         }
     }
 }

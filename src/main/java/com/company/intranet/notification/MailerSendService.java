@@ -27,6 +27,8 @@ public class MailerSendService {
     private final String siteBaseUrl;
     private final String vacationNotifyEmail;
     private final String newsNotifyEmail;
+    private final String vacationReviewedTemplateId;
+    private final String eventCreatedTemplateId;
     private final RestClient restClient;
 
     public MailerSendService(
@@ -36,14 +38,18 @@ public class MailerSendService {
             @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}") String loginBaseUrl,
             @Value("${mailersend.site-url:https://intranet.yourcompany.com}") String siteBaseUrl,
             @Value("${mailersend.vacation-notify-email:marcus.karlsson@netler.com}") String vacationNotifyEmail,
-            @Value("${mailersend.news-notify-email:marcus.karlsson@netler.com}") String newsNotifyEmail) {
+            @Value("${mailersend.news-notify-email:marcus.karlsson@netler.com}") String newsNotifyEmail,
+            @Value("${mailersend.vacation-reviewed-template-id:}") String vacationReviewedTemplateId,
+            @Value("${mailersend.event-created-template-id:}") String eventCreatedTemplateId) {
         this.apiToken            = apiToken;
         this.fromEmail           = fromEmail;
         this.fromName            = fromName;
         this.loginBaseUrl        = loginBaseUrl;
         this.siteBaseUrl         = siteBaseUrl;
-        this.vacationNotifyEmail = vacationNotifyEmail;
-        this.newsNotifyEmail     = newsNotifyEmail;
+        this.vacationNotifyEmail        = vacationNotifyEmail;
+        this.newsNotifyEmail            = newsNotifyEmail;
+        this.vacationReviewedTemplateId = vacationReviewedTemplateId;
+        this.eventCreatedTemplateId     = eventCreatedTemplateId;
         this.restClient   = RestClient.builder()
                 .baseUrl(MAILERSEND_API_URL)
                 .build();
@@ -93,12 +99,16 @@ public class MailerSendService {
                 "category",       ""
         );
 
+        var recipients = List.of(newsNotifyEmail, "mackke90@gmail.com");
+
         var payload = Map.of(
                 "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              List.of(Map.of("email", newsNotifyEmail)),
+                "to",              recipients.stream().map(e -> Map.of("email", e)).toList(),
                 "subject",         postTitle,
                 "template_id",     NEWS_TEMPLATE_ID,
-                "personalization", List.of(Map.of("email", newsNotifyEmail, "data", personalizationData))
+                "personalization", recipients.stream()
+                        .map(e -> Map.of("email", e, "data", personalizationData))
+                        .toList()
         );
 
         restClient.post()
@@ -109,8 +119,8 @@ public class MailerSendService {
                 .retrieve()
                 .toBodilessEntity();
 
-        log.info("News published email sent via MailerSend to {} for post '{}'",
-                newsNotifyEmail, postTitle);
+        log.info("News published email sent via MailerSend to {} recipients for post '{}'",
+                recipients.size(), postTitle);
     }
 
     public void sendVacationRequested(String employeeName, String jobTitle,
@@ -146,5 +156,83 @@ public class MailerSendService {
 
         log.info("Vacation request email sent via MailerSend to {} for '{}'",
                 vacationNotifyEmail, employeeName);
+    }
+
+    public void sendVacationReviewed(String employeeEmail, String employeeName,
+                                     String dateRange, String status) {
+        if (vacationReviewedTemplateId.isBlank()) {
+            log.warn("sendVacationReviewed skipped — mailersend.vacation-reviewed-template-id not configured");
+            return;
+        }
+
+        var personalizationData = Map.of(
+                "year",          String.valueOf(Year.now().getValue()),
+                "employee_name", employeeName,
+                "date_range",    dateRange,
+                "status",        status,
+                "portal_url",    siteBaseUrl + "/vacation"
+        );
+
+        var payload = Map.of(
+                "from",            Map.of("email", fromEmail, "name", fromName),
+                "to",              List.of(Map.of("email", employeeEmail)),
+                "subject",         "Your vacation request has been " + status,
+                "template_id",     vacationReviewedTemplateId,
+                "personalization", List.of(Map.of("email", employeeEmail, "data", personalizationData))
+        );
+
+        restClient.post()
+                .uri("/email")
+                .header("Authorization", "Bearer " + apiToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
+
+        log.info("Vacation reviewed email sent via MailerSend to {} ({})", employeeEmail, status);
+    }
+
+    public void sendEventCreated(String eventTitle, String eventDate,
+                                 String location, List<String> recipientEmails) {
+        if (eventCreatedTemplateId.isBlank()) {
+            log.warn("sendEventCreated skipped — mailersend.event-created-template-id not configured");
+            return;
+        }
+        if (recipientEmails == null || recipientEmails.isEmpty()) return;
+
+        var personalizationData = Map.of(
+                "year",        String.valueOf(Year.now().getValue()),
+                "event_title", eventTitle,
+                "event_date",  eventDate,
+                "location",    location != null ? location : "",
+                "portal_url",  siteBaseUrl + "/events"
+        );
+
+        var to = recipientEmails.stream()
+                .map(email -> Map.of("email", email))
+                .toList();
+
+        var personalizations = recipientEmails.stream()
+                .map(email -> Map.of("email", email, "data", personalizationData))
+                .toList();
+
+        var payload = Map.of(
+                "from",            Map.of("email", fromEmail, "name", fromName),
+                "to",              to,
+                "subject",         "New event: " + eventTitle,
+                "template_id",     eventCreatedTemplateId,
+                "personalization", personalizations
+        );
+
+        restClient.post()
+                .uri("/email")
+                .header("Authorization", "Bearer " + apiToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(payload)
+                .retrieve()
+                .toBodilessEntity();
+
+        log.info("Event created email sent via MailerSend to {} recipients for '{}'",
+                recipientEmails.size(), eventTitle);
     }
 }
