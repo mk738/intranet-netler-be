@@ -11,5 +11,6 @@ public record NewsPostDto(
         Instant publishedAt,
         boolean pinned,
         boolean hasImage,
-        Instant createdAt
+        Instant createdAt,
+        String  category
 ) {}
