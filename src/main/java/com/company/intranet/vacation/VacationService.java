@@ -105,6 +105,7 @@ public class VacationService {
                 .startDate(startDate)
                 .endDate(endDate)
                 .daysCount(requestedDays)
+                .reason(request.reason())
                 .status(VacationRequest.VacationStatus.PENDING)
                 .build();
 
