@@ -31,6 +31,7 @@ DELETE FROM employee_avatars;
 DELETE FROM vacation_requests;
 DELETE FROM event_rsvp;
 DELETE FROM faq;
+DELETE FROM candidates;
 DELETE FROM assignments;
 DELETE FROM news_posts;
 DELETE FROM events;
@@ -1198,3 +1199,58 @@ INSERT INTO employee_skills (employee_id, skill_id) VALUES
     ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000007'),
     ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000008'),
     ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000010');
+
+
+-- =============================================================================
+-- CANDIDATES
+-- =============================================================================
+
+INSERT INTO candidates (id, name, role, email, phone, notes, stage, created_at, updated_at)
+VALUES
+    ('00000000-0000-0000-0006-000000000001',
+     'Sofia Ekström', 'Fullstack-utvecklare',
+     'sofia.ekstrom@example.com', '070-111 22 33',
+     'Stark React- och Spring Boot-bakgrund. Söker nytt uppdrag från maj.',
+     0, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000002',
+     'Mattias Holm', 'Backend Developer',
+     'mattias.holm@example.com', '070-222 33 44',
+     'Java/Kotlin-specialist med 6 års erfarenhet. Möte bokat nästa vecka.',
+     1, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000003',
+     'Rebecka Strand', 'DevOps Engineer',
+     'rebecka.strand@example.com', '073-333 44 55',
+     'Kubernetes, Terraform och AWS. Intervju genomförd, mycket positiv.',
+     2, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000004',
+     'Oscar Lindberg', 'Frontend Developer',
+     'oscar.lindberg@example.com', NULL,
+     'Specialiserad på React och TypeScript. Referenskoll pågår.',
+     3, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000005',
+     'Camilla Åberg', 'Data Engineer',
+     'camilla.aberg@example.com', '076-555 66 77',
+     'Python, Apache Kafka och Spark. Erbjudande skickat igår.',
+     4, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000006',
+     'Henrik Norén', 'Backend Developer',
+     'henrik.noren@example.com', '070-666 77 88',
+     'Anställd från 2026-04-01. Startdatum bekräftat.',
+     5, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000007',
+     'Frida Malmqvist', 'UX/UI Designer',
+     'frida.malmqvist@example.com', '073-777 88 99',
+     'Portfolio imponerade. Lämplig för produktteam hos kund.',
+     0, NOW(), NOW()),
+
+    ('00000000-0000-0000-0006-000000000008',
+     'Jonas Bergström', 'Tech Lead',
+     'jonas.bergstrom@example.com', '070-888 99 00',
+     '12 års erfarenhet, van att leda team på 5–10 personer.',
+     1, NOW(), NOW());
