@@ -62,7 +62,7 @@ class NewsControllerTest {
 
     private NewsPostDetailDto sampleDetail(UUID id) {
         return new NewsPostDetailDto(id, "Test Title", "Body text",
-                "Anna Admin", "AA", null, false, null, null, Instant.parse("2026-01-01T00:00:00Z"));
+                "Anna Admin", "AA", null, false, null, null, Instant.parse("2026-01-01T00:00:00Z"), null);
     }
 
     // ── GET /api/news ─────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ class NewsControllerTest {
     void getNews_asAdmin_returnsAllPosts() throws Exception {
         Employee admin = adminEmployee();
         NewsPostDto dto = new NewsPostDto(UUID.randomUUID(), "Title", "Anna", "AA",
-                null, false, false, null);
+                null, false, false, null, null);
         when(hubService.getNews(0, 10, true))
                 .thenReturn(new NewsListDto(List.of(dto), 0, 10, 1, 1));
 
@@ -128,7 +128,7 @@ class NewsControllerTest {
     void createNews_asAdmin_returns201() throws Exception {
         Employee admin = adminEmployee();
         UUID id = UUID.randomUUID();
-        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null);
+        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null, null);
 
         when(hubService.createNews(any(CreateNewsRequest.class), eq(admin)))
                 .thenReturn(sampleDetail(id));
@@ -145,7 +145,7 @@ class NewsControllerTest {
     @Test
     void createNews_asEmployee_returns403() throws Exception {
         Employee emp = regularEmployee();
-        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null);
+        CreateNewsRequest req = new CreateNewsRequest("Title", "Body", false, false, null, null, null);
 
         mockMvc.perform(post("/api/news")
                         .with(authentication(auth(emp)))
