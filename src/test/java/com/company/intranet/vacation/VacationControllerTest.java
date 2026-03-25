@@ -61,7 +61,7 @@ class VacationControllerTest {
     private VacationDto sampleDto(UUID id) {
         return new VacationDto(id, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "PENDING", null, null, "2026-01-01T00:00:00Z", null);
+                5, "PENDING", null, null, "2026-01-01T00:00:00Z", null, "Semester");
     }
 
     // ── GET /api/vacations/me ─────────────────────────────────────────────────
@@ -84,7 +84,7 @@ class VacationControllerTest {
         Employee emp = regularEmployee();
         UUID vacId   = UUID.randomUUID();
         SubmitVacationRequest req = new SubmitVacationRequest(
-                LocalDate.now().plusDays(7), LocalDate.now().plusDays(11));
+                LocalDate.now().plusDays(7), LocalDate.now().plusDays(11), "Semester");
 
         when(vacationService.submitVacation(any(SubmitVacationRequest.class), eq(emp)))
                 .thenReturn(sampleDto(vacId));
@@ -102,7 +102,7 @@ class VacationControllerTest {
     void submitVacation_pastStartDate_returns400() throws Exception {
         Employee emp = regularEmployee();
         SubmitVacationRequest req = new SubmitVacationRequest(
-                LocalDate.now().minusDays(1), LocalDate.now().plusDays(3));
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(3), "Semester");
 
         when(vacationService.submitVacation(any(), any()))
                 .thenThrow(new BadRequestException("Start date cannot be in the past"));
@@ -161,7 +161,7 @@ class VacationControllerTest {
         ReviewVacationRequest req = new ReviewVacationRequest(true);
         VacationDto approved = new VacationDto(vacId, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "APPROVED", admin.getEmail(), null, null, null);
+                5, "APPROVED", admin.getEmail(), null, null, null, "Semester");
 
         when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(admin)))
                 .thenReturn(approved);

@@ -35,6 +35,10 @@ public class VacationRequest extends Auditable {
     @Column(name = "days_count", nullable = false)
     private Integer daysCount;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private String reason = "Semester";
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

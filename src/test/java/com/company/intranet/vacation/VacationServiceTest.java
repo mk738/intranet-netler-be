@@ -56,7 +56,7 @@ class VacationServiceTest {
     void submitVacation_pastStartDate_throwsVacationPastDate() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         SubmitVacationRequest req = new SubmitVacationRequest(
-                LocalDate.now().minusDays(1), LocalDate.now().plusDays(3));
+                LocalDate.now().minusDays(1), LocalDate.now().plusDays(3), "Semester");
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
                 .isInstanceOf(AppException.class)
@@ -68,7 +68,7 @@ class VacationServiceTest {
     void submitVacation_endBeforeStart_throwsVacationDateInvalid() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         LocalDate start = LocalDate.now().plusDays(5);
-        SubmitVacationRequest req = new SubmitVacationRequest(start, start.minusDays(1));
+        SubmitVacationRequest req = new SubmitVacationRequest(start, start.minusDays(1), "Semester");
 
         assertThatThrownBy(() -> vacationService.submitVacation(req, me))
                 .isInstanceOf(AppException.class)
@@ -80,7 +80,7 @@ class VacationServiceTest {
     void submitVacation_overlappingRequest_throwsVacationOverlap() {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         LocalDate start = LocalDate.now().plusDays(5);
-        SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(4));
+        SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(4), "Semester");
 
         when(vacationRepository
                 .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
@@ -101,7 +101,7 @@ class VacationServiceTest {
         Employee me = employee(UUID.randomUUID(), "e@x.com");
         LocalDate start = LocalDate.now().plusDays(5);
         // Request 5 business days when 23 already used (25 allowance)
-        SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(6));
+        SubmitVacationRequest req = new SubmitVacationRequest(start, start.plusDays(6), "Semester");
 
         when(vacationRepository
                 .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
@@ -121,7 +121,7 @@ class VacationServiceTest {
         Employee me = employee(id, "erik@company.com");
         LocalDate start = LocalDate.now().plusDays(7);
         LocalDate end   = start.plusDays(4);
-        SubmitVacationRequest req = new SubmitVacationRequest(start, end);
+        SubmitVacationRequest req = new SubmitVacationRequest(start, end, "Semester");
 
         when(vacationRepository
                 .existsByEmployeeAndStartDateLessThanEqualAndEndDateGreaterThanEqualAndStatus(
@@ -139,7 +139,7 @@ class VacationServiceTest {
                 .thenReturn(List.of("admin@company.com"));
         when(vacationMapper.toDto(saved))
                 .thenReturn(new VacationDto(saved.getId(), id, "Erik Lindqvist", "EL",
-                        start, end, 5, "PENDING", null, null, null, null));
+                        start, end, 5, "PENDING", null, null, null, null, "Semester"));
 
         vacationService.submitVacation(req, me);
 
@@ -221,7 +221,7 @@ class VacationServiceTest {
         when(vacationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vacationMapper.toDto(any())).thenReturn(
                 new VacationDto(vacId, emp.getId(), "Erik Lindqvist", "EL",
-                        start, end, 5, "APPROVED", "Admin User", null, null, null));
+                        start, end, 5, "APPROVED", "Admin User", null, null, null, "Semester"));
 
         vacationService.reviewVacation(vacId, new ReviewVacationRequest(true), admin);
 

@@ -28,7 +28,8 @@ public class VacationMapper {
                         ? request.getReviewedAt().toString() : null,
                 request.getCreatedAt() != null
                         ? request.getCreatedAt().toString() : null,
-                avatarUrl
+                avatarUrl,
+                request.getReason()
         );
     }
 
