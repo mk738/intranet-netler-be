@@ -4,6 +4,7 @@ import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.response.ErrorResponse;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
+import java.time.LocalDate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -81,10 +82,15 @@ public class FirebaseTokenFilter extends OncePerRequestFilter {
             Employee employee = employeeOpt.get();
 
             if (!employee.isActive()) {
-                writeError(response, HttpServletResponse.SC_FORBIDDEN,
-                        ErrorCode.AUTH_ACCOUNT_INACTIVE,
-                        "This account has been deactivated.");
-                return;
+                // Allow access if a future termination date is set — block only when it has passed
+                boolean hasFutureTermination = employee.getTerminationDate() != null
+                        && LocalDate.now().isBefore(employee.getTerminationDate());
+                if (!hasFutureTermination) {
+                    writeError(response, HttpServletResponse.SC_FORBIDDEN,
+                            ErrorCode.AUTH_ACCOUNT_INACTIVE,
+                            "This account has been deactivated.");
+                    return;
+                }
             }
 
             var auth = new UsernamePasswordAuthenticationToken(

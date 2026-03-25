@@ -7,6 +7,7 @@ public record CreateNewsRequest(
         @NotBlank String body,
         boolean pinned,
         boolean published,
+        String category,
         String coverImageData,
         String coverImageType
 ) {}

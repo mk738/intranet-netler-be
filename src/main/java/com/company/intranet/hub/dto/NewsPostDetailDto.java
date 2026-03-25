@@ -13,5 +13,6 @@ public record NewsPostDetailDto(
         boolean pinned,
         String  coverImageData,
         String  coverImageType,
-        Instant createdAt
+        Instant createdAt,
+        String  category
 ) {}

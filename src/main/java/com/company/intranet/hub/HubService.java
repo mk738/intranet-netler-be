@@ -77,6 +77,7 @@ public class HubService {
                 .title(request.title())
                 .body(request.body())
                 .pinned(request.pinned())
+                .category(request.category())
                 .author(author)
                 .coverImageData(request.coverImageData())
                 .coverImageType(request.coverImageType())

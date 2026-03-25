@@ -44,4 +44,7 @@ public class NewsPost extends Auditable {
     @Column(nullable = false)
     @Builder.Default
     private boolean pinned = false;
+
+    @Column(length = 100)
+    private String category;
 }

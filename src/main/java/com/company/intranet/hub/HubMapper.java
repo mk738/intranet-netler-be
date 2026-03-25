@@ -17,7 +17,8 @@ public class HubMapper {
                 post.getPublishedAt(),
                 post.isPinned(),
                 post.getCoverImageData() != null,
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getCategory()
         );
     }
 
@@ -32,7 +33,8 @@ public class HubMapper {
                 post.isPinned(),
                 post.getCoverImageData(),
                 post.getCoverImageType(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getCategory()
         );
     }
 
