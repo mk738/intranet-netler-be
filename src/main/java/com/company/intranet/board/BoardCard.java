@@ -34,6 +34,9 @@ public class BoardCard extends Auditable {
     @Column
     private String category;
 
+    @Column(name = "assigned_to")
+    private String assignedTo;
+
     @Column(nullable = false)
     private int position;
 

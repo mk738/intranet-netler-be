@@ -65,7 +65,7 @@ class BoardControllerTest {
     }
 
     private BoardCardDto sampleCard(UUID id) {
-        return new BoardCardDto(id, "Fix bug", "Details", "Backend", 0,
+        return new BoardCardDto(id, "Fix bug", "Details", "Backend", null, 0,
                 "2026-01-01T00:00:00Z", List.of());
     }
 
@@ -264,7 +264,7 @@ class BoardControllerTest {
                 .thenReturn(sampleCard(cardId));
 
         String body = objectMapper.writeValueAsString(
-                new UpdateCardRequest("Fix bug", "Details", "Backend", 0, colId));
+                new UpdateCardRequest("Fix bug", "Details", "Backend", null, 0, colId));
 
         mockMvc.perform(put("/api/columns/" + colId + "/cards/" + cardId)
                         .with(authentication(auth(admin())))

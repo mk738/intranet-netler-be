@@ -1362,126 +1362,126 @@ VALUES
 -- BOARD CARDS
 -- =============================================================================
 
-INSERT INTO board_cards (id, column_id, title, text, category, position, created_by, updated_by, created_at, updated_at)
+INSERT INTO board_cards (id, column_id, title, text, category, assigned_to, position, created_by, updated_by, created_at, updated_at)
 VALUES
     -- Rekryteringspipeline → Nya kandidater
     ('00000000-0000-0000-0009-000000000001', '00000000-0000-0000-0008-000000000001',
-     'Sofia Ekström', 'Fullstack-utvecklare, stark React- och Spring Boot-bakgrund. Söker nytt uppdrag från maj.', 'Fullstack', 0,
+     'Sofia Ekström', 'Fullstack-utvecklare, stark React- och Spring Boot-bakgrund. Söker nytt uppdrag från maj.', 'Fullstack', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000002', '00000000-0000-0000-0008-000000000001',
-     'Frida Malmqvist', 'UX/UI Designer med imponerande portfolio. Lämplig för produktteam hos kund.', 'Design', 1,
+     'Frida Malmqvist', 'UX/UI Designer med imponerande portfolio. Lämplig för produktteam hos kund.', 'Design', 'Petra Lindström', 1,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Rekryteringspipeline → Första kontakt
     ('00000000-0000-0000-0009-000000000003', '00000000-0000-0000-0008-000000000002',
-     'Mattias Holm', 'Java/Kotlin-specialist med 6 års erfarenhet. Möte bokat nästa vecka.', 'Backend', 0,
+     'Mattias Holm', 'Java/Kotlin-specialist med 6 års erfarenhet. Möte bokat nästa vecka.', 'Backend', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000004', '00000000-0000-0000-0008-000000000002',
-     'Jonas Bergström', 'Tech Lead, 12 års erfarenhet, van att leda team på 5–10 personer.', 'Ledning', 1,
+     'Jonas Bergström', 'Tech Lead, 12 års erfarenhet, van att leda team på 5–10 personer.', 'Ledning', 'Marcus Karlsson', 1,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Rekryteringspipeline → Intervju
     ('00000000-0000-0000-0009-000000000005', '00000000-0000-0000-0008-000000000003',
-     'Rebecka Strand', 'DevOps Engineer – Kubernetes, Terraform och AWS. Intervju genomförd, mycket positiv.', 'DevOps', 0,
+     'Rebecka Strand', 'DevOps Engineer – Kubernetes, Terraform och AWS. Intervju genomförd, mycket positiv.', 'DevOps', 'Philip Schill', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Rekryteringspipeline → Referenskoll
     ('00000000-0000-0000-0009-000000000006', '00000000-0000-0000-0008-000000000004',
-     'Oscar Lindberg', 'Frontend Developer specialiserad på React och TypeScript. Referenskoll pågår.', 'Frontend', 0,
+     'Oscar Lindberg', 'Frontend Developer specialiserad på React och TypeScript. Referenskoll pågår.', 'Frontend', 'Philip Olsson', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Rekryteringspipeline → Erbjudande skickat
     ('00000000-0000-0000-0009-000000000007', '00000000-0000-0000-0008-000000000005',
-     'Camilla Åberg', 'Data Engineer – Python, Apache Kafka och Spark. Erbjudande skickat, inväntar svar.', 'Data', 0,
+     'Camilla Åberg', 'Data Engineer – Python, Apache Kafka och Spark. Erbjudande skickat, inväntar svar.', 'Data', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Rekryteringspipeline → Anställd
     ('00000000-0000-0000-0009-000000000008', '00000000-0000-0000-0008-000000000006',
-     'Henrik Norén', 'Backend Developer. Anställd från 2026-04-01, startdatum bekräftat.', 'Backend', 0,
+     'Henrik Norén', 'Backend Developer. Anställd från 2026-04-01, startdatum bekräftat.', 'Backend', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Onboarding → Förberedelser
     ('00000000-0000-0000-0009-000000000009', '00000000-0000-0000-0008-000000000007',
-     'Beställ dator och utrustning', 'MacBook Pro 16", extern skärm och headset. Skicka beställning till leverantör senast en vecka innan startdatum.', 'IT', 0,
+     'Beställ dator och utrustning', 'MacBook Pro 16", extern skärm och headset. Skicka beställning till leverantör senast en vecka innan startdatum.', 'IT', 'Philip Schill', 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000027', '00000000-0000-0000-0008-000000000007',
-     'Skapa konton', 'Google Workspace, Slack, GitHub, Figma och intranet. Skicka inbjudan via Firebase.', 'IT', 1,
+     'Skapa konton', 'Google Workspace, Slack, GitHub, Figma och intranet. Skicka inbjudan via Firebase.', 'IT', 'Philip Schill', 1,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000028', '00000000-0000-0000-0008-000000000007',
-     'Skicka välkomstmail', 'Inkludera schema för dag 1, parkering, kontaktperson och dresscode.', 'HR', 2,
+     'Skicka välkomstmail', 'Inkludera schema för dag 1, parkering, kontaktperson och dresscode.', 'HR', 'Petra Lindström', 2,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Onboarding → Dag 1
     ('00000000-0000-0000-0009-000000000029', '00000000-0000-0000-0008-000000000008',
-     'Husrundtur och presentation för teamet', 'Visa kontoret, mötesrum, kök och nödutgångar. Presentera för alla kollegor.', 'HR', 0,
+     'Husrundtur och presentation för teamet', 'Visa kontoret, mötesrum, kök och nödutgångar. Presentera för alla kollegor.', 'HR', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000030', '00000000-0000-0000-0008-000000000008',
-     'Genomgång av rutiner och verktyg', 'Gå igenom hur vi jobbar – standup, sprintplanering, code review och deploy-process.', 'Process', 1,
+     'Genomgång av rutiner och verktyg', 'Gå igenom hur vi jobbar – standup, sprintplanering, code review och deploy-process.', 'Process', 'Marcus Karlsson', 1,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     -- Onboarding → Vecka 1
     ('00000000-0000-0000-0009-000000000020', '00000000-0000-0000-0008-000000000009',
-     'Sätt upp lokal utvecklingsmiljö', 'Klona repo, kör Docker Compose lokalt och verifiera att frontend och backend startar.', 'Teknik', 0,
+     'Sätt upp lokal utvecklingsmiljö', 'Klona repo, kör Docker Compose lokalt och verifiera att frontend och backend startar.', 'Teknik', 'Philip Schill', 0,
      'philip.schill@netler.com', 'philip.schill@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000021', '00000000-0000-0000-0008-000000000009',
-     'Genomgång av arkitektur och kodbas', 'Pair programming med senior kollega. Gå igenom domänmodell, säkerhet och deployflöde.', 'Teknik', 1,
+     'Genomgång av arkitektur och kodbas', 'Pair programming med senior kollega. Gå igenom domänmodell, säkerhet och deployflöde.', 'Teknik', 'Philip Schill', 1,
      'philip.schill@netler.com', 'philip.schill@netler.com', NOW(), NOW()),
 
     -- Onboarding → Månad 1
     ('00000000-0000-0000-0009-000000000010', '00000000-0000-0000-0008-000000000016',
-     'Håll en teknikpresentation', 'Presentera ett valfritt ämne för teamet under ett lunch-and-learn.', 'Kompetens', 0,
+     'Håll en teknikpresentation', 'Presentera ett valfritt ämne för teamet under ett lunch-and-learn.', 'Kompetens', NULL, 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000011', '00000000-0000-0000-0008-000000000016',
-     '1:1 uppföljning med närmaste chef', 'Hur mår du? Vad fungerar bra och vad kan förbättras?', 'HR', 1,
+     '1:1 uppföljning med närmaste chef', 'Hur mår du? Vad fungerar bra och vad kan förbättras?', 'HR', 'Petra Lindström', 1,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Onboarding → Klart
     ('00000000-0000-0000-0009-000000000012', '00000000-0000-0000-0008-000000000017',
-     'Henrik Norén – onboarding klar', 'Alla steg genomförda. Välkommen till teamet!', 'HR', 0,
+     'Henrik Norén – onboarding klar', 'Alla steg genomförda. Välkommen till teamet!', 'HR', 'Petra Lindström', 0,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Kundpipeline → Identifierade
     ('00000000-0000-0000-0009-000000000013', '00000000-0000-0000-0008-000000000018',
-     'Volvo Cars', 'Letar efter ett React/TypeScript-team för nytt digitalt produktprogram. Kontakt via LinkedIn.', 'Fordon', 0,
+     'Volvo Cars', 'Letar efter ett React/TypeScript-team för nytt digitalt produktprogram. Kontakt via LinkedIn.', 'Fordon', 'Marcus Karlsson', 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000014', '00000000-0000-0000-0008-000000000018',
-     'Saab AB', 'Cloud-migrering av legacy-system till AWS. Behöver DevOps-kompetens.', 'Försvar/Flyg', 1,
+     'Saab AB', 'Cloud-migrering av legacy-system till AWS. Behöver DevOps-kompetens.', 'Försvar/Flyg', 'Philip Olsson', 1,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     -- Kundpipeline → Kontaktad
     ('00000000-0000-0000-0009-000000000015', '00000000-0000-0000-0008-000000000019',
-     'Telia Company', 'Söker erfaren DevOps-konsult för CI/CD-pipeline. Inledande samtal bokat.', 'Telekom', 0,
+     'Telia Company', 'Söker erfaren DevOps-konsult för CI/CD-pipeline. Inledande samtal bokat.', 'Telekom', 'Philip Olsson', 0,
      'philip.olsson@netler.com', 'philip.olsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000016', '00000000-0000-0000-0008-000000000019',
-     'Vattenfall', 'Dataingenjörer för energioptimerings-projekt. Kontaktperson: Anna Berg, IT-chef.', 'Energi', 1,
+     'Vattenfall', 'Dataingenjörer för energioptimerings-projekt. Kontaktperson: Anna Berg, IT-chef.', 'Energi', 'Marcus Karlsson', 1,
      'philip.olsson@netler.com', 'philip.olsson@netler.com', NOW(), NOW()),
 
     -- Kundpipeline → Dialog pågår
     ('00000000-0000-0000-0009-000000000017', '00000000-0000-0000-0008-000000000020',
-     'Spotify', 'Söker 2 backend-konsulter (Java/Kotlin) för nytt betalningssystem. Dialog aktiv.', 'Media/Tech', 0,
+     'Spotify', 'Söker 2 backend-konsulter (Java/Kotlin) för nytt betalningssystem. Dialog aktiv.', 'Media/Tech', 'Marcus Karlsson', 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     ('00000000-0000-0000-0009-000000000018', '00000000-0000-0000-0008-000000000020',
-     'IKEA Digital', 'Frontend-lead till e-handelsteam. Bra kulturmatch, pris under diskussion.', 'Retail', 1,
+     'IKEA Digital', 'Frontend-lead till e-handelsteam. Bra kulturmatch, pris under diskussion.', 'Retail', 'Petra Lindström', 1,
      'petra@netler.com', 'petra@netler.com', NOW(), NOW()),
 
     -- Kundpipeline → Förhandling
     ('00000000-0000-0000-0009-000000000019', '00000000-0000-0000-0008-000000000021',
-     'Scania', 'Tech Lead + 3 seniora utvecklare för nytt uppkopplat fordonsplatform. SOW under granskning.', 'Fordon', 0,
+     'Scania', 'Tech Lead + 3 seniora utvecklare för nytt uppkopplat fordonsplatform. SOW under granskning.', 'Fordon', 'Marcus Karlsson', 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW()),
 
     -- Kundpipeline → Avtal klart
     ('00000000-0000-0000-0009-000000000026', '00000000-0000-0000-0008-000000000022',
-     'Sandvik', 'Fullstack-team om 4 konsulter. Avtal signerat 2026-03-01, start 2026-04-07.', 'Industri', 0,
+     'Sandvik', 'Fullstack-team om 4 konsulter. Avtal signerat 2026-03-01, start 2026-04-07.', 'Industri', 'Marcus Karlsson', 0,
      'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com', NOW(), NOW());
 
 -- =============================================================================
