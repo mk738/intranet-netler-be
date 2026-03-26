@@ -222,7 +222,7 @@ class BoardServiceTest {
         when(columnRepository.findById(colId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> boardService.createCard(colId,
-                new CreateCardRequest("Task", null, null, 0)))
+                new CreateCardRequest("Task", null, null, null, 0)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -244,7 +244,7 @@ class BoardServiceTest {
         });
 
         BoardCardDto result = boardService.createCard(colId,
-                new CreateCardRequest("Fix bug", "Details", "Backend", 0));
+                new CreateCardRequest("Fix bug", "Details", "Backend", null, 0));
 
         assertThat(result.title()).isEqualTo("Fix bug");
         assertThat(result.category()).isEqualTo("Backend");
@@ -270,7 +270,7 @@ class BoardServiceTest {
         when(cardRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         boardService.updateCard(colId, cardId,
-                new UpdateCardRequest("Task", null, null, 1, targetColId));
+                new UpdateCardRequest("Task", null, null, null, 1, targetColId));
 
         assertThat(c.getBoardColumn().getId()).isEqualTo(targetColId);
     }

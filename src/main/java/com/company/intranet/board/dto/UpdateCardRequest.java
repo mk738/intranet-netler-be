@@ -8,6 +8,7 @@ public record UpdateCardRequest(
         @NotBlank String title,
         String text,
         String category,
+        String assignedTo,
         int    position,
         UUID   columnId
 ) {}

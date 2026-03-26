@@ -102,6 +102,7 @@ public class BoardService {
                 .title(request.title())
                 .text(request.text())
                 .category(request.category())
+                .assignedTo(request.assignedTo())
                 .position(request.position())
                 .build();
         return toCardDto(cardRepository.save(card));
@@ -118,6 +119,7 @@ public class BoardService {
         card.setTitle(request.title());
         card.setText(request.text());
         card.setCategory(request.category());
+        card.setAssignedTo(request.assignedTo());
         card.setPosition(request.position());
 
         // Support moving card to a different column
@@ -192,6 +194,7 @@ public class BoardService {
                 card.getTitle(),
                 card.getText(),
                 card.getCategory(),
+                card.getAssignedTo(),
                 card.getPosition(),
                 card.getCreatedAt() != null ? card.getCreatedAt().toString() : null,
                 card.getComments().stream().map(this::toCommentDto).toList()

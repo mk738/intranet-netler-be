@@ -8,6 +8,7 @@ public record BoardCardDto(
         String                 title,
         String                 text,
         String                 category,
+        String                 assignedTo,
         int                    position,
         String                 createdAt,
         List<BoardCommentDto>  comments

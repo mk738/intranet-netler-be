@@ -6,5 +6,6 @@ public record CreateCardRequest(
         @NotBlank String title,
         String text,
         String category,
+        String assignedTo,
         int    position
 ) {}
