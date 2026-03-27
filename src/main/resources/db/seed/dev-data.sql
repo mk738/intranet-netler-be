@@ -53,7 +53,7 @@ DELETE FROM employees;
 
 INSERT INTO employees (id, firebase_uid, email, role, is_active)
 VALUES
-    ('00000000-0000-0000-0000-000000000001', 'UqhXiWJBfZYSlGZyj34PPaj8jJY2', 'marcus.karlsson@netler.com', 'ADMIN',    TRUE),
+    ('00000000-0000-0000-0000-000000000001', 'UqhXiWJBfZYSlGZyj34PPaj8jJY2', 'marcus.karlsson@netler.com', 'SUPERADMIN', TRUE),
     ('00000000-0000-0000-0000-000000000002', 'erik-netler-uid',               'erik.lindqvist@netler.com',  'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000003', 'sara-netler-uid',               'sara.berg@netler.com',        'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000004', 'johan-netler-uid',              'johan.petersson@netler.com',  'EMPLOYEE', TRUE),
@@ -1018,8 +1018,8 @@ VALUES
 -- =============================================================================
 
 INSERT INTO employees (id, firebase_uid, email, role, is_active) VALUES
-    ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'ADMIN', TRUE),
-    ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'ADMIN', TRUE),
+    ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'SUPERADMIN', TRUE),
+    ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'SUPERADMIN', TRUE),
     ('00000000-0000-0000-0000-000000000013', 'petra-netler-uid',              'petra@netler.com',          'ADMIN', TRUE);
 
 INSERT INTO employee_profiles
