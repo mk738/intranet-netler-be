@@ -12,12 +12,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import com.company.intranet.security.RolePermissions;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,15 +50,22 @@ class VacationControllerTest {
                 .id(UUID.randomUUID()).email("admin@x.com").role(Employee.Role.ADMIN).build();
     }
 
+    private Employee superAdminEmployee() {
+        return Employee.builder()
+                .id(UUID.randomUUID()).email("superadmin@x.com").role(Employee.Role.SUPERADMIN).build();
+    }
+
     private Employee regularEmployee() {
         return Employee.builder()
                 .id(UUID.randomUUID()).email("emp@x.com").role(Employee.Role.EMPLOYEE).build();
     }
 
     private Authentication auth(Employee employee) {
-        String authority = "ROLE_" + employee.getRole().name();
-        return new UsernamePasswordAuthenticationToken(
-                employee, null, List.of(new SimpleGrantedAuthority(authority)));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + employee.getRole().name()));
+        RolePermissions.of(employee.getRole())
+                .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.name())));
+        return new UsernamePasswordAuthenticationToken(employee, null, authorities);
     }
 
     private VacationDto sampleDto(UUID id) {
@@ -155,19 +165,19 @@ class VacationControllerTest {
 
     @Test
     void reviewVacation_returns200WithUpdatedStatus() throws Exception {
-        Employee admin = adminEmployee();
-        UUID vacId     = UUID.randomUUID();
+        Employee superAdmin = superAdminEmployee();
+        UUID vacId          = UUID.randomUUID();
 
         ReviewVacationRequest req = new ReviewVacationRequest(true);
         VacationDto approved = new VacationDto(vacId, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "APPROVED", admin.getEmail(), null, null, null, "Semester");
+                5, "APPROVED", superAdmin.getEmail(), null, null, null, "Semester");
 
-        when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(admin)))
+        when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(superAdmin)))
                 .thenReturn(approved);
 
         mockMvc.perform(put("/api/vacations/" + vacId + "/review")
-                        .with(authentication(auth(admin)))
+                        .with(authentication(auth(superAdmin)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))

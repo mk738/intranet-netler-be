@@ -12,6 +12,8 @@ public enum ErrorCode {
     EMPLOYEE_ALREADY_INACTIVE,
     EMPLOYEE_SKILLS_TOO_MANY,
     EMPLOYEE_SKILL_TOO_LONG,
+    EMPLOYEE_ROLE_CHANGE_FORBIDDEN,
+    EMPLOYEE_DEACTIVATE_FORBIDDEN,
 
     // ── Vacation ──────────────────────────────────────────────────────────────
     VACATION_PAST_DATE,

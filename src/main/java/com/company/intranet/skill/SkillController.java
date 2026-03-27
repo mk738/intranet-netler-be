@@ -33,7 +33,7 @@ public class SkillController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SKILL_CATALOG_MANAGE')")
     public ResponseEntity<ApiResponse<List<SkillDto>>> addSkills(
             @RequestBody @Valid AddSkillsRequest request) {
         log.info("POST /api/skills count={}", request.names().size());
@@ -43,7 +43,7 @@ public class SkillController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('SKILL_CATALOG_MANAGE')")
     public ResponseEntity<Void> deleteSkill(@PathVariable UUID id) {
         log.info("DELETE /api/skills/{}", id);
         skillService.deleteSkill(id);
@@ -54,7 +54,7 @@ public class SkillController {
     // ── Employee skills ───────────────────────────────────────────────────────
 
     @GetMapping("/employees/{employeeId}")
-    @PreAuthorize("hasRole('ADMIN') or #me.id == #employeeId")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL') or #me.id == #employeeId")
     public ResponseEntity<ApiResponse<List<SkillDto>>> getEmployeeSkills(
             @PathVariable UUID employeeId,
             @CurrentUser Employee me) {
@@ -63,7 +63,7 @@ public class SkillController {
     }
 
     @PostMapping("/employees/{employeeId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<List<SkillDto>>> setEmployeeSkills(
             @PathVariable UUID employeeId,
             @RequestBody @Valid AddSkillsRequest request) {

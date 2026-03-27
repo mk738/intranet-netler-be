@@ -32,7 +32,7 @@ public class FaqController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ResponseEntity<ApiResponse<FaqItemDto>> create(
             @RequestBody @Valid CreateFaqRequest request,
             @CurrentUser Employee me) {
@@ -44,7 +44,7 @@ public class FaqController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ResponseEntity<ApiResponse<FaqItemDto>> update(
             @PathVariable UUID id,
             @RequestBody @Valid CreateFaqRequest request) {
@@ -55,7 +55,7 @@ public class FaqController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('FAQ_MANAGE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         log.info("DELETE /api/faq/{}", id);
         faqService.delete(id);

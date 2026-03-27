@@ -50,10 +50,14 @@ mailersend:
   from-name: ${MAILERSEND_FROM_NAME:Intranet}
   login-url: ${MAILERSEND_LOGIN_URL:https://intranet.yourcompany.com/login}
   site-url: ${MAILERSEND_SITE_URL:https://intranet.yourcompany.com}
-  vacation-notify-email: ${MAILERSEND_VACATION_NOTIFY_EMAIL:marcus.karlsson@netler.com}
-  news-notify-email: ${MAILERSEND_NEWS_NOTIFY_EMAIL:marcus.karlsson@netler.com}
-  vacation-reviewed-template-id: ${MAILERSEND_VACATION_REVIEWED_TEMPLATE_ID:}
-  event-created-template-id: ${MAILERSEND_EVENT_CREATED_TEMPLATE_ID:}
+  vacation-notify-email: ${MAILERSEND_VACATION_NOTIFY_EMAIL:}
+  news-notify-email: ${MAILERSEND_NEWS_NOTIFY_EMAIL:}
+  templates:
+    invite: ${MAILERSEND_TEMPLATE_INVITE:vywj2lpy71jl7oqz}
+    news: ${MAILERSEND_TEMPLATE_NEWS:k68zxl2613egj905}
+    vacation-requested: ${MAILERSEND_TEMPLATE_VACATION_REQUESTED:pxkjn41wpn5lz781}
+    vacation-reviewed: ${MAILERSEND_TEMPLATE_VACATION_REVIEWED:}
+    event-created: ${MAILERSEND_TEMPLATE_EVENT_CREATED:}
 
 firebase:
   credentials:

@@ -204,6 +204,52 @@ public class EmployeeService {
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
+    @Transactional
+    public EmployeeDto updateRole(UUID id, UpdateRoleRequest request) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (employee.getRole() == Employee.Role.SUPERADMIN) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_ROLE_CHANGE_FORBIDDEN,
+                    "Cannot change the role of a SUPERADMIN",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        employee.setRole(request.role());
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
+    @Transactional
+    public EmployeeDto updateActive(UUID id, UpdateActiveRequest request, Employee me) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (!request.active()) {
+            if (employee.getId().equals(me.getId())) {
+                throw new AppException(
+                        ErrorCode.EMPLOYEE_DEACTIVATE_FORBIDDEN,
+                        "Cannot deactivate your own account",
+                        HttpStatus.FORBIDDEN);
+            }
+            if (employee.getRole() == Employee.Role.SUPERADMIN) {
+                throw new AppException(
+                        ErrorCode.EMPLOYEE_DEACTIVATE_FORBIDDEN,
+                        "Cannot deactivate a SUPERADMIN",
+                        HttpStatus.FORBIDDEN);
+            }
+        }
+
+        employee.setActive(request.active());
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
     // ── Self-service ──────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)

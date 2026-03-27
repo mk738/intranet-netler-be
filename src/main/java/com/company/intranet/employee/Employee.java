@@ -66,5 +66,5 @@ public class Employee extends Auditable {
              + profile.getLastName().charAt(0);
     }
 
-    public enum Role { ADMIN, EMPLOYEE }
+    public enum Role { SUPERADMIN, ADMIN, EMPLOYEE }
 }

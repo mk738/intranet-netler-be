@@ -44,7 +44,7 @@ public class NewsController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('NEWS_MANAGE')")
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> createNews(
             @RequestBody @Valid CreateNewsRequest request,
             @CurrentUser Employee me) {
@@ -56,7 +56,7 @@ public class NewsController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('NEWS_MANAGE')")
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> updateNews(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateNewsRequest request) {
@@ -67,7 +67,7 @@ public class NewsController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('NEWS_MANAGE')")
     public ResponseEntity<ApiResponse<Void>> deleteNews(@PathVariable UUID id) {
         log.info("DELETE /api/news/{}", id);
         hubService.deleteNews(id);
@@ -76,7 +76,7 @@ public class NewsController {
     }
 
     @PutMapping("/{id}/published")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('NEWS_MANAGE')")
     public ResponseEntity<ApiResponse<NewsPostDetailDto>> publishNews(
             @PathVariable UUID id,
             @RequestBody PublishNewsRequest request) {
