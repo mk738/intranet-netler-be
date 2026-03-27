@@ -7,6 +7,8 @@ public enum Permission {
     EMPLOYEE_TERMINATE,
     EMPLOYEE_VIEW_ALL,
     EMPLOYEE_EDIT_ANY,
+    EMPLOYEE_CHANGE_ROLE,
+    EMPLOYEE_TOGGLE_ACTIVE,
 
     // ── Vacation ──────────────────────────────────────────────────────────────
     VACATION_VIEW_ALL,

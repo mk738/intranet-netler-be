@@ -122,6 +122,29 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    @PutMapping("/{id}/role")
+    @PreAuthorize("hasAuthority('EMPLOYEE_CHANGE_ROLE')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> updateRole(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateRoleRequest request) {
+        log.info("PUT /api/employees/{}/role role={}", id, request.role());
+        EmployeeDto result = employeeService.updateRole(id, request);
+        log.info("Employee role updated id={} role={}", id, request.role());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PutMapping("/{id}/active")
+    @PreAuthorize("hasAuthority('EMPLOYEE_TOGGLE_ACTIVE')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> updateActive(
+            @PathVariable UUID id,
+            @RequestBody @Valid UpdateActiveRequest request,
+            @CurrentUser Employee me) {
+        log.info("PUT /api/employees/{}/active active={}", id, request.active());
+        EmployeeDto result = employeeService.updateActive(id, request, me);
+        log.info("Employee active status updated id={} active={}", id, request.active());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
     @PutMapping("/{id}/terminate")
     @PreAuthorize("hasAuthority('EMPLOYEE_TERMINATE')")
     public ResponseEntity<ApiResponse<EmployeeDto>> terminateEmployee(
