@@ -38,7 +38,7 @@ public class EventController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_MANAGE')")
     public ResponseEntity<ApiResponse<EventDto>> createEvent(
             @RequestBody @Valid CreateEventRequest request,
             @CurrentUser Employee me) {
@@ -50,7 +50,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_MANAGE')")
     public ResponseEntity<ApiResponse<EventDto>> updateEvent(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateEventRequest request) {
@@ -61,7 +61,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_MANAGE')")
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable UUID id) {
         log.info("Deleting event with id={}", id);
         hubService.deleteEvent(id);

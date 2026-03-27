@@ -24,14 +24,14 @@ public class CandidateController {
     private final CandidateService candidateService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
     public ResponseEntity<ApiResponse<List<CandidateDto>>> getAll() {
         log.info("GET /api/candidates");
         return ResponseEntity.ok(ApiResponse.success(candidateService.getAll()));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
     public ResponseEntity<ApiResponse<CandidateDto>> create(
             @RequestBody @Valid CreateCandidateRequest request) {
         log.info("POST /api/candidates name={}", request.name());
@@ -41,7 +41,7 @@ public class CandidateController {
     }
 
     @PatchMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
     public ResponseEntity<ApiResponse<CandidateDto>> patch(
             @PathVariable UUID id,
             @RequestBody @Valid PatchCandidateRequest request) {
@@ -52,7 +52,7 @@ public class CandidateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
         log.info("DELETE /api/candidates/{}", id);
         candidateService.delete(id);

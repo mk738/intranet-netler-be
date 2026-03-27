@@ -11,12 +11,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import com.company.intranet.security.RolePermissions;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -56,10 +59,11 @@ class EmployeeControllerTest {
     }
 
     private Authentication auth(Employee employee) {
-        String authority = "ROLE_" + employee.getRole().name();
-        return new UsernamePasswordAuthenticationToken(
-                employee, null,
-                List.of(new SimpleGrantedAuthority(authority)));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + employee.getRole().name()));
+        RolePermissions.of(employee.getRole())
+                .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.name())));
+        return new UsernamePasswordAuthenticationToken(employee, null, authorities);
     }
 
     private EmployeeDto sampleDto(Employee employee) {

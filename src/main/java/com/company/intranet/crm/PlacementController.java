@@ -23,14 +23,14 @@ public class PlacementController {
     private final CrmService crmService;
 
     @GetMapping("/api/placements")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<PlacementViewDto>> getPlacements() {
         log.info("GET /api/placements");
         return ResponseEntity.ok(ApiResponse.success(crmService.getPlacementView()));
     }
 
     @PostMapping("/api/assignments")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<AssignmentDto>> createAssignment(
             @RequestBody @Valid CreateAssignmentRequest request) {
         log.info("POST /api/assignments employeeId={} clientId={}", request.employeeId(), request.clientId());
@@ -41,7 +41,7 @@ public class PlacementController {
     }
 
     @PutMapping("/api/assignments/{id}/end")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<AssignmentDto>> endAssignment(
             @PathVariable UUID id,
             @RequestBody(required = false) EndAssignmentRequest request) {

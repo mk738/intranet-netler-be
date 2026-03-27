@@ -24,14 +24,14 @@ public class ClientController {
     private final CrmService crmService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<List<ClientDto>>> getAllClients() {
         log.info("GET /api/clients");
         return ResponseEntity.ok(ApiResponse.success(crmService.getAllClients()));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<ClientDto>> createClient(
             @RequestBody @Valid NewClientDto request) {
         log.info("POST /api/clients companyName={}", request.companyName());
@@ -42,7 +42,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<ClientDto>> getClientById(
             @PathVariable UUID id) {
         log.info("GET /api/clients/{}", id);
@@ -50,7 +50,7 @@ public class ClientController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CRM_MANAGE')")
     public ResponseEntity<ApiResponse<ClientDto>> updateClient(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateClientRequest request) {

@@ -13,11 +13,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
+import com.company.intranet.security.RolePermissions;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,8 +45,11 @@ class ClientControllerTest {
     private Authentication adminAuth() {
         Employee admin = Employee.builder()
                 .id(UUID.randomUUID()).email("admin@x.com").role(Employee.Role.ADMIN).build();
-        return new UsernamePasswordAuthenticationToken(
-                admin, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        RolePermissions.of(Employee.Role.ADMIN)
+                .forEach(p -> authorities.add(new SimpleGrantedAuthority(p.name())));
+        return new UsernamePasswordAuthenticationToken(admin, null, authorities);
     }
 
     private ClientDto spotifyDto() {

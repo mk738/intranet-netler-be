@@ -28,14 +28,14 @@ public class EmployeeController {
     // ── Admin ─────────────────────────────────────────────────────────────────
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
     public ResponseEntity<ApiResponse<List<EmployeeDto>>> getAllEmployees() {
         log.info("GET /api/employees");
         return ResponseEntity.ok(ApiResponse.success(employeeService.getAllEmployees()));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_INVITE')")
     public ResponseEntity<ApiResponse<EmployeeDto>> inviteEmployee(
             @RequestBody @Valid InviteEmployeeRequest request,
             @CurrentUser Employee me) {
@@ -104,7 +104,7 @@ public class EmployeeController {
     // ── Admin — by id ─────────────────────────────────────────────────────────
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
     public ResponseEntity<ApiResponse<EmployeeDetailDto>> getEmployeeById(
             @PathVariable UUID id) {
         log.info("GET /api/employees/{}", id);
@@ -112,7 +112,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}/profile")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<EmployeeDto>> updateEmployeeProfile(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateProfileRequest request) {
@@ -123,7 +123,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}/terminate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_TERMINATE')")
     public ResponseEntity<ApiResponse<EmployeeDto>> terminateEmployee(
             @PathVariable UUID id,
             @RequestBody @Valid TerminateEmployeeRequest request) {
@@ -134,7 +134,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}/skills")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<EmployeeDto>> updateSkills(
             @PathVariable UUID id,
             @RequestBody @Valid UpdateSkillsRequest request) {
@@ -147,7 +147,7 @@ public class EmployeeController {
     // ── Avatar ────────────────────────────────────────────────────────────────
 
     @PostMapping(value = "/{id}/avatar", consumes = "multipart/form-data")
-    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY') or #me.id == #id")
     public ResponseEntity<ApiResponse<EmployeeDto>> uploadAvatar(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file,
@@ -172,7 +172,7 @@ public class EmployeeController {
     // ── Contract ──────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/contract")
-    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL') or #me.id == #id")
     public ResponseEntity<ApiResponse<ContractDto>> getContract(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
@@ -181,7 +181,7 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/{id}/contract", consumes = "multipart/form-data")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<Void>> uploadContract(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -194,7 +194,7 @@ public class EmployeeController {
     // ── CV ────────────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/cv")
-    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL') or #me.id == #id")
     public ResponseEntity<ApiResponse<ContractDto>> getCv(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
@@ -203,7 +203,7 @@ public class EmployeeController {
     }
 
     @PostMapping(value = "/{id}/cv", consumes = "multipart/form-data")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<Void>> uploadCv(
             @PathVariable UUID id,
             @RequestParam("file") MultipartFile file) {
@@ -216,7 +216,7 @@ public class EmployeeController {
     // ── Benefits ──────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/benefits")
-    @PreAuthorize("hasRole('ADMIN') or #me.id == #id")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL') or #me.id == #id")
     public ResponseEntity<ApiResponse<List<BenefitDto>>> getBenefits(
             @PathVariable UUID id,
             @CurrentUser Employee me) {
@@ -225,7 +225,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}/benefits")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EMPLOYEE_EDIT_ANY')")
     public ResponseEntity<ApiResponse<List<BenefitDto>>> replaceBenefits(
             @PathVariable UUID id,
             @RequestBody @Valid List<BenefitRequest> requests) {

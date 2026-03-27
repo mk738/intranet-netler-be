@@ -15,10 +15,7 @@ import java.util.UUID;
 @Slf4j
 public class MailerSendService {
 
-    private static final String INVITE_TEMPLATE_ID    = "vywj2lpy71jl7oqz";
-    private static final String NEWS_TEMPLATE_ID      = "k68zxl2613egj905";
-    private static final String VACATION_TEMPLATE_ID  = "pxkjn41wpn5lz781";
-    private static final String MAILERSEND_API_URL  = "https://api.mailersend.com/v1";
+    private static final String MAILERSEND_API_URL = "https://api.mailersend.com/v1";
 
     private final String apiToken;
     private final String fromEmail;
@@ -27,6 +24,9 @@ public class MailerSendService {
     private final String siteBaseUrl;
     private final String vacationNotifyEmail;
     private final String newsNotifyEmail;
+    private final String inviteTemplateId;
+    private final String newsTemplateId;
+    private final String vacationRequestedTemplateId;
     private final String vacationReviewedTemplateId;
     private final String eventCreatedTemplateId;
     private final RestClient restClient;
@@ -37,19 +37,25 @@ public class MailerSendService {
             @Value("${mailersend.from-name:Intranet}") String fromName,
             @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}") String loginBaseUrl,
             @Value("${mailersend.site-url:https://intranet.yourcompany.com}") String siteBaseUrl,
-            @Value("${mailersend.vacation-notify-email:marcus.karlsson@netler.com}") String vacationNotifyEmail,
-            @Value("${mailersend.news-notify-email:marcus.karlsson@netler.com}") String newsNotifyEmail,
-            @Value("${mailersend.vacation-reviewed-template-id:}") String vacationReviewedTemplateId,
-            @Value("${mailersend.event-created-template-id:}") String eventCreatedTemplateId) {
+            @Value("${mailersend.vacation-notify-email:}") String vacationNotifyEmail,
+            @Value("${mailersend.news-notify-email:}") String newsNotifyEmail,
+            @Value("${mailersend.templates.invite:}") String inviteTemplateId,
+            @Value("${mailersend.templates.news:}") String newsTemplateId,
+            @Value("${mailersend.templates.vacation-requested:}") String vacationRequestedTemplateId,
+            @Value("${mailersend.templates.vacation-reviewed:}") String vacationReviewedTemplateId,
+            @Value("${mailersend.templates.event-created:}") String eventCreatedTemplateId) {
         this.apiToken            = apiToken;
         this.fromEmail           = fromEmail;
         this.fromName            = fromName;
         this.loginBaseUrl        = loginBaseUrl;
         this.siteBaseUrl         = siteBaseUrl;
-        this.vacationNotifyEmail        = vacationNotifyEmail;
-        this.newsNotifyEmail            = newsNotifyEmail;
-        this.vacationReviewedTemplateId = vacationReviewedTemplateId;
-        this.eventCreatedTemplateId     = eventCreatedTemplateId;
+        this.vacationNotifyEmail         = vacationNotifyEmail;
+        this.newsNotifyEmail             = newsNotifyEmail;
+        this.inviteTemplateId            = inviteTemplateId;
+        this.newsTemplateId              = newsTemplateId;
+        this.vacationRequestedTemplateId = vacationRequestedTemplateId;
+        this.vacationReviewedTemplateId  = vacationReviewedTemplateId;
+        this.eventCreatedTemplateId      = eventCreatedTemplateId;
         this.restClient   = RestClient.builder()
                 .baseUrl(MAILERSEND_API_URL)
                 .build();
@@ -61,7 +67,7 @@ public class MailerSendService {
                 "from",            Map.of("email", fromEmail, "name", fromName),
                 "to",              List.of(Map.of("email", recipientEmail, "name", recipientName)),
                 "subject",         "You've been invited to the intranet",
-                "template_id",     INVITE_TEMPLATE_ID,
+                "template_id",     inviteTemplateId,
                 "personalization", List.of(Map.of(
                         "email", recipientEmail,
                         "data",  Map.of(
@@ -99,14 +105,14 @@ public class MailerSendService {
                 "category",       ""
         );
 
-        var recipients = List.of(newsNotifyEmail, "mackke90@gmail.com");
+        var recipients = newsNotifyEmail.isBlank() ? List.<String>of() : List.of(newsNotifyEmail);
 
         for (String recipient : recipients) {
             var payload = Map.of(
                     "from",            Map.of("email", fromEmail, "name", fromName),
                     "to",              List.of(Map.of("email", recipient)),
                     "subject",         postTitle,
-                    "template_id",     NEWS_TEMPLATE_ID,
+                    "template_id",     newsTemplateId,
                     "personalization", List.of(Map.of("email", recipient, "data", personalizationData))
             );
 
@@ -126,6 +132,10 @@ public class MailerSendService {
                                       String startDate, String endDate,
                                       int daysCount, String submittedAt,
                                       List<String> adminEmails) {
+        if (vacationRequestedTemplateId.isBlank()) {
+            log.warn("sendVacationRequested skipped — mailersend.templates.vacation-requested not configured");
+            return;
+        }
         var personalizationData = Map.of(
                 "year",               String.valueOf(Year.now().getValue()),
                 "employee_name",      employeeName,
@@ -141,7 +151,7 @@ public class MailerSendService {
                 "from",            Map.of("email", fromEmail, "name", fromName),
                 "to",              List.of(Map.of("email", vacationNotifyEmail)),
                 "subject",         employeeName + " has submitted a vacation request",
-                "template_id",     VACATION_TEMPLATE_ID,
+                "template_id",     vacationRequestedTemplateId,
                 "personalization", List.of(Map.of("email", vacationNotifyEmail, "data", personalizationData))
         );
 

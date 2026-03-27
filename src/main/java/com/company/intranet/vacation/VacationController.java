@@ -34,7 +34,7 @@ public class VacationController {
     }
 
     @GetMapping("/summary")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('VACATION_VIEW_ALL')")
     public ResponseEntity<ApiResponse<VacationSummaryDto>> getSummary() {
         log.info("GET /api/vacations/summary");
         return ResponseEntity.ok(ApiResponse.success(vacationService.getSummary()));
@@ -55,7 +55,7 @@ public class VacationController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('VACATION_VIEW_ALL')")
     public ResponseEntity<ApiResponse<List<VacationDto>>> getAllVacations(
             @RequestParam(required = false) String status) {
         log.info("GET /api/vacations status={}", status);
@@ -76,7 +76,7 @@ public class VacationController {
     }
 
     @PutMapping("/{id}/review")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('VACATION_APPROVE')")
     public ResponseEntity<ApiResponse<VacationDto>> reviewVacation(
             @PathVariable UUID id,
             @RequestBody @Valid ReviewVacationRequest request,

@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequestMapping("/api")
 @RequiredArgsConstructor
 @Slf4j
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('BOARD_MANAGE')")
 public class BoardController {
 
     private final BoardService boardService;
