@@ -17,8 +17,12 @@ public final class RolePermissions {
     private RolePermissions() {}
 
     public static final Map<Employee.Role, Set<Permission>> MAP = Map.of(
-            Employee.Role.ADMIN,    EnumSet.allOf(Permission.class),
-            Employee.Role.EMPLOYEE, EnumSet.noneOf(Permission.class)
+            Employee.Role.SUPERADMIN, EnumSet.allOf(Permission.class),
+            Employee.Role.ADMIN,      EnumSet.complementOf(EnumSet.of(
+                                          Permission.EMPLOYEE_TERMINATE,
+                                          Permission.VACATION_APPROVE
+                                      )),
+            Employee.Role.EMPLOYEE,   EnumSet.noneOf(Permission.class)
     );
 
     public static Set<Permission> of(Employee.Role role) {

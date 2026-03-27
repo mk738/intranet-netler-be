@@ -50,6 +50,11 @@ class VacationControllerTest {
                 .id(UUID.randomUUID()).email("admin@x.com").role(Employee.Role.ADMIN).build();
     }
 
+    private Employee superAdminEmployee() {
+        return Employee.builder()
+                .id(UUID.randomUUID()).email("superadmin@x.com").role(Employee.Role.SUPERADMIN).build();
+    }
+
     private Employee regularEmployee() {
         return Employee.builder()
                 .id(UUID.randomUUID()).email("emp@x.com").role(Employee.Role.EMPLOYEE).build();
@@ -160,19 +165,19 @@ class VacationControllerTest {
 
     @Test
     void reviewVacation_returns200WithUpdatedStatus() throws Exception {
-        Employee admin = adminEmployee();
-        UUID vacId     = UUID.randomUUID();
+        Employee superAdmin = superAdminEmployee();
+        UUID vacId          = UUID.randomUUID();
 
         ReviewVacationRequest req = new ReviewVacationRequest(true);
         VacationDto approved = new VacationDto(vacId, UUID.randomUUID(), "Erik L", "EL",
                 LocalDate.now().plusDays(7), LocalDate.now().plusDays(11),
-                5, "APPROVED", admin.getEmail(), null, null, null, "Semester");
+                5, "APPROVED", superAdmin.getEmail(), null, null, null, "Semester");
 
-        when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(admin)))
+        when(vacationService.reviewVacation(eq(vacId), any(ReviewVacationRequest.class), eq(superAdmin)))
                 .thenReturn(approved);
 
         mockMvc.perform(put("/api/vacations/" + vacId + "/review")
-                        .with(authentication(auth(admin)))
+                        .with(authentication(auth(superAdmin)))
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
