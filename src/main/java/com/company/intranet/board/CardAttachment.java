@@ -3,6 +3,8 @@ package com.company.intranet.board;
 import com.company.intranet.common.audit.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class CardAttachment extends Auditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private BoardCard card;
 
     @Column(name = "file_name", nullable = false)

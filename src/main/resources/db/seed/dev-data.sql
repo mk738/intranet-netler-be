@@ -36,6 +36,7 @@ DELETE FROM assignments;
 DELETE FROM news_posts;
 DELETE FROM events;
 DELETE FROM board_comments;
+DELETE FROM card_attachments;
 DELETE FROM board_cards;
 DELETE FROM board_columns;
 DELETE FROM boards;
