@@ -11,5 +11,6 @@ public record BoardCardDto(
         String                 assignedTo,
         int                    position,
         String                 createdAt,
+        int                    attachmentCount,
         List<BoardCommentDto>  comments
 ) {}

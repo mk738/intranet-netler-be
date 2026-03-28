@@ -8,9 +8,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -135,6 +137,34 @@ public class BoardController {
             @PathVariable UUID id) {
         log.info("DELETE /api/cards/{}/comments/{}", cardId, id);
         boardService.deleteComment(cardId, id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ── Attachments ───────────────────────────────────────────────────────────
+
+    @GetMapping("/cards/{cardId}/attachments")
+    public ResponseEntity<ApiResponse<List<CardAttachmentDto>>> getAttachments(
+            @PathVariable UUID cardId) {
+        log.info("GET /api/cards/{}/attachments", cardId);
+        return ResponseEntity.ok(ApiResponse.success(boardService.getAttachments(cardId)));
+    }
+
+    @PostMapping(value = "/cards/{cardId}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<CardAttachmentDto>> uploadAttachment(
+            @PathVariable UUID cardId,
+            @RequestPart("file") MultipartFile file) {
+        log.info("POST /api/cards/{}/attachments fileName={} size={}", cardId, file.getOriginalFilename(), file.getSize());
+        CardAttachmentDto result = boardService.uploadAttachment(cardId, file);
+        log.info("Attachment created id={}", result.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(result));
+    }
+
+    @DeleteMapping("/cards/{cardId}/attachments/{attachmentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteAttachment(
+            @PathVariable UUID cardId,
+            @PathVariable UUID attachmentId) {
+        log.info("DELETE /api/cards/{}/attachments/{}", cardId, attachmentId);
+        boardService.deleteAttachment(cardId, attachmentId);
         return ResponseEntity.noContent().build();
     }
 }

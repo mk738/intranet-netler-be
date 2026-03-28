@@ -71,7 +71,11 @@ class BoardControllerTest {
 
     private BoardCardDto sampleCard(UUID id) {
         return new BoardCardDto(id, "Fix bug", "Details", "Backend", null, 0,
-                "2026-01-01T00:00:00Z", List.of());
+                "2026-01-01T00:00:00Z", 0, List.of());
+    }
+
+    private CardAttachmentDto sampleAttachment(UUID id) {
+        return new CardAttachmentDto(id, "document.pdf", "application/pdf", "base64data==");
     }
 
     private BoardCommentDto sampleComment(UUID id) {
@@ -333,6 +337,51 @@ class BoardControllerTest {
         doNothing().when(boardService).deleteComment(cardId, commentId);
 
         mockMvc.perform(delete("/api/cards/" + cardId + "/comments/" + commentId)
+                        .with(authentication(auth(admin())))
+                        .with(csrf()))
+                .andExpect(status().isNoContent());
+    }
+
+    // ── GET /api/cards/{cardId}/attachments ───────────────────────────────────
+
+    @Test
+    void getAttachments_asAdmin_returns200WithList() throws Exception {
+        UUID cardId = UUID.randomUUID();
+        UUID attId  = UUID.randomUUID();
+        when(boardService.getAttachments(cardId)).thenReturn(List.of(sampleAttachment(attId)));
+
+        mockMvc.perform(get("/api/cards/" + cardId + "/attachments")
+                        .with(authentication(auth(admin()))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].fileName").value("document.pdf"))
+                .andExpect(jsonPath("$.data[0].contentType").value("application/pdf"));
+    }
+
+    // ── POST /api/cards/{cardId}/attachments ──────────────────────────────────
+
+    @Test
+    void uploadAttachment_asAdmin_returns201() throws Exception {
+        UUID cardId = UUID.randomUUID();
+        UUID attId  = UUID.randomUUID();
+        when(boardService.uploadAttachment(eq(cardId), any())).thenReturn(sampleAttachment(attId));
+
+        mockMvc.perform(multipart("/api/cards/" + cardId + "/attachments")
+                        .file("file", "PDF content".getBytes())
+                        .with(authentication(auth(admin())))
+                        .with(csrf()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.id").value(attId.toString()));
+    }
+
+    // ── DELETE /api/cards/{cardId}/attachments/{attachmentId} ─────────────────
+
+    @Test
+    void deleteAttachment_asAdmin_returns204() throws Exception {
+        UUID cardId = UUID.randomUUID();
+        UUID attId  = UUID.randomUUID();
+        doNothing().when(boardService).deleteAttachment(cardId, attId);
+
+        mockMvc.perform(delete("/api/cards/" + cardId + "/attachments/" + attId)
                         .with(authentication(auth(admin())))
                         .with(csrf()))
                 .andExpect(status().isNoContent());
