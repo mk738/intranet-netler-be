@@ -25,16 +25,23 @@ public class EventController {
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<EventDto>>> getEvents() {
-        log.info("GET /api/events");
-        return ResponseEntity.ok(ApiResponse.success(hubService.getUpcomingEvents()));
+    public ResponseEntity<ApiResponse<List<EventDto>>> getEvents(
+            @RequestParam(required = false, defaultValue = "false") boolean attending,
+            @CurrentUser Employee me) {
+        log.info("GET /api/events attending={} employeeId={}", attending, me.getId());
+        List<EventDto> events = attending
+                ? hubService.getAttendingEvents(me)
+                : hubService.getUpcomingEvents(me);
+        return ResponseEntity.ok(ApiResponse.success(events));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<EventDto>> getEventById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<EventDto>> getEventById(
+            @PathVariable UUID id,
+            @CurrentUser Employee me) {
         log.info("GET /api/events/{}", id);
-        return ResponseEntity.ok(ApiResponse.success(hubService.getEventById(id)));
+        return ResponseEntity.ok(ApiResponse.success(hubService.getEventById(id, me)));
     }
 
     @PostMapping

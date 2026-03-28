@@ -34,6 +34,7 @@ class HubServiceTest {
 
     @Mock NewsPostRepository    newsPostRepository;
     @Mock EventRepository       eventRepository;
+    @Mock EventRsvpRepository   eventRsvpRepository;
     @Mock EmployeeRepository    employeeRepository;
     @Mock HubMapper             hubMapper;
     @Mock ApplicationEventPublisher eventPublisher;
@@ -216,9 +217,9 @@ class HubServiceTest {
                 .location("HQ").eventDate(start).allDay(true).author(author).build();
 
         when(eventRepository.save(any())).thenReturn(saved);
-        when(hubMapper.toEventDto(saved)).thenReturn(
+        when(hubMapper.toEventDto(saved, null)).thenReturn(
                 new EventDto(saved.getId(), "Team Meeting", "Quarterly sync",
-                        "HQ", start, null, true, null, null, "Anna Admin", null));
+                        "HQ", start, null, true, null, null, "Anna Admin", null, null));
 
         EventDto result = hubService.createEvent(req, author);
 

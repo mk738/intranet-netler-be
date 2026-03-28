@@ -14,5 +14,6 @@ public record EventDto(
         String    startTime,
         String    endTime,
         String    authorName,
-        String    createdAt
+        String    createdAt,
+        String    myRsvpStatus   // null if the current user has not RSVPed
 ) {}

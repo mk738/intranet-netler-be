@@ -63,7 +63,7 @@ class EventControllerTest {
 
     private EventDto sampleEvent(UUID id) {
         return new EventDto(id, "Team Meeting", "Quarterly sync", "HQ",
-                LocalDate.now().plusDays(7), null, true, null, null, "Anna Admin", "2026-01-01T00:00:00Z");
+                LocalDate.now().plusDays(7), null, true, null, null, "Anna Admin", "2026-01-01T00:00:00Z", null);
     }
 
     // ── GET /api/events ───────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ class EventControllerTest {
     void getEvents_asEmployee_returns200WithList() throws Exception {
         Employee emp = regularEmployee();
         UUID id = UUID.randomUUID();
-        when(hubService.getUpcomingEvents()).thenReturn(List.of(sampleEvent(id)));
+        when(hubService.getUpcomingEvents(any())).thenReturn(List.of(sampleEvent(id)));
 
         mockMvc.perform(get("/api/events").with(authentication(auth(emp))))
                 .andExpect(status().isOk())
@@ -92,7 +92,7 @@ class EventControllerTest {
     void getEventById_returns200() throws Exception {
         Employee emp = regularEmployee();
         UUID id = UUID.randomUUID();
-        when(hubService.getEventById(id)).thenReturn(sampleEvent(id));
+        when(hubService.getEventById(eq(id), any())).thenReturn(sampleEvent(id));
 
         mockMvc.perform(get("/api/events/" + id).with(authentication(auth(emp))))
                 .andExpect(status().isOk())
