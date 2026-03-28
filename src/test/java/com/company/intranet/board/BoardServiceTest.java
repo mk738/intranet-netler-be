@@ -23,10 +23,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BoardServiceTest {
 
-    @Mock BoardRepository        boardRepository;
-    @Mock BoardColumnRepository  columnRepository;
-    @Mock BoardCardRepository    cardRepository;
-    @Mock BoardCommentRepository commentRepository;
+    @Mock BoardRepository            boardRepository;
+    @Mock BoardColumnRepository      columnRepository;
+    @Mock BoardCardRepository        cardRepository;
+    @Mock BoardCommentRepository     commentRepository;
+    @Mock CardAttachmentRepository   attachmentRepository;
 
     @InjectMocks BoardService boardService;
 
