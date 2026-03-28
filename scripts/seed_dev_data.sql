@@ -29,6 +29,11 @@ DELETE FROM assignments;
 DELETE FROM news_posts;
 DELETE FROM events;
 DELETE FROM employee_profiles;
+DELETE FROM employee_benefit;
+DELETE FROM employee_contract;
+DELETE FROM employee_cv;
+DELETE FROM employee_skills;
+DELETE FROM employee_avatars;
 DELETE FROM clients;
 DELETE FROM employees;
 
@@ -42,13 +47,15 @@ DELETE FROM employees;
 
 INSERT INTO employees (id, firebase_uid, email, role, is_active)
 VALUES
-    ('00000000-0000-0000-0000-000000000001', 'marcus-netler-uid',  'marcus.karlsson@netler.com', 'ADMIN',    TRUE),
-    ('00000000-0000-0000-0000-000000000002', 'erik-netler-uid',    'erik.lindqvist@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000003', 'sara-netler-uid',    'sara.berg@netler.com',        'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000004', 'johan-netler-uid',   'johan.petersson@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000005', 'lina-netler-uid',    'lina.eriksson@netler.com',    'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',  'mikael.svensson@netler.com',  'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',    'anna.johansson@netler.com',   'EMPLOYEE', TRUE);
+    ('00000000-0000-0000-0000-000000000001', 'marcus-netler-uid',           'marcus.karlsson@netler.com', 'SUPERADMIN', TRUE),
+    ('00000000-0000-0000-0000-000000000002', 'erik-netler-uid',             'erik.lindqvist@netler.com',  'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000003', 'sara-netler-uid',             'sara.berg@netler.com',        'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000004', 'johan-netler-uid',            'johan.petersson@netler.com',  'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000005', 'lina-netler-uid',             'lina.eriksson@netler.com',    'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',           'mikael.svensson@netler.com',  'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',             'anna.johansson@netler.com',   'EMPLOYEE',   TRUE),
+    ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'SUPERADMIN', TRUE),
+    ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'SUPERADMIN', TRUE);
 
 
 -- =============================================================================
@@ -126,7 +133,27 @@ VALUES
      '+46 70 789 01 23',
      'Sveavägen 22, 113 59 Stockholm',
      'Björn Johansson – +46 73 321 09 87',
-     '2023-09-01', '1992-12-11');
+     '2023-09-01', '1992-12-11'),
+
+    -- Philip Olsson
+    ('00000000-0000-0000-0002-000000000010',
+     '00000000-0000-0000-0000-000000000010',
+     'Philip', 'Olsson',
+     'Account Manager',
+     '+46 70 111 22 33',
+     'Birger Jarlsgatan 8, 114 34 Stockholm',
+     'Anna Olsson – +46 73 111 22 44',
+     '2023-05-01', '1990-06-15'),
+
+    -- Philip Schill
+    ('00000000-0000-0000-0002-000000000011',
+     '00000000-0000-0000-0000-000000000011',
+     'Philip', 'Schill',
+     'Frontend Developer',
+     '+46 70 222 33 44',
+     'Linnégatan 14, 413 04 Göteborg',
+     'Sofia Schill – +46 73 222 33 55',
+     '2024-04-01', '1997-03-08');
 
 
 -- =============================================================================
@@ -164,7 +191,15 @@ VALUES
 
     ('00000000-0000-0000-0003-000000000007',
      '00000000-0000-0000-0000-000000000007',
-     'ICA Banken', '88812345', '9270-6');
+     'ICA Banken', '88812345', '9270-6'),
+
+    ('00000000-0000-0000-0003-000000000010',
+     '00000000-0000-0000-0000-000000000010',
+     'Swedbank', '91234567', '8327-9'),
+
+    ('00000000-0000-0000-0003-000000000011',
+     '00000000-0000-0000-0000-000000000011',
+     'Nordea', '82345678', '3300-3');
 
 
 -- =============================================================================
