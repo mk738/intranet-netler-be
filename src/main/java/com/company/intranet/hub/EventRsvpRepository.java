@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,6 +15,11 @@ public interface EventRsvpRepository extends JpaRepository<EventRsvp, UUID> {
     Optional<EventRsvp> findByEventAndEmployee(
             @Param("eventId")     UUID eventId,
             @Param("employeeId")  UUID employeeId);
+
+    @Query("SELECT r FROM EventRsvp r WHERE r.employee.id = :employeeId AND r.event.id IN :eventIds")
+    List<EventRsvp> findByEmployeeAndEventIds(
+            @Param("employeeId") UUID employeeId,
+            @Param("eventIds")   List<UUID> eventIds);
 
     @Query("SELECT COUNT(r) FROM EventRsvp r WHERE r.event.id = :eventId AND r.status = :status")
     long countByEventIdAndStatus(

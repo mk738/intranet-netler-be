@@ -23,8 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +38,7 @@ public class HubService {
 
     private final NewsPostRepository    newsPostRepository;
     private final EventRepository       eventRepository;
+    private final EventRsvpRepository   eventRsvpRepository;
     private final EmployeeRepository    employeeRepository;
     private final HubMapper             hubMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -167,16 +170,34 @@ public class HubService {
     // ── Events ────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public List<EventDto> getUpcomingEvents() {
-        return hubMapper.toEventDtos(
-                eventRepository.findByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate.now()));
+    public List<EventDto> getUpcomingEvents(Employee me) {
+        List<Event> events = eventRepository.findByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate.now());
+        return hubMapper.toEventDtos(events, buildRsvpMap(events, me));
     }
 
     @Transactional(readOnly = true)
-    public EventDto getEventById(UUID id) {
+    public List<EventDto> getAttendingEvents(Employee me) {
+        List<Event> events = eventRepository.findAttendingEvents(me.getId(), LocalDate.now());
+        return hubMapper.toEventDtos(events, buildRsvpMap(events, me));
+    }
+
+    @Transactional(readOnly = true)
+    public EventDto getEventById(UUID id, Employee me) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
-        return hubMapper.toEventDto(event);
+        String myRsvpStatus = eventRsvpRepository
+                .findByEventAndEmployee(id, me.getId())
+                .map(r -> r.getStatus().name())
+                .orElse(null);
+        return hubMapper.toEventDto(event, myRsvpStatus);
+    }
+
+    private Map<UUID, String> buildRsvpMap(List<Event> events, Employee me) {
+        if (events.isEmpty()) return Map.of();
+        List<UUID> eventIds = events.stream().map(Event::getId).toList();
+        return eventRsvpRepository.findByEmployeeAndEventIds(me.getId(), eventIds)
+                .stream()
+                .collect(Collectors.toMap(r -> r.getEvent().getId(), r -> r.getStatus().name()));
     }
 
     @Transactional
@@ -203,7 +224,7 @@ public class HubService {
         eventPublisher.publishEvent(
                 new EventCreatedEvent(saved.getTitle(), formattedDate, saved.getLocation(), allEmails));
 
-        return hubMapper.toEventDto(saved);
+        return hubMapper.toEventDto(saved, null);
     }
 
     @Transactional
@@ -222,7 +243,7 @@ public class HubService {
         event.setStartTime(request.allDay() ? null : request.startTime());
         event.setEndTime(request.allDay() ? null : request.endTime());
 
-        return hubMapper.toEventDto(eventRepository.save(event));
+        return hubMapper.toEventDto(eventRepository.save(event), null);
     }
 
     @Transactional

@@ -139,7 +139,7 @@ class VacationServiceTest {
                 .thenReturn(List.of("admin@company.com"));
         when(vacationMapper.toDto(saved))
                 .thenReturn(new VacationDto(saved.getId(), id, "Erik Lindqvist", "EL",
-                        start, end, 5, "PENDING", null, null, null, null, "Semester"));
+                        start, end, 5, "PENDING", null, null, null, null, "Semester", null));
 
         vacationService.submitVacation(req, me);
 
@@ -198,7 +198,7 @@ class VacationServiceTest {
         when(vacationRepository.findById(vacId)).thenReturn(Optional.of(vacation));
 
         assertThatThrownBy(() -> vacationService.reviewVacation(
-                vacId, new ReviewVacationRequest(true),
+                vacId, new ReviewVacationRequest(true, null),
                 employee(UUID.randomUUID(), "admin@x.com")))
                 .isInstanceOf(AppException.class);
     }
@@ -221,9 +221,9 @@ class VacationServiceTest {
         when(vacationRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vacationMapper.toDto(any())).thenReturn(
                 new VacationDto(vacId, emp.getId(), "Erik Lindqvist", "EL",
-                        start, end, 5, "APPROVED", "Admin User", null, null, null, "Semester"));
+                        start, end, 5, "APPROVED", "Admin User", null, null, null, "Semester", null));
 
-        vacationService.reviewVacation(vacId, new ReviewVacationRequest(true), admin);
+        vacationService.reviewVacation(vacId, new ReviewVacationRequest(true, null), admin);
 
         ArgumentCaptor<VacationReviewedEvent> captor =
                 ArgumentCaptor.forClass(VacationReviewedEvent.class);

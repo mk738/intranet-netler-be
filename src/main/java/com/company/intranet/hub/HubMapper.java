@@ -4,6 +4,8 @@ import com.company.intranet.hub.dto.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class HubMapper {
@@ -42,7 +44,7 @@ public class HubMapper {
         return posts.stream().map(this::toDto).toList();
     }
 
-    public EventDto toEventDto(Event event) {
+    public EventDto toEventDto(Event event, String myRsvpStatus) {
         return new EventDto(
                 event.getId(),
                 event.getTitle(),
@@ -54,8 +56,19 @@ public class HubMapper {
                 event.getStartTime(),
                 event.getEndTime(),
                 event.getAuthor().getFullName(),
-                event.getCreatedAt() != null ? event.getCreatedAt().toString() : null
+                event.getCreatedAt() != null ? event.getCreatedAt().toString() : null,
+                myRsvpStatus
         );
+    }
+
+    public EventDto toEventDto(Event event) {
+        return toEventDto(event, null);
+    }
+
+    public List<EventDto> toEventDtos(List<Event> events, Map<UUID, String> rsvpStatusByEventId) {
+        return events.stream()
+                .map(e -> toEventDto(e, rsvpStatusByEventId.get(e.getId())))
+                .toList();
     }
 
     public List<EventDto> toEventDtos(List<Event> events) {

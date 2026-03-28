@@ -29,7 +29,8 @@ public class VacationMapper {
                 request.getCreatedAt() != null
                         ? request.getCreatedAt().toString() : null,
                 avatarUrl,
-                request.getReason()
+                request.getReason(),
+                request.getRejectionReason()
         );
     }
 

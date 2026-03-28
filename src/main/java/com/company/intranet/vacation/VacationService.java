@@ -197,6 +197,7 @@ public class VacationService {
                 : VacationRequest.VacationStatus.REJECTED);
         vacation.setReviewedBy(admin);
         vacation.setReviewedAt(Instant.now());
+        vacation.setRejectionReason(review.approved() ? null : review.rejectionReason());
 
         VacationRequest saved = vacationRepository.save(vacation);
 

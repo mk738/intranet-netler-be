@@ -16,5 +16,6 @@ public record VacationDto(
         String    reviewedAt,         // ISO instant string, null if not reviewed
         String    createdAt,
         String    employeeAvatarUrl,
-        String    reason
+        String    reason,
+        String    rejectionReason
 ) {}

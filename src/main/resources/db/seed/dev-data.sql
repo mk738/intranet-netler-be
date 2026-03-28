@@ -491,82 +491,83 @@ VALUES
 -- =============================================================================
 
 ALTER TABLE vacation_requests ADD COLUMN IF NOT EXISTS reason VARCHAR(255) NOT NULL DEFAULT 'Semester';
+ALTER TABLE vacation_requests ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
 
 INSERT INTO vacation_requests
-    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at)
+    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at, rejection_reason)
 VALUES
     -- Erik: approved summer vacation 2025 (historical)
     ('00000000-0000-0000-0006-000000000001',
      '00000000-0000-0000-0000-000000000002',
      '2025-07-07', '2025-07-25', 15, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2025-05-12 10:30:00+00'),
+     '2025-05-12 10:30:00+00', NULL),
 
     -- Erik: approved upcoming vacation
     ('00000000-0000-0000-0006-000000000002',
      '00000000-0000-0000-0000-000000000002',
      '2026-06-15', '2026-06-26', 10, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-01 09:00:00+00'),
+     '2026-03-01 09:00:00+00', NULL),
 
     -- Sara: approved Christmas 2025 (historical)
     ('00000000-0000-0000-0006-000000000003',
      '00000000-0000-0000-0000-000000000003',
      '2025-12-22', '2026-01-02', 8, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2025-10-08 09:15:00+00'),
+     '2025-10-08 09:15:00+00', NULL),
 
     -- Sara: pending request for Easter week
     ('00000000-0000-0000-0006-000000000004',
      '00000000-0000-0000-0000-000000000003',
      '2026-04-06', '2026-04-10', 5, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Johan: pending vacation (week after his IKEA assignment ends)
     ('00000000-0000-0000-0006-000000000005',
      '00000000-0000-0000-0000-000000000004',
      '2026-04-13', '2026-04-17', 5, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Lina: pending upcoming vacation
     ('00000000-0000-0000-0006-000000000006',
      '00000000-0000-0000-0000-000000000005',
      '2026-05-04', '2026-05-15', 10, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Mikael: rejected request (too close to delivery milestone)
     ('00000000-0000-0000-0006-000000000007',
      '00000000-0000-0000-0000-000000000006',
      '2026-03-23', '2026-03-27', 5, 'Semester', 'REJECTED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-10 14:00:00+00'),
+     '2026-03-10 14:00:00+00', 'Vi har för få tillgängliga konsulter den perioden.'),
 
     -- Mikael: approved summer vacation
     ('00000000-0000-0000-0006-000000000008',
      '00000000-0000-0000-0000-000000000006',
      '2026-07-13', '2026-07-24', 10, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-01 11:30:00+00'),
+     '2026-03-01 11:30:00+00', NULL),
 
     -- Anna: pending upcoming vacation
     ('00000000-0000-0000-0006-000000000009',
      '00000000-0000-0000-0000-000000000007',
      '2026-04-20', '2026-04-30', 9, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Marcus: approved summer vacation
     ('00000000-0000-0000-0006-000000000010',
      '00000000-0000-0000-0000-000000000001',
      '2026-07-06', '2026-07-24', 15, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-02-20 11:00:00+00'),
+     '2026-02-20 11:00:00+00', NULL),
 
     -- Johan: approved summer vacation (in addition to his pending April week)
     ('00000000-0000-0000-0006-000000000018',
      '00000000-0000-0000-0000-000000000004',
      '2026-07-27', '2026-08-07', 10, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-20 13:00:00+00');
+     '2026-03-20 13:00:00+00', NULL);
 
 
 -- =============================================================================
@@ -1155,46 +1156,46 @@ INSERT INTO employee_skills (employee_id, skill_id) VALUES
     ('00000000-0000-0000-0000-000000000013', '00000000-0000-0000-000c-000000000005');
 
 INSERT INTO vacation_requests
-    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at)
+    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at, rejection_reason)
 VALUES
     -- Philip Olsson: approved midsummer week
     ('00000000-0000-0000-0006-000000000011',
      '00000000-0000-0000-0000-000000000010',
      '2026-06-19', '2026-06-26', 6, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-05 09:00:00+00'),
+     '2026-03-05 09:00:00+00', NULL),
 
     -- Philip Olsson: pending late summer week
     ('00000000-0000-0000-0006-000000000012',
      '00000000-0000-0000-0000-000000000010',
      '2026-08-10', '2026-08-14', 5, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Philip Schill: pending Easter week
     ('00000000-0000-0000-0006-000000000013',
      '00000000-0000-0000-0000-000000000011',
      '2026-04-06', '2026-04-10', 5, 'Semester', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Philip Schill: approved summer vacation
     ('00000000-0000-0000-0006-000000000014',
      '00000000-0000-0000-0000-000000000011',
      '2026-07-20', '2026-08-07', 15, 'Semester', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-10 10:00:00+00'),
+     '2026-03-10 10:00:00+00', NULL),
 
     -- Petra: pending tjänstledighet
     ('00000000-0000-0000-0006-000000000015',
      '00000000-0000-0000-0000-000000000013',
      '2026-04-30', '2026-05-04', 3, 'Tjänstledighet', 'PENDING',
-     NULL, NULL),
+     NULL, NULL, NULL),
 
     -- Petra: approved föräldraledighet
     ('00000000-0000-0000-0006-000000000016',
      '00000000-0000-0000-0000-000000000013',
      '2026-06-01', '2026-06-12', 10, 'Föräldraledighet', 'APPROVED',
      '00000000-0000-0000-0000-000000000001',
-     '2026-03-18 08:30:00+00');
+     '2026-03-18 08:30:00+00', NULL);
 
 
 -- =============================================================================
@@ -1256,13 +1257,13 @@ INSERT INTO employee_skills (employee_id, skill_id) VALUES
     ('00000000-0000-0000-0000-000000000012', '00000000-0000-0000-000c-000000000010');
 
 INSERT INTO vacation_requests
-    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at)
+    (id, employee_id, start_date, end_date, days_count, reason, status, reviewed_by, reviewed_at, rejection_reason)
 VALUES
     -- Emma: pending spring vacation
     ('00000000-0000-0000-0006-000000000017',
      '00000000-0000-0000-0000-000000000012',
      '2026-04-27', '2026-05-08', 10, 'Semester', 'PENDING',
-     NULL, NULL);
+     NULL, NULL, NULL);
 
 
 -- =============================================================================

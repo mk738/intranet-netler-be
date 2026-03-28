@@ -35,7 +35,7 @@ public class VacationRequest extends Auditable {
     @Column(name = "days_count", nullable = false)
     private Integer daysCount;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Builder.Default
     private String reason = "Semester";
 
@@ -50,6 +50,9 @@ public class VacationRequest extends Auditable {
 
     @Column(name = "reviewed_at")
     private Instant reviewedAt;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
 
     public enum VacationStatus { PENDING, APPROVED, REJECTED }
 }
