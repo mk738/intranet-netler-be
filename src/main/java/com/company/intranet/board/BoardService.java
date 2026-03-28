@@ -1,12 +1,18 @@
 package com.company.intranet.board;
 
 import com.company.intranet.board.dto.*;
+import com.company.intranet.common.exception.AppException;
+import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.employee.Employee;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,10 +20,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BoardService {
 
-    private final BoardRepository        boardRepository;
-    private final BoardColumnRepository  columnRepository;
-    private final BoardCardRepository    cardRepository;
-    private final BoardCommentRepository commentRepository;
+    private static final long MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+    private final BoardRepository            boardRepository;
+    private final BoardColumnRepository      columnRepository;
+    private final BoardCardRepository        cardRepository;
+    private final BoardCommentRepository     commentRepository;
+    private final CardAttachmentRepository   attachmentRepository;
 
     // ── Boards ────────────────────────────────────────────────────────────────
 
@@ -166,6 +175,64 @@ public class BoardService {
         commentRepository.delete(comment);
     }
 
+    // ── Attachments ───────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<CardAttachmentDto> getAttachments(UUID cardId) {
+        if (!cardRepository.existsById(cardId)) {
+            throw new ResourceNotFoundException("Card not found");
+        }
+        return attachmentRepository.findAllByCardId(cardId)
+                .stream()
+                .map(this::toAttachmentDto)
+                .toList();
+    }
+
+    @Transactional
+    public CardAttachmentDto uploadAttachment(UUID cardId, MultipartFile file) {
+        BoardCard card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
+        validateAttachmentFile(file);
+        try {
+            CardAttachment attachment = CardAttachment.builder()
+                    .card(card)
+                    .fileName(file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment")
+                    .contentType(file.getContentType())
+                    .data(file.getBytes())
+                    .build();
+            return toAttachmentDto(attachmentRepository.save(attachment));
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to read uploaded file.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional
+    public void deleteAttachment(UUID cardId, UUID attachmentId) {
+        CardAttachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attachment not found"));
+        if (!attachment.getCard().getId().equals(cardId)) {
+            throw new ResourceNotFoundException("Attachment not found on this card");
+        }
+        attachmentRepository.delete(attachment);
+    }
+
+    private void validateAttachmentFile(MultipartFile file) {
+        if (file.getSize() > MAX_FILE_BYTES) {
+            throw new AppException(
+                    ErrorCode.FILE_TOO_LARGE,
+                    "File exceeds the maximum allowed size of 10 MB.",
+                    HttpStatus.BAD_REQUEST);
+        }
+        String contentType = file.getContentType();
+        if (contentType == null
+                || (!contentType.startsWith("image/") && !contentType.equals("application/pdf"))) {
+            throw new AppException(
+                    ErrorCode.FILE_INVALID_TYPE,
+                    "Only images and PDF files are accepted.",
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
     // ── Mappers ───────────────────────────────────────────────────────────────
 
     private BoardDto toBoardDto(Board board) {
@@ -197,6 +264,7 @@ public class BoardService {
                 card.getAssignedTo(),
                 card.getPosition(),
                 card.getCreatedAt() != null ? card.getCreatedAt().toString() : null,
+                (int) attachmentRepository.countByCardId(card.getId()),
                 card.getComments().stream().map(this::toCommentDto).toList()
         );
     }
@@ -207,6 +275,15 @@ public class BoardService {
                 comment.getText(),
                 comment.getAuthorName(),
                 comment.getCreatedAt() != null ? comment.getCreatedAt().toString() : null
+        );
+    }
+
+    private CardAttachmentDto toAttachmentDto(CardAttachment attachment) {
+        return new CardAttachmentDto(
+                attachment.getId(),
+                attachment.getFileName(),
+                attachment.getContentType(),
+                Base64.getEncoder().encodeToString(attachment.getData())
         );
     }
 }
