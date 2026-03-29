@@ -167,7 +167,7 @@ class HubServiceTest {
     @Test
     void deleteNews_notFound_throwsResourceNotFound() {
         UUID id = UUID.randomUUID();
-        when(newsPostRepository.existsById(id)).thenReturn(false);
+        when(newsPostRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> hubService.deleteNews(id))
                 .isInstanceOf(ResourceNotFoundException.class);
