@@ -75,7 +75,7 @@ class BoardControllerTest {
     }
 
     private CardAttachmentDto sampleAttachment(UUID id) {
-        return new CardAttachmentDto(id, "document.pdf", "application/pdf", "base64data==");
+        return new CardAttachmentDto(id, "document.pdf", "application/pdf", "https://storage.example.com/signed-url");
     }
 
     private BoardCommentDto sampleComment(UUID id) {

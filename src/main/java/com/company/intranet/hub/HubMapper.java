@@ -1,6 +1,8 @@
 package com.company.intranet.hub;
 
+import com.company.intranet.config.FirebaseStorageService;
 import com.company.intranet.hub.dto.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -8,7 +10,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class HubMapper {
+
+    private final FirebaseStorageService storageService;
 
     public NewsPostDto toDto(NewsPost post) {
         return new NewsPostDto(
@@ -18,13 +23,16 @@ public class HubMapper {
                 post.getAuthor().getInitials(),
                 post.getPublishedAt(),
                 post.isPinned(),
-                post.getCoverImageData() != null,
+                post.getCoverImagePath() != null,
                 post.getCreatedAt(),
                 post.getCategory()
         );
     }
 
     public NewsPostDetailDto toDetailDto(NewsPost post) {
+        String coverImageUrl = post.getCoverImagePath() != null
+                ? storageService.getSignedUrl(post.getCoverImagePath())
+                : null;
         return new NewsPostDetailDto(
                 post.getId(),
                 post.getTitle(),
@@ -33,8 +41,7 @@ public class HubMapper {
                 post.getAuthor().getInitials(),
                 post.getPublishedAt(),
                 post.isPinned(),
-                post.getCoverImageData(),
-                post.getCoverImageType(),
+                coverImageUrl,
                 post.getCreatedAt(),
                 post.getCategory()
         );

@@ -25,6 +25,6 @@ public class EmployeeAvatar {
     @Column(name = "content_type", nullable = false, length = 50)
     private String contentType;
 
-    @Column(name = "data", nullable = false)
-    private byte[] data;
+    @Column(name = "storage_path")
+    private String storagePath;
 }

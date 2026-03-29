@@ -28,11 +28,8 @@ public class NewsPost extends Auditable {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
 
-    @Column(name = "cover_image_data", columnDefinition = "TEXT")
-    private String coverImageData;
-
-    @Column(name = "cover_image_type", length = 50)
-    private String coverImageType;
+    @Column(name = "cover_image_path")
+    private String coverImagePath;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

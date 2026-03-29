@@ -4,6 +4,7 @@ import com.company.intranet.board.dto.*;
 import com.company.intranet.common.exception.AppException;
 import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
+import com.company.intranet.config.FirebaseStorageService;
 import com.company.intranet.employee.Employee;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +27,7 @@ public class BoardService {
     private final BoardCardRepository        cardRepository;
     private final BoardCommentRepository     commentRepository;
     private final CardAttachmentRepository   attachmentRepository;
+    private final FirebaseStorageService     storageService;
 
     // ── Boards ────────────────────────────────────────────────────────────────
 
@@ -193,17 +194,22 @@ public class BoardService {
         BoardCard card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new ResourceNotFoundException("Card not found"));
         validateAttachmentFile(file);
+        String fileName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment";
+        UUID attachmentId = UUID.randomUUID();
+        String objectPath = "attachments/" + cardId + "/" + attachmentId + "_" + fileName;
         try {
-            CardAttachment attachment = CardAttachment.builder()
-                    .card(card)
-                    .fileName(file.getOriginalFilename() != null ? file.getOriginalFilename() : "attachment")
-                    .contentType(file.getContentType())
-                    .data(file.getBytes())
-                    .build();
-            return toAttachmentDto(attachmentRepository.save(attachment));
+            storageService.upload(objectPath, file);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to read uploaded file.", HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload file.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        CardAttachment attachment = CardAttachment.builder()
+                .id(attachmentId)
+                .card(card)
+                .fileName(fileName)
+                .contentType(file.getContentType())
+                .storagePath(objectPath)
+                .build();
+        return toAttachmentDto(attachmentRepository.save(attachment));
     }
 
     @Transactional
@@ -213,6 +219,7 @@ public class BoardService {
         if (!attachment.getCard().getId().equals(cardId)) {
             throw new ResourceNotFoundException("Attachment not found on this card");
         }
+        storageService.delete(attachment.getStoragePath());
         attachmentRepository.delete(attachment);
     }
 
@@ -283,7 +290,7 @@ public class BoardService {
                 attachment.getId(),
                 attachment.getFileName(),
                 attachment.getContentType(),
-                Base64.getEncoder().encodeToString(attachment.getData())
+                storageService.getSignedUrl(attachment.getStoragePath())
         );
     }
 }

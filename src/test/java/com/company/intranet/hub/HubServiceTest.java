@@ -38,6 +38,7 @@ class HubServiceTest {
     @Mock EmployeeRepository    employeeRepository;
     @Mock HubMapper             hubMapper;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock com.company.intranet.config.FirebaseStorageService storageService;
 
     @InjectMocks HubService hubService;
 

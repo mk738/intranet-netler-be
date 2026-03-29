@@ -24,11 +24,8 @@ public class EmployeeCv {
     @JoinColumn(name = "employee_id", nullable = false, unique = true)
     private Employee employee;
 
-    @Column(name = "content_type", nullable = false)
-    private String contentType;
-
-    @Column(name = "data", nullable = false)
-    private byte[] data;
+    @Column(name = "storage_path")
+    private String storagePath;
 
     @CreationTimestamp
     @Column(name = "uploaded_at", nullable = false, updatable = false)

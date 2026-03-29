@@ -2,6 +2,7 @@ package com.company.intranet.hub;
 
 import com.company.intranet.common.exception.BadRequestException;
 import com.company.intranet.common.exception.ResourceNotFoundException;
+import com.company.intranet.config.FirebaseStorageService;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
 import com.company.intranet.hub.dto.*;
@@ -36,12 +37,13 @@ public class HubService {
     private static final Set<String> ALLOWED_MIME     = Set.of(
             "image/jpeg", "image/png", "image/gif", "image/webp");
 
-    private final NewsPostRepository    newsPostRepository;
-    private final EventRepository       eventRepository;
-    private final EventRsvpRepository   eventRsvpRepository;
-    private final EmployeeRepository    employeeRepository;
-    private final HubMapper             hubMapper;
+    private final NewsPostRepository       newsPostRepository;
+    private final EventRepository          eventRepository;
+    private final EventRsvpRepository      eventRsvpRepository;
+    private final EmployeeRepository       employeeRepository;
+    private final HubMapper                hubMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final FirebaseStorageService   storageService;
 
     // ── News ──────────────────────────────────────────────────────────────────
 
@@ -82,12 +84,15 @@ public class HubService {
                 .pinned(request.pinned())
                 .category(request.category())
                 .author(author)
-                .coverImageData(request.coverImageData())
-                .coverImageType(request.coverImageType())
                 .publishedAt(publishedAt)
                 .build();
 
         NewsPost saved = newsPostRepository.save(post);
+
+        if (request.coverImageData() != null && !request.coverImageData().isBlank()) {
+            saved.setCoverImagePath(uploadNewsImage(saved.getId(), request.coverImageData(), request.coverImageType()));
+            saved = newsPostRepository.save(saved);
+        }
 
         if (request.published()) {
             String publishedDate = saved.getPublishedAt()
@@ -119,8 +124,19 @@ public class HubService {
         post.setTitle(request.title());
         post.setBody(request.body());
         post.setPinned(request.pinned());
-        post.setCoverImageData(request.coverImageData());
-        post.setCoverImageType(request.coverImageType());
+
+        if (request.coverImageData() != null && !request.coverImageData().isBlank()) {
+            if (post.getCoverImagePath() != null) {
+                storageService.delete(post.getCoverImagePath());
+            }
+            post.setCoverImagePath(uploadNewsImage(post.getId(), request.coverImageData(), request.coverImageType()));
+        } else if (request.coverImageData() != null) {
+            // empty string means "remove image"
+            if (post.getCoverImagePath() != null) {
+                storageService.delete(post.getCoverImagePath());
+            }
+            post.setCoverImagePath(null);
+        }
 
         return hubMapper.toDetailDto(newsPostRepository.save(post));
     }
@@ -161,10 +177,12 @@ public class HubService {
 
     @Transactional
     public void deleteNews(UUID id) {
-        if (!newsPostRepository.existsById(id)) {
-            throw new ResourceNotFoundException("News post not found");
+        NewsPost post = newsPostRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("News post not found"));
+        if (post.getCoverImagePath() != null) {
+            storageService.delete(post.getCoverImagePath());
         }
-        newsPostRepository.deleteById(id);
+        newsPostRepository.delete(post);
     }
 
     // ── Events ────────────────────────────────────────────────────────────────
@@ -272,6 +290,20 @@ public class HubService {
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid base64 image data");
         }
+    }
+
+    private String uploadNewsImage(UUID newsId, String base64Data, String contentType) {
+        String ext = switch (contentType.toLowerCase()) {
+            case "image/jpeg" -> ".jpg";
+            case "image/png"  -> ".png";
+            case "image/gif"  -> ".gif";
+            case "image/webp" -> ".webp";
+            default -> "";
+        };
+        String path = "news/" + newsId + "/cover" + ext;
+        byte[] decoded = Base64.getDecoder().decode(base64Data);
+        storageService.upload(path, decoded, contentType);
+        return path;
     }
 
     private void validateEventDates(LocalDate eventDate, LocalDate endDate) {
