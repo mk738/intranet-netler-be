@@ -1,5 +1,6 @@
 package com.company.intranet.employee;
 
+import com.company.intranet.config.FirebaseStorageService;
 import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.skill.SkillService;
@@ -13,7 +14,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmployeeMapper {
 
-    private final SkillService skillService;
+    private final SkillService              skillService;
+    private final EmployeeAvatarRepository  avatarRepository;
+    private final FirebaseStorageService    storageService;
 
     public EmployeeDto toDto(Employee employee) {
         return new EmployeeDto(
@@ -23,11 +26,11 @@ public class EmployeeMapper {
                 employee.isActive(),
                 employee.getTerminationDate(),
                 toSkillDtos(employee),
-                toProfileDto(employee.getProfile())
+                toProfileDto(employee.getProfile(), resolveAvatarUrl(employee))
         );
     }
 
-    public EmployeeProfileDto toProfileDto(EmployeeProfile profile) {
+    public EmployeeProfileDto toProfileDto(EmployeeProfile profile, String avatarUrl) {
         if (profile == null) return null;
         return new EmployeeProfileDto(
                 profile.getFirstName(),
@@ -36,7 +39,7 @@ public class EmployeeMapper {
                 profile.getPhone(),
                 profile.getAddress(),
                 profile.getEmergencyContact(),
-                profile.getAvatarUrl(),
+                avatarUrl,
                 profile.getStartDate(),
                 profile.getBirthDate()
         );
@@ -60,13 +63,21 @@ public class EmployeeMapper {
                 employee.getTerminationDate(),
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
                 toSkillDtos(employee),
-                toProfileDto(employee.getProfile()),
+                toProfileDto(employee.getProfile(), resolveAvatarUrl(employee)),
                 bankInfo,
                 education,
                 benefits,
                 currentAssignment,
                 assignments
         );
+    }
+
+    private String resolveAvatarUrl(Employee employee) {
+        return avatarRepository.findByEmployee(employee)
+                .map(EmployeeAvatar::getStoragePath)
+                .filter(path -> path != null)
+                .map(storageService::getSignedUrl)
+                .orElse(null);
     }
 
     public BankInfoDto toBankInfoDto(BankInfo bankInfo) {
