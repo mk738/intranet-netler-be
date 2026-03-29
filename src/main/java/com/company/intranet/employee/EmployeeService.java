@@ -416,8 +416,10 @@ public class EmployeeService {
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
+    public record AvatarData(byte[] bytes, String contentType) {}
+
     @Transactional(readOnly = true)
-    public String getAvatarUrl(UUID employeeId) {
+    public AvatarData getAvatar(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new AppException(
                         ErrorCode.EMPLOYEE_NOT_FOUND,
@@ -429,7 +431,10 @@ public class EmployeeService {
                         ErrorCode.NOT_FOUND,
                         "No avatar found for this employee",
                         HttpStatus.NOT_FOUND));
-        return storageService.getSignedUrl(avatar.getStoragePath());
+
+        byte[] bytes = storageService.download(avatar.getStoragePath());
+        if (bytes == null) throw new AppException(ErrorCode.NOT_FOUND, "Avatar not found in storage", HttpStatus.NOT_FOUND);
+        return new AvatarData(bytes, avatar.getContentType());
     }
 
     // ── Skills ────────────────────────────────────────────────────────────────

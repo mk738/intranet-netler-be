@@ -47,6 +47,14 @@ public class FirebaseStorageService {
         }
     }
 
+    public byte[] download(String objectPath) {
+        Blob blob = StorageClient.getInstance(firebaseApp)
+                .bucket(bucketName)
+                .get(objectPath);
+        if (blob == null) return null;
+        return blob.getContent();
+    }
+
     public String getSignedUrl(String objectPath) {
         Storage storage = StorageClient.getInstance(firebaseApp)
                 .bucket(bucketName)

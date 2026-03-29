@@ -183,12 +183,13 @@ public class EmployeeController {
 
     @GetMapping("/{id}/avatar")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> getAvatar(@PathVariable UUID id) {
+    public ResponseEntity<byte[]> getAvatar(@PathVariable UUID id) {
         log.info("GET /api/employees/{}/avatar", id);
-        String signedUrl = employeeService.getAvatarUrl(id);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header(HttpHeaders.LOCATION, signedUrl)
-                .build();
+        EmployeeService.AvatarData avatar = employeeService.getAvatar(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, avatar.contentType())
+                .header(HttpHeaders.CACHE_CONTROL, "max-age=3600")
+                .body(avatar.bytes());
     }
 
     // ── Contract ──────────────────────────────────────────────────────────────
