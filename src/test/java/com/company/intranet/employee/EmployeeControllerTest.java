@@ -200,21 +200,20 @@ class EmployeeControllerTest {
     @Test
     void getContract_asAdmin_returns200() throws Exception {
         Employee admin = buildEmployee(Employee.Role.ADMIN);
-        ContractDto dto = new ContractDto("base64data==", "application/pdf");
+        ContractDto dto = new ContractDto("https://storage.example.com/contract-url");
 
         when(employeeService.getContract(EMP_ID)).thenReturn(dto);
 
         mockMvc.perform(get("/api/employees/" + EMP_ID + "/contract")
                         .with(authentication(auth(admin))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.contentType").value("application/pdf"))
-                .andExpect(jsonPath("$.data.data").value("base64data=="));
+                .andExpect(jsonPath("$.data.downloadUrl").value("https://storage.example.com/contract-url"));
     }
 
     @Test
     void getContract_asOwner_returns200() throws Exception {
         Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
-        ContractDto dto = new ContractDto("base64data==", "application/pdf");
+        ContractDto dto = new ContractDto("https://storage.example.com/contract-url");
 
         when(employeeService.getContract(EMP_ID)).thenReturn(dto);
 
@@ -257,21 +256,20 @@ class EmployeeControllerTest {
     @Test
     void getCv_asAdmin_returns200() throws Exception {
         Employee admin = buildEmployee(Employee.Role.ADMIN);
-        ContractDto dto = new ContractDto("cvbase64==", "application/pdf");
+        ContractDto dto = new ContractDto("https://storage.example.com/cv-url");
 
         when(employeeService.getCv(EMP_ID)).thenReturn(dto);
 
         mockMvc.perform(get("/api/employees/" + EMP_ID + "/cv")
                         .with(authentication(auth(admin))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.contentType").value("application/pdf"))
-                .andExpect(jsonPath("$.data.data").value("cvbase64=="));
+                .andExpect(jsonPath("$.data.downloadUrl").value("https://storage.example.com/cv-url"));
     }
 
     @Test
     void getCv_asOwner_returns200() throws Exception {
         Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
-        ContractDto dto = new ContractDto("cvbase64==", "application/pdf");
+        ContractDto dto = new ContractDto("https://storage.example.com/cv-url");
 
         when(employeeService.getCv(EMP_ID)).thenReturn(dto);
 

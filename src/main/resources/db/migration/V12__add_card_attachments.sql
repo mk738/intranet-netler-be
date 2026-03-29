@@ -5,7 +5,7 @@ CREATE TABLE card_attachments (
     card_id      UUID        NOT NULL REFERENCES board_cards(id) ON DELETE CASCADE,
     file_name    TEXT        NOT NULL,
     content_type TEXT        NOT NULL,
-    data         BYTEA       NOT NULL,
+    storage_path TEXT,
     created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     created_by   TEXT,

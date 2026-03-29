@@ -3,6 +3,7 @@ package com.company.intranet.employee;
 import com.company.intranet.common.exception.AppException;
 import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
+import com.company.intranet.config.FirebaseStorageService;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
 import com.company.intranet.skill.Skill;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -55,6 +55,7 @@ public class EmployeeService {
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
+    private final FirebaseStorageService     storageService;
 
     @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
     private String loginUrl;
@@ -319,10 +320,7 @@ public class EmployeeService {
                         HttpStatus.NOT_FOUND));
         EmployeeContract contract = contractRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No contract found"));
-        return new ContractDto(
-                Base64.getEncoder().encodeToString(contract.getData()),
-                contract.getContentType()
-        );
+        return new ContractDto(storageService.getSignedUrl(contract.getStoragePath()));
     }
 
     @Transactional
@@ -333,15 +331,16 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
+        String path = "contracts/" + employeeId;
         try {
-            EmployeeContract contract = contractRepository.findByEmployee(employee)
-                    .orElseGet(() -> EmployeeContract.builder().employee(employee).build());
-            contract.setContentType(file.getContentType());
-            contract.setData(file.getBytes());
-            contractRepository.save(contract);
+            storageService.upload(path, file);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload contract", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        EmployeeContract contract = contractRepository.findByEmployee(employee)
+                .orElseGet(() -> EmployeeContract.builder().employee(employee).build());
+        contract.setStoragePath(path);
+        contractRepository.save(contract);
     }
 
     // ── CV ────────────────────────────────────────────────────────────────────
@@ -355,10 +354,7 @@ public class EmployeeService {
                         HttpStatus.NOT_FOUND));
         EmployeeCv cv = cvRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No CV found"));
-        return new ContractDto(
-                Base64.getEncoder().encodeToString(cv.getData()),
-                cv.getContentType()
-        );
+        return new ContractDto(storageService.getSignedUrl(cv.getStoragePath()));
     }
 
     @Transactional
@@ -369,15 +365,16 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
+        String path = "cvs/" + employeeId;
         try {
-            EmployeeCv cv = cvRepository.findByEmployee(employee)
-                    .orElseGet(() -> EmployeeCv.builder().employee(employee).build());
-            cv.setContentType(file.getContentType());
-            cv.setData(file.getBytes());
-            cvRepository.save(cv);
+            storageService.upload(path, file);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload CV", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        EmployeeCv cv = cvRepository.findByEmployee(employee)
+                .orElseGet(() -> EmployeeCv.builder().employee(employee).build());
+        cv.setStoragePath(path);
+        cvRepository.save(cv);
     }
 
     // ── Avatar ────────────────────────────────────────────────────────────────
@@ -403,33 +400,36 @@ public class EmployeeService {
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
 
+        String path = "avatars/" + employeeId;
         try {
-            EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
-                    .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());
-            avatar.setContentType(file.getContentType());
-            avatar.setData(file.getBytes());
-            avatarRepository.save(avatar);
+            storageService.upload(path, file);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.FILE_TOO_LARGE, "Failed to read uploaded file", HttpStatus.BAD_REQUEST);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload avatar", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
+                .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());
+        avatar.setContentType(file.getContentType());
+        avatar.setStoragePath(path);
+        avatarRepository.save(avatar);
 
         employee.getProfile().setAvatarUrl("/api/employees/" + employeeId + "/avatar");
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
     @Transactional(readOnly = true)
-    public EmployeeAvatar getAvatar(UUID employeeId) {
+    public String getAvatarUrl(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new AppException(
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
 
-        return avatarRepository.findByEmployee(employee)
+        EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
                 .orElseThrow(() -> new AppException(
                         ErrorCode.NOT_FOUND,
                         "No avatar found for this employee",
                         HttpStatus.NOT_FOUND));
+        return storageService.getSignedUrl(avatar.getStoragePath());
     }
 
     // ── Skills ────────────────────────────────────────────────────────────────

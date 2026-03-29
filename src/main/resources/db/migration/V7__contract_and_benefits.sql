@@ -4,8 +4,7 @@
 CREATE TABLE employee_contract (
     id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     employee_id  UUID        NOT NULL UNIQUE REFERENCES employees(id) ON DELETE CASCADE,
-    content_type VARCHAR(100) NOT NULL,
-    data         BYTEA       NOT NULL,
+    storage_path TEXT,
     created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_by   VARCHAR(255),

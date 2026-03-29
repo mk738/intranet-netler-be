@@ -63,6 +63,8 @@ firebase:
   credentials:
     # Empty default so local dev without the env var falls back to firebase-service-account.json file
     json: ${FIREBASE_CREDENTIALS_JSON:}
+  storage:
+    bucket: ${FIREBASE_STORAGE_BUCKET}
 
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost:3000}

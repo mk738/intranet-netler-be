@@ -32,6 +32,6 @@ public class CardAttachment extends Auditable {
     @Column(name = "content_type", nullable = false)
     private String contentType;
 
-    @Column(nullable = false)
-    private byte[] data;
+    @Column(name = "storage_path")
+    private String storagePath;
 }

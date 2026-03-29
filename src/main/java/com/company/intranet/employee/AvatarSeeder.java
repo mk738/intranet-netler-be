@@ -1,5 +1,6 @@
 package com.company.intranet.employee;
 
+import com.company.intranet.config.FirebaseStorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -21,8 +22,6 @@ import java.util.UUID;
  *
  * Runs only in the default (local) and test (Railway test) profiles.
  * Silently skips files if the employee is not found in the database.
- *
- * en temporär lösning tills vi hittar andra sätt att spara bilder på.
  */
 @Component
 @Profile({"default", "test"})
@@ -34,6 +33,7 @@ public class AvatarSeeder implements ApplicationRunner {
     private final EmployeeRepository        employeeRepository;
     private final EmployeeAvatarRepository  avatarRepository;
     private final ResourcePatternResolver   resourceResolver;
+    private final FirebaseStorageService    storageService;
 
     @Override
     @Transactional
@@ -68,13 +68,24 @@ public class AvatarSeeder implements ApplicationRunner {
                 continue;
             }
 
+            // Skip if already uploaded to Firebase
+            if (avatarRepository.findByEmployee(employee)
+                    .map(a -> a.getStoragePath() != null)
+                    .orElse(false)) {
+                log.debug("Avatar seeder: skipping '{}' — already seeded", employeeId);
+                continue;
+            }
+
             byte[] data        = resource.getInputStream().readAllBytes();
             String contentType = contentTypeFor(filename);
+            String path        = "avatars/" + employeeId;
+
+            storageService.upload(path, data, contentType);
 
             EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
                     .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());
             avatar.setContentType(contentType);
-            avatar.setData(data);
+            avatar.setStoragePath(path);
             avatarRepository.save(avatar);
 
             if (employee.getProfile() != null) {

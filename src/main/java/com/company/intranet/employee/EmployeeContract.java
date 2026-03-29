@@ -23,9 +23,6 @@ public class EmployeeContract extends Auditable {
     @JoinColumn(name = "employee_id", nullable = false, unique = true)
     private Employee employee;
 
-    @Column(name = "content_type", nullable = false)
-    private String contentType;
-
-    @Column(name = "data", nullable = false)
-    private byte[] data;
+    @Column(name = "storage_path")
+    private String storagePath;
 }

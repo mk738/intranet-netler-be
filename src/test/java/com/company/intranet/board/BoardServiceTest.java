@@ -28,6 +28,7 @@ class BoardServiceTest {
     @Mock BoardCardRepository        cardRepository;
     @Mock BoardCommentRepository     commentRepository;
     @Mock CardAttachmentRepository   attachmentRepository;
+    @Mock com.company.intranet.config.FirebaseStorageService storageService;
 
     @InjectMocks BoardService boardService;
 

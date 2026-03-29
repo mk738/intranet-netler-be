@@ -38,6 +38,7 @@ class HubServiceTest {
     @Mock EmployeeRepository    employeeRepository;
     @Mock HubMapper             hubMapper;
     @Mock ApplicationEventPublisher eventPublisher;
+    @Mock com.company.intranet.config.FirebaseStorageService storageService;
 
     @InjectMocks HubService hubService;
 
@@ -72,7 +73,7 @@ class HubServiceTest {
         when(newsPostRepository.save(any())).thenReturn(saved);
         when(hubMapper.toDetailDto(saved)).thenReturn(
                 new NewsPostDetailDto(saved.getId(), "Title", "Body",
-                        "Anna Admin", "AA", null, false, null, null, null, null));
+                        "Anna Admin", "AA", null, false, null, null, null));
 
         NewsPostDetailDto result = hubService.createNews(req, author);
 
@@ -125,7 +126,7 @@ class HubServiceTest {
         when(employeeRepository.findAll()).thenReturn(List.of(author));
         when(hubMapper.toDetailDto(any())).thenReturn(
                 new NewsPostDetailDto(post.getId(), "Test Post", "Body text",
-                        "Anna Admin", "AA", Instant.now(), false, null, null, null, null));
+                        "Anna Admin", "AA", Instant.now(), false, null, null, null));
 
         hubService.publishNews(post.getId(), true);
 
@@ -145,7 +146,7 @@ class HubServiceTest {
         when(newsPostRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(hubMapper.toDetailDto(any())).thenReturn(
                 new NewsPostDetailDto(post.getId(), "Test Post", "Body text",
-                        "Anna Admin", "AA", post.getPublishedAt(), false, null, null, null, null));
+                        "Anna Admin", "AA", post.getPublishedAt(), false, null, null, null));
 
         hubService.publishNews(post.getId(), true);
 
@@ -166,7 +167,7 @@ class HubServiceTest {
     @Test
     void deleteNews_notFound_throwsResourceNotFound() {
         UUID id = UUID.randomUUID();
-        when(newsPostRepository.existsById(id)).thenReturn(false);
+        when(newsPostRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> hubService.deleteNews(id))
                 .isInstanceOf(ResourceNotFoundException.class);

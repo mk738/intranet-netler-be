@@ -67,7 +67,7 @@ class NewsControllerTest {
 
     private NewsPostDetailDto sampleDetail(UUID id) {
         return new NewsPostDetailDto(id, "Test Title", "Body text",
-                "Anna Admin", "AA", null, false, null, null, Instant.parse("2026-01-01T00:00:00Z"), null);
+                "Anna Admin", "AA", null, false, null, Instant.parse("2026-01-01T00:00:00Z"), null);
     }
 
     // ── GET /api/news ─────────────────────────────────────────────────────────

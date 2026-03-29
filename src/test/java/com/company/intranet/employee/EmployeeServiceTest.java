@@ -42,6 +42,7 @@ class EmployeeServiceTest {
     @Mock FirebaseAuth              firebaseAuth;
     @Mock ApplicationEventPublisher eventPublisher;
     @Mock EmployeeMapper            employeeMapper;
+    @Mock com.company.intranet.config.FirebaseStorageService storageService;
 
     @InjectMocks EmployeeService employeeService;
 
