@@ -22,6 +22,10 @@ public class MinioInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        log.info("MinIO endpoint: {}", props.getEndpoint());
+        log.info("MinIO access key: '{}'", props.getAccessKey());
+        log.info("MinIO region: {}", props.getRegion());
+
         List<String> buckets = List.of(
                 props.getBucket().getAvatars(),
                 props.getBucket().getContracts(),
