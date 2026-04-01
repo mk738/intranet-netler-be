@@ -63,8 +63,19 @@ firebase:
   credentials:
     # Empty default so local dev without the env var falls back to firebase-service-account.json file
     json: ${FIREBASE_CREDENTIALS_JSON:}
-  storage:
-    bucket: ${FIREBASE_STORAGE_BUCKET}
+
+storage:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  region: us-east-1
+  bucket:
+    avatars: avatars
+    contracts: contracts
+    cvs: cvs
+    news-covers: news-covers
+    board-attachments: board-attachments
+  signed-url-expiry-minutes: 60
 
 cors:
   allowed-origins: ${CORS_ORIGINS:http://localhost:3000}

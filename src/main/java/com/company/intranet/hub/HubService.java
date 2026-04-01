@@ -2,7 +2,8 @@ package com.company.intranet.hub;
 
 import com.company.intranet.common.exception.BadRequestException;
 import com.company.intranet.common.exception.ResourceNotFoundException;
-import com.company.intranet.config.FirebaseStorageService;
+import com.company.intranet.storage.StorageProperties;
+import com.company.intranet.storage.StorageService;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
 import com.company.intranet.hub.dto.*;
@@ -43,7 +44,8 @@ public class HubService {
     private final EmployeeRepository       employeeRepository;
     private final HubMapper                hubMapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final FirebaseStorageService   storageService;
+    private final StorageService           storageService;
+    private final StorageProperties        storageProps;
 
     // ── News ──────────────────────────────────────────────────────────────────
 
@@ -127,13 +129,13 @@ public class HubService {
 
         if (request.coverImageData() != null && !request.coverImageData().isBlank()) {
             if (post.getCoverImagePath() != null) {
-                storageService.delete(post.getCoverImagePath());
+                storageService.delete(storageProps.getBucket().getNewsCovers(), post.getCoverImagePath());
             }
             post.setCoverImagePath(uploadNewsImage(post.getId(), request.coverImageData(), request.coverImageType()));
         } else if (request.coverImageData() != null) {
             // empty string means "remove image"
             if (post.getCoverImagePath() != null) {
-                storageService.delete(post.getCoverImagePath());
+                storageService.delete(storageProps.getBucket().getNewsCovers(), post.getCoverImagePath());
             }
             post.setCoverImagePath(null);
         }
@@ -180,7 +182,7 @@ public class HubService {
         NewsPost post = newsPostRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("News post not found"));
         if (post.getCoverImagePath() != null) {
-            storageService.delete(post.getCoverImagePath());
+            storageService.delete(storageProps.getBucket().getNewsCovers(), post.getCoverImagePath());
         }
         newsPostRepository.delete(post);
     }
@@ -293,16 +295,9 @@ public class HubService {
     }
 
     private String uploadNewsImage(UUID newsId, String base64Data, String contentType) {
-        String ext = switch (contentType.toLowerCase()) {
-            case "image/jpeg" -> ".jpg";
-            case "image/png"  -> ".png";
-            case "image/gif"  -> ".gif";
-            case "image/webp" -> ".webp";
-            default -> "";
-        };
-        String path = "news/" + newsId + "/cover" + ext;
+        String path = newsId.toString();
         byte[] decoded = Base64.getDecoder().decode(base64Data);
-        storageService.upload(path, decoded, contentType);
+        storageService.upload(storageProps.getBucket().getNewsCovers(), path, decoded, contentType);
         return path;
     }
 

@@ -28,6 +28,8 @@ public enum ErrorCode {
     // ── File upload ───────────────────────────────────────────────────────────
     FILE_TOO_LARGE,
     FILE_INVALID_TYPE,
+    FILE_NOT_FOUND,
+    FILE_UPLOAD_FAILED,
 
     // ── Assignment ────────────────────────────────────────────────────────────
     ASSIGNMENT_ALREADY_ACTIVE,
