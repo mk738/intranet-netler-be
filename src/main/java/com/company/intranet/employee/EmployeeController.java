@@ -145,6 +145,19 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasAuthority('EMPLOYEE_DEACTIVATE')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> deactivateEmployee(
+            @PathVariable UUID id,
+            @RequestBody @Valid DeactivateEmployeeRequest request,
+            @CurrentUser Employee me) {
+        log.info("PATCH /api/employees/{}/deactivate employmentEndDate={}", id, request.employmentEndDate());
+        EmployeeDto result = employeeService.deactivateEmployee(id, request, me);
+        log.info("Employee deactivation processed id={} isActive={} employmentEndDate={}",
+                result.id(), result.isActive(), result.employmentEndDate());
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
     @PutMapping("/{id}/terminate")
     @PreAuthorize("hasAuthority('EMPLOYEE_TERMINATE')")
     public ResponseEntity<ApiResponse<EmployeeDto>> terminateEmployee(

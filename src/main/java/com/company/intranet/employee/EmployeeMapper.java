@@ -27,6 +27,7 @@ public class EmployeeMapper {
                 employee.getRole(),
                 employee.isActive(),
                 employee.getTerminationDate(),
+                employee.getEmploymentEndDate(),
                 toSkillDtos(employee),
                 toProfileDto(employee.getProfile(), resolveAvatarUrl(employee))
         );
@@ -63,6 +64,7 @@ public class EmployeeMapper {
                 employee.getRole().name(),
                 employee.isActive(),
                 employee.getTerminationDate(),
+                employee.getEmploymentEndDate(),
                 employee.getCreatedAt() != null ? employee.getCreatedAt().toString() : null,
                 toSkillDtos(employee),
                 toProfileDto(employee.getProfile(), resolveAvatarUrl(employee)),

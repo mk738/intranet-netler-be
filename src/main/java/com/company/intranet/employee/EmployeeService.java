@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -203,6 +206,47 @@ public class EmployeeService {
 
         employee.setActive(false);
         employee.setTerminationDate(request.terminationDate());
+        return employeeMapper.toDto(employeeRepository.save(employee));
+    }
+
+    @Transactional
+    public EmployeeDto deactivateEmployee(UUID id, DeactivateEmployeeRequest request, Employee me) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new AppException(
+                        ErrorCode.EMPLOYEE_NOT_FOUND,
+                        "Employee not found",
+                        HttpStatus.NOT_FOUND));
+
+        if (!employee.isActive()) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_ALREADY_INACTIVE,
+                    "Employee is already inactive",
+                    HttpStatus.CONFLICT);
+        }
+
+        if (employee.getId().equals(me.getId())) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_DEACTIVATE_FORBIDDEN,
+                    "Cannot deactivate your own account",
+                    HttpStatus.FORBIDDEN);
+        }
+
+        if (!employee.getFullName().equalsIgnoreCase(request.confirmName().trim())) {
+            throw new AppException(
+                    ErrorCode.EMPLOYEE_CONFIRM_NAME_MISMATCH,
+                    "Confirmation name does not match the employee's full name",
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        LocalDate endDate = request.employmentEndDate();
+        if (endDate != null && !endDate.isBefore(LocalDate.now())) {
+            employee.setEmploymentEndDate(endDate);
+        } else {
+            employee.setActive(false);
+            employee.setEmploymentEndDate(null);
+            disableFirebaseUser(employee);
+        }
+
         return employeeMapper.toDto(employeeRepository.save(employee));
     }
 
@@ -513,6 +557,15 @@ public class EmployeeService {
                     ErrorCode.FILE_INVALID_TYPE,
                     "Only PDF files are accepted (application/pdf).",
                     HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private void disableFirebaseUser(Employee employee) {
+        try {
+            firebaseAuth.updateUser(
+                    new UserRecord.UpdateRequest(employee.getFirebaseUid()).setDisabled(true));
+        } catch (FirebaseAuthException e) {
+            log.warn("Failed to disable Firebase user for employee {}: {}", employee.getId(), e.getMessage());
         }
     }
 
