@@ -39,4 +39,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
         ORDER BY e.profile.lastName
     """)
     List<Employee> findAllWithNoActiveAssignment();
+
+    List<Employee> findByEmploymentEndDateBeforeAndIsActiveTrue(java.time.LocalDate date);
 }

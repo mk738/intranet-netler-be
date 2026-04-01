@@ -13,6 +13,7 @@ public record EmployeeDto(
         Employee.Role role,
         boolean isActive,
         LocalDate terminationDate,
+        LocalDate employmentEndDate,
         List<SkillDto> skills,
         EmployeeProfileDto profile
 ) {}

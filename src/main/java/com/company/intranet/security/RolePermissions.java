@@ -20,6 +20,7 @@ public final class RolePermissions {
             Employee.Role.SUPERADMIN, EnumSet.allOf(Permission.class),
             Employee.Role.ADMIN,      EnumSet.complementOf(EnumSet.of(
                                           Permission.EMPLOYEE_TERMINATE,
+                                          Permission.EMPLOYEE_DEACTIVATE,
                                           Permission.EMPLOYEE_CHANGE_ROLE,
                                           Permission.EMPLOYEE_TOGGLE_ACTIVE,
                                           Permission.VACATION_APPROVE

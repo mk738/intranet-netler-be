@@ -39,6 +39,9 @@ public class Employee extends Auditable {
     @Column(name = "termination_date")
     private LocalDate terminationDate;
 
+    @Column(name = "employment_end_date")
+    private LocalDate employmentEndDate;
+
     @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private EmployeeProfile profile;
 

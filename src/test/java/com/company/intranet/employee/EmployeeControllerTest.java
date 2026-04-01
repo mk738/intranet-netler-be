@@ -68,7 +68,7 @@ class EmployeeControllerTest {
 
     private EmployeeDto sampleDto(Employee employee) {
         return new EmployeeDto(
-                employee.getId(), employee.getEmail(), employee.getRole(), true, null, Collections.emptyList(),
+                employee.getId(), employee.getEmail(), employee.getRole(), true, null, null, Collections.emptyList(),
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 3, 1), null));
     }
@@ -76,7 +76,7 @@ class EmployeeControllerTest {
     private EmployeeDetailDto sampleDetailDto(Employee employee) {
         return new EmployeeDetailDto(
                 employee.getId(), employee.getEmail(), employee.getRole().name(),
-                true, null, "2023-01-01T00:00:00Z", Collections.emptyList(),
+                true, null, null, "2023-01-01T00:00:00Z", Collections.emptyList(),
                 new EmployeeProfileDto("Erik", "Lindqvist", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 3, 1), null),
                 null,
@@ -140,7 +140,7 @@ class EmployeeControllerTest {
 
         UUID newId = UUID.randomUUID();
         EmployeeDto created = new EmployeeDto(newId, "new@company.com",
-                Employee.Role.EMPLOYEE, true, null, Collections.emptyList(), null);
+                Employee.Role.EMPLOYEE, true, null, null, Collections.emptyList(), null);
 
         when(employeeService.inviteEmployee(any(InviteEmployeeRequest.class), any(Employee.class)))
                 .thenReturn(created);
@@ -354,6 +354,78 @@ class EmployeeControllerTest {
                 .andExpect(status().isForbidden());
     }
 
+    // ── PATCH /api/employees/{id}/deactivate ──────────────────────────────────
+
+    @Test
+    void deactivate_asEmployee_returns403() throws Exception {
+        Employee emp = buildEmployee(Employee.Role.EMPLOYEE);
+        DeactivateEmployeeRequest request = new DeactivateEmployeeRequest(null, "Erik Lindqvist");
+
+        mockMvc.perform(patch("/api/employees/" + EMP_ID + "/deactivate")
+                        .with(authentication(auth(emp)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deactivate_asAdmin_returns403() throws Exception {
+        Employee admin = buildEmployee(Employee.Role.ADMIN);
+        DeactivateEmployeeRequest request = new DeactivateEmployeeRequest(null, "Erik Lindqvist");
+
+        mockMvc.perform(patch("/api/employees/" + EMP_ID + "/deactivate")
+                        .with(authentication(auth(admin)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deactivate_asSuperadmin_immediateDeactivation_returns200() throws Exception {
+        Employee superadmin = buildEmployee(Employee.Role.SUPERADMIN);
+        DeactivateEmployeeRequest request = new DeactivateEmployeeRequest(null, "Erik Lindqvist");
+
+        EmployeeDto result = new EmployeeDto(EMP_ID, "erik@company.com",
+                Employee.Role.EMPLOYEE, false, null, null, Collections.emptyList(), null);
+
+        when(employeeService.deactivateEmployee(eq(EMP_ID), any(DeactivateEmployeeRequest.class), any(Employee.class)))
+                .thenReturn(result);
+
+        mockMvc.perform(patch("/api/employees/" + EMP_ID + "/deactivate")
+                        .with(authentication(auth(superadmin)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.isActive").value(false));
+    }
+
+    @Test
+    void deactivate_asSuperadmin_futureDate_returns200() throws Exception {
+        Employee superadmin = buildEmployee(Employee.Role.SUPERADMIN);
+        LocalDate futureDate = LocalDate.now().plusDays(14);
+        DeactivateEmployeeRequest request = new DeactivateEmployeeRequest(futureDate, "Erik Lindqvist");
+
+        EmployeeDto result = new EmployeeDto(EMP_ID, "erik@company.com",
+                Employee.Role.EMPLOYEE, true, null, futureDate, Collections.emptyList(), null);
+
+        when(employeeService.deactivateEmployee(eq(EMP_ID), any(DeactivateEmployeeRequest.class), any(Employee.class)))
+                .thenReturn(result);
+
+        mockMvc.perform(patch("/api/employees/" + EMP_ID + "/deactivate")
+                        .with(authentication(auth(superadmin)))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.isActive").value(true))
+                .andExpect(jsonPath("$.data.employmentEndDate").value(futureDate.toString()));
+    }
+
     // ── GET /api/employees/{id} ───────────────────────────────────────────────
 
     @Test
@@ -362,7 +434,7 @@ class EmployeeControllerTest {
         UUID targetId = UUID.randomUUID();
 
         EmployeeDetailDto detail = new EmployeeDetailDto(
-                targetId, "sara@company.com", "EMPLOYEE", true, null, "2023-06-01T00:00:00Z",
+                targetId, "sara@company.com", "EMPLOYEE", true, null, null, "2023-06-01T00:00:00Z",
                 List.of(),
                 new EmployeeProfileDto("Sara", "Berg", "Backend Dev",
                         null, null, null, null, LocalDate.of(2023, 6, 1), null),
