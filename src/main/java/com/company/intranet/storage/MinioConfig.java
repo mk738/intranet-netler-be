@@ -25,6 +25,7 @@ public class MinioConfig {
                         AwsBasicCredentials.create(props.getAccessKey(), props.getSecretKey())))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)   // required for MinIO
+                        .chunkedEncodingEnabled(false)
                         .build())
                 .build();
     }
@@ -38,6 +39,7 @@ public class MinioConfig {
                         AwsBasicCredentials.create(props.getAccessKey(), props.getSecretKey())))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
+                        .chunkedEncodingEnabled(false)
                         .build())
                 .build();
     }
