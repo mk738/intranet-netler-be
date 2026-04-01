@@ -26,6 +26,7 @@ public class MinioConfig {
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)   // required for MinIO
                         .chunkedEncodingEnabled(false)
+                        .checksumValidationEnabled(false)
                         .build())
                 .build();
     }
@@ -40,6 +41,7 @@ public class MinioConfig {
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .chunkedEncodingEnabled(false)
+                        .checksumValidationEnabled(false)
                         .build())
                 .build();
     }
