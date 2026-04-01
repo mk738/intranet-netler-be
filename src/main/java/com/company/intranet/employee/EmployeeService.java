@@ -3,7 +3,8 @@ package com.company.intranet.employee;
 import com.company.intranet.common.exception.AppException;
 import com.company.intranet.common.exception.ErrorCode;
 import com.company.intranet.common.exception.ResourceNotFoundException;
-import com.company.intranet.config.FirebaseStorageService;
+import com.company.intranet.storage.StorageProperties;
+import com.company.intranet.storage.StorageService;
 import com.company.intranet.crm.AssignmentRepository;
 import com.company.intranet.crm.CrmMapper;
 import com.company.intranet.skill.Skill;
@@ -23,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -55,7 +55,8 @@ public class EmployeeService {
     private final FirebaseAuth               firebaseAuth;
     private final ApplicationEventPublisher  eventPublisher;
     private final EmployeeMapper             employeeMapper;
-    private final FirebaseStorageService     storageService;
+    private final StorageService             storageService;
+    private final StorageProperties          storageProps;
 
     @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
     private String loginUrl;
@@ -320,7 +321,7 @@ public class EmployeeService {
                         HttpStatus.NOT_FOUND));
         EmployeeContract contract = contractRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No contract found"));
-        return new ContractDto(storageService.getSignedUrl(contract.getStoragePath()));
+        return new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getContracts(), contract.getStoragePath()));
     }
 
     @Transactional
@@ -331,12 +332,8 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
-        String path = "contracts/" + employeeId;
-        try {
-            storageService.upload(path, file);
-        } catch (IOException e) {
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload contract", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        String path = employeeId.toString();
+        storageService.upload(storageProps.getBucket().getContracts(), path, file);
         EmployeeContract contract = contractRepository.findByEmployee(employee)
                 .orElseGet(() -> EmployeeContract.builder().employee(employee).build());
         contract.setStoragePath(path);
@@ -354,7 +351,7 @@ public class EmployeeService {
                         HttpStatus.NOT_FOUND));
         EmployeeCv cv = cvRepository.findByEmployee(employee)
                 .orElseThrow(() -> new ResourceNotFoundException("No CV found"));
-        return new ContractDto(storageService.getSignedUrl(cv.getStoragePath()));
+        return new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getCvs(), cv.getStoragePath()));
     }
 
     @Transactional
@@ -365,12 +362,8 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
-        String path = "cvs/" + employeeId;
-        try {
-            storageService.upload(path, file);
-        } catch (IOException e) {
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload CV", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        String path = employeeId.toString();
+        storageService.upload(storageProps.getBucket().getCvs(), path, file);
         EmployeeCv cv = cvRepository.findByEmployee(employee)
                 .orElseGet(() -> EmployeeCv.builder().employee(employee).build());
         cv.setStoragePath(path);
@@ -400,12 +393,8 @@ public class EmployeeService {
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
 
-        String path = "avatars/" + employeeId;
-        try {
-            storageService.upload(path, file);
-        } catch (IOException e) {
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to upload avatar", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        String path = employeeId.toString();
+        storageService.upload(storageProps.getBucket().getAvatars(), path, file);
         EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
                 .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());
         avatar.setContentType(file.getContentType());
@@ -432,8 +421,7 @@ public class EmployeeService {
                         "No avatar found for this employee",
                         HttpStatus.NOT_FOUND));
 
-        byte[] bytes = storageService.download(avatar.getStoragePath());
-        if (bytes == null) throw new AppException(ErrorCode.NOT_FOUND, "Avatar not found in storage", HttpStatus.NOT_FOUND);
+        byte[] bytes = storageService.download(storageProps.getBucket().getAvatars(), avatar.getStoragePath());
         return new AvatarData(bytes, avatar.getContentType());
     }
 

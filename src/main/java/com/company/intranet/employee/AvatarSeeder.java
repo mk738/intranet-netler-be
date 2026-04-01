@@ -1,6 +1,7 @@
 package com.company.intranet.employee;
 
-import com.company.intranet.config.FirebaseStorageService;
+import com.company.intranet.storage.StorageProperties;
+import com.company.intranet.storage.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
@@ -33,7 +34,8 @@ public class AvatarSeeder implements ApplicationRunner {
     private final EmployeeRepository        employeeRepository;
     private final EmployeeAvatarRepository  avatarRepository;
     private final ResourcePatternResolver   resourceResolver;
-    private final FirebaseStorageService    storageService;
+    private final StorageService            storageService;
+    private final StorageProperties         storageProps;
 
     @Override
     @Transactional
@@ -68,9 +70,11 @@ public class AvatarSeeder implements ApplicationRunner {
                 continue;
             }
 
-            // Skip if already uploaded to Firebase
+            // Skip only if the MinIO-style path (plain UUID) is already stored —
+            // old Firebase paths like "avatars/{uuid}" must be re-seeded.
+            String expectedPath = employeeId.toString();
             if (avatarRepository.findByEmployee(employee)
-                    .map(a -> a.getStoragePath() != null)
+                    .map(a -> expectedPath.equals(a.getStoragePath()))
                     .orElse(false)) {
                 log.debug("Avatar seeder: skipping '{}' — already seeded", employeeId);
                 continue;
@@ -78,9 +82,9 @@ public class AvatarSeeder implements ApplicationRunner {
 
             byte[] data        = resource.getInputStream().readAllBytes();
             String contentType = contentTypeFor(filename);
-            String path        = "avatars/" + employeeId;
+            String path        = employeeId.toString();
 
-            storageService.upload(path, data, contentType);
+            storageService.upload(storageProps.getBucket().getAvatars(), path, data, contentType);
 
             EmployeeAvatar avatar = avatarRepository.findByEmployee(employee)
                     .orElseGet(() -> EmployeeAvatar.builder().employee(employee).build());

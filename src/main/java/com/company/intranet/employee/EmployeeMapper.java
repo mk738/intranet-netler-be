@@ -1,6 +1,7 @@
 package com.company.intranet.employee;
 
-import com.company.intranet.config.FirebaseStorageService;
+import com.company.intranet.storage.StorageProperties;
+import com.company.intranet.storage.StorageService;
 import com.company.intranet.crm.dto.AssignmentDto;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.skill.SkillService;
@@ -16,7 +17,8 @@ public class EmployeeMapper {
 
     private final SkillService              skillService;
     private final EmployeeAvatarRepository  avatarRepository;
-    private final FirebaseStorageService    storageService;
+    private final StorageService            storageService;
+    private final StorageProperties         storageProps;
 
     public EmployeeDto toDto(Employee employee) {
         return new EmployeeDto(
@@ -76,7 +78,7 @@ public class EmployeeMapper {
         return avatarRepository.findByEmployee(employee)
                 .map(EmployeeAvatar::getStoragePath)
                 .filter(path -> path != null)
-                .map(storageService::getSignedUrl)
+                .map(path -> storageService.getSignedUrl(storageProps.getBucket().getAvatars(), path))
                 .orElse(null);
     }
 

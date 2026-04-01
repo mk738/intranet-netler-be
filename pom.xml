@@ -22,7 +22,20 @@
     <lombok.version>1.18.32</lombok.version>
     <firebase.version>9.3.0</firebase.version>
     <jasypt.version>3.0.5</jasypt.version>
+    <awssdk.version>2.25.27</awssdk.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${awssdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
 
@@ -50,11 +63,17 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
-    <!-- Firebase Admin SDK -->
+    <!-- Firebase Admin SDK — still required for JWT auth (FirebaseAuth.verifyIdToken) -->
     <dependency>
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-admin</artifactId>
       <version>${firebase.version}</version>
+    </dependency>
+
+    <!-- AWS SDK v2 S3 — used for MinIO-compatible object storage -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
     </dependency>
 
     <!-- Jasypt — field-level encryption for bank info -->
