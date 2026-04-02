@@ -1022,7 +1022,7 @@ VALUES
 INSERT INTO employees (id, firebase_uid, email, role, is_active) VALUES
     ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'SUPERADMIN', TRUE),
     ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'SUPERADMIN', TRUE),
-    ('00000000-0000-0000-0000-000000000013', 'petra-netler-uid',              'petra@netler.com',          'ADMIN', TRUE);
+    ('00000000-0000-0000-0000-000000000013', 'jdMOkk4CJzXWVB0qPvmICLRrink1',  'petra@netler.com',          'ADMIN', TRUE);
 
 INSERT INTO employee_profiles
     (id, employee_id, first_name, last_name, job_title, phone, address, emergency_contact, start_date, birth_date)
