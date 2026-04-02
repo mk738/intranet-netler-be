@@ -13,6 +13,7 @@ public record EmployeeDetailDto(
         String role,
         boolean isActive,
         LocalDate terminationDate,
+        LocalDate employmentEndDate,
         String createdAt,
         List<SkillDto> skills,
         EmployeeProfileDto profile,

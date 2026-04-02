@@ -202,3 +202,32 @@ All responses use a standard envelope:
 | _(none)_ | Local development | No |
 | `test` | Railway test environment | Yes — reloaded on every restart |
 | `prod` | Railway production | No |
+
+
+## mini access
+## MinIO CLI (mc) — Useful Commands
+
+### Setup (one-time only)
+./mc.exe alias set railway-minio <minio-url> <MINIO_ROOT_USER> <MINIO_ROOT_PASSWORD>
+
+### List all buckets
+./mc.exe ls railway-minio
+
+### List files in a specific bucket
+./mc.exe ls railway-minio/avatars
+./mc.exe ls railway-minio/contracts
+./mc.exe ls railway-minio/cvs
+./mc.exe ls railway-minio/news-covers
+./mc.exe ls railway-minio/board-attachments
+
+### Copy a file from a bucket to local
+./mc.exe cp railway-minio/avatars/<filename> ./local-file
+
+### Remove a file from a bucket
+./mc.exe rm railway-minio/avatars/<filename>
+
+### Show bucket disk usage
+./mc.exe du railway-minio
+
+### Watch live events in a bucket (useful for debugging uploads)
+./mc.exe watch railway-minio/avatars

@@ -5,6 +5,7 @@ public enum Permission {
     // ── Employee management ───────────────────────────────────────────────────
     EMPLOYEE_INVITE,
     EMPLOYEE_TERMINATE,
+    EMPLOYEE_DEACTIVATE,
     EMPLOYEE_VIEW_ALL,
     EMPLOYEE_EDIT_ANY,
     EMPLOYEE_CHANGE_ROLE,
