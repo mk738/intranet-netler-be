@@ -93,6 +93,3 @@ logging:
   level:
     com.company.intranet: DEBUG
     org.springframework.security: INFO
-    software.amazon.awssdk.request: DEBUG
-    software.amazon.awssdk.requestId: DEBUG
-    software.amazon.awssdk: DEBUG
