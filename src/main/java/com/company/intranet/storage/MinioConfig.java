@@ -18,28 +18,33 @@ import java.net.URI;
 public class MinioConfig {
 
     @Bean(destroyMethod = "close")
-    public S3Client s3Client(StorageProperties props) {
+    public S3Client s3Client(@Value("${storage.endpoint}") String endpoint,
+                             @Value("${storage.access-key}") String accessKey,
+                             @Value("${storage.secret-key}") String secretKey,
+                             @Value("${storage.region:us-east-1}") String region) {
         return S3Client.builder()
-                .endpointOverride(URI.create(props.getEndpoint()))
-                .region(Region.of(props.getRegion()))
+                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(props.getAccessKey(), props.getSecretKey())))
-
+                        AwsBasicCredentials.create(accessKey, secretKey)))
                 .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(true)   //  MinIO routing
-                        .chunkedEncodingEnabled(false) // MinIO transfer compatibility
-                        .checksumValidationEnabled(false) // Railway proxy strips checksum headers
+                        .pathStyleAccessEnabled(true)   // required for MinIO
+                        .chunkedEncodingEnabled(false)
+                        .checksumValidationEnabled(false)
                         .build())
                 .build();
     }
 
     @Bean(destroyMethod = "close")
-    public S3Presigner s3Presigner(StorageProperties props) {
+    public S3Presigner s3Presigner(@Value("${storage.endpoint}") String endpoint,
+                                   @Value("${storage.access-key}") String accessKey,
+                                   @Value("${storage.secret-key}") String secretKey,
+                                   @Value("${storage.region:us-east-1}") String region) {
         return S3Presigner.builder()
-                .endpointOverride(URI.create(props.getEndpoint()))
-                .region(Region.of(props.getRegion()))
+                .endpointOverride(URI.create(endpoint))
+                .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(props.getAccessKey(), props.getSecretKey())))
+                        AwsBasicCredentials.create(accessKey, secretKey)))
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .chunkedEncodingEnabled(false)

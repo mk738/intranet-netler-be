@@ -63,3 +63,4 @@ logging:
     com.company.intranet: DEBUG
     org.springframework.security: INFO
     org.hibernate.SQL: INFO
+    software.amazon.awssdk.request: DEBUG
