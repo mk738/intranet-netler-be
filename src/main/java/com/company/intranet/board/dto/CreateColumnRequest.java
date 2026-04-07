@@ -6,4 +6,5 @@ public record CreateColumnRequest(
         @NotBlank String title,
         int colorIndex,
         int position
-) {}
+) {
+}

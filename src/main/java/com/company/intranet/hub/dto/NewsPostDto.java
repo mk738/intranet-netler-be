@@ -4,13 +4,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 public record NewsPostDto(
-        UUID    id,
-        String  title,
-        String  authorName,
-        String  authorInitials,
+        UUID id,
+        String title,
+        String authorName,
+        String authorInitials,
         Instant publishedAt,
         boolean pinned,
         boolean hasImage,
         Instant createdAt,
-        String  category
-) {}
+        String category
+) {
+}

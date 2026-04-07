@@ -8,10 +8,11 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record CreateAssignmentRequest(
-        @NotNull UUID      employeeId,
-        UUID               clientId,    // either clientId OR newClient — validated in service
+        @NotNull UUID employeeId,
+        UUID clientId,    // either clientId OR newClient — validated in service
         @Valid NewClientDto newClient,
-        @NotBlank String   projectName,
+        @NotBlank String projectName,
         @NotNull LocalDate startDate,
-        LocalDate          endDate
-) {}
+        LocalDate endDate
+) {
+}

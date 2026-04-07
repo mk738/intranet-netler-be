@@ -363,9 +363,9 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
-        EmployeeContract contract = contractRepository.findByEmployee(employee)
-                .orElseThrow(() -> new ResourceNotFoundException("No contract found"));
-        return new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getContracts(), contract.getStoragePath()));
+        return contractRepository.findByEmployee(employee)
+                .map(c -> new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getContracts(), c.getStoragePath())))
+                .orElse(null);
     }
 
     @Transactional
@@ -393,9 +393,9 @@ public class EmployeeService {
                         ErrorCode.EMPLOYEE_NOT_FOUND,
                         "Employee not found",
                         HttpStatus.NOT_FOUND));
-        EmployeeCv cv = cvRepository.findByEmployee(employee)
-                .orElseThrow(() -> new ResourceNotFoundException("No CV found"));
-        return new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getCvs(), cv.getStoragePath()));
+        return cvRepository.findByEmployee(employee)
+                .map(cv -> new ContractDto(storageService.getSignedUrl(storageProps.getBucket().getCvs(), cv.getStoragePath())))
+                .orElse(null);
     }
 
     @Transactional

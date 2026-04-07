@@ -5,9 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 
 public record NewClientDto(
         @NotBlank String companyName,
-        String           orgNumber,
-        String           contactName,
-        String           contactEmail,
-        String           phone,
+        String orgNumber,
+        String contactName,
+        String contactEmail,
+        String phone,
         Client.ClientStatus status
-) {}
+) {
+}

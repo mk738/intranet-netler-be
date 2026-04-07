@@ -3,7 +3,7 @@ package com.company.intranet.crm.dto;
 import java.util.UUID;
 
 public record ClientDto(
-        UUID   id,
+        UUID id,
         String companyName,
         String contactName,
         String contactEmail,
@@ -11,4 +11,5 @@ public record ClientDto(
         String orgNumber,
         String status,
         String createdAt
-) {}
+) {
+}

@@ -32,6 +32,10 @@ public enum ErrorCode {
     FILE_NOT_FOUND,
     FILE_UPLOAD_FAILED,
 
+    // ── Category ──────────────────────────────────────────────────────────────
+    CATEGORY_NOT_FOUND,
+    CATEGORY_NAME_TAKEN,
+
     // ── Assignment ────────────────────────────────────────────────────────────
     ASSIGNMENT_ALREADY_ACTIVE,
     ASSIGNMENT_DATE_INVALID,
