@@ -44,19 +44,19 @@ public class MailerSendService {
             @Value("${mailersend.templates.vacation-requested:}") String vacationRequestedTemplateId,
             @Value("${mailersend.templates.vacation-reviewed:}") String vacationReviewedTemplateId,
             @Value("${mailersend.templates.event-created:}") String eventCreatedTemplateId) {
-        this.apiToken            = apiToken;
-        this.fromEmail           = fromEmail;
-        this.fromName            = fromName;
-        this.loginBaseUrl        = loginBaseUrl;
-        this.siteBaseUrl         = siteBaseUrl;
-        this.vacationNotifyEmail         = vacationNotifyEmail;
-        this.newsNotifyEmail             = newsNotifyEmail;
-        this.inviteTemplateId            = inviteTemplateId;
-        this.newsTemplateId              = newsTemplateId;
+        this.apiToken = apiToken;
+        this.fromEmail = fromEmail;
+        this.fromName = fromName;
+        this.loginBaseUrl = loginBaseUrl;
+        this.siteBaseUrl = siteBaseUrl;
+        this.vacationNotifyEmail = vacationNotifyEmail;
+        this.newsNotifyEmail = newsNotifyEmail;
+        this.inviteTemplateId = inviteTemplateId;
+        this.newsTemplateId = newsTemplateId;
         this.vacationRequestedTemplateId = vacationRequestedTemplateId;
-        this.vacationReviewedTemplateId  = vacationReviewedTemplateId;
-        this.eventCreatedTemplateId      = eventCreatedTemplateId;
-        this.restClient   = RestClient.builder()
+        this.vacationReviewedTemplateId = vacationReviewedTemplateId;
+        this.eventCreatedTemplateId = eventCreatedTemplateId;
+        this.restClient = RestClient.builder()
                 .baseUrl(MAILERSEND_API_URL)
                 .build();
     }
@@ -64,17 +64,17 @@ public class MailerSendService {
     public void sendInvite(String recipientEmail, String recipientName,
                            String inviteLink, String invitedByName) {
         var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              List.of(Map.of("email", recipientEmail, "name", recipientName)),
-                "subject",         "You've been invited to the intranet",
-                "template_id",     inviteTemplateId,
+                "from", Map.of("email", fromEmail, "name", fromName),
+                "to", List.of(Map.of("email", recipientEmail, "name", recipientName)),
+                "subject", "You've been invited to the intranet",
+                "template_id", inviteTemplateId,
                 "personalization", List.of(Map.of(
                         "email", recipientEmail,
-                        "data",  Map.of(
-                                "year",           String.valueOf(Year.now().getValue()),
-                                "login_url",      inviteLink.isBlank() ? loginBaseUrl : inviteLink,
-                                "invited_by",     invitedByName,
-                                "employee_name",  recipientName,
+                        "data", Map.of(
+                                "year", String.valueOf(Year.now().getValue()),
+                                "login_url", inviteLink.isBlank() ? loginBaseUrl : inviteLink,
+                                "invited_by", invitedByName,
+                                "employee_name", recipientName,
                                 "employee_email", recipientEmail
                         )
                 ))
@@ -95,24 +95,24 @@ public class MailerSendService {
                                   String publishedDate, String excerpt,
                                   List<String> recipientEmails) {
         var personalizationData = Map.of(
-                "year",           String.valueOf(Year.now().getValue()),
-                "post_title",     postTitle,
-                "author_name",    authorName,
+                "year", String.valueOf(Year.now().getValue()),
+                "post_title", postTitle,
+                "author_name", authorName,
                 "published_date", publishedDate,
-                "excerpt",        excerpt,
-                "post_url",       siteBaseUrl + "/news/" + postId,
-                "teaser_text",    excerpt,
-                "category",       ""
+                "excerpt", excerpt,
+                "post_url", siteBaseUrl + "/news/" + postId,
+                "teaser_text", excerpt,
+                "category", ""
         );
 
         var recipients = newsNotifyEmail.isBlank() ? List.<String>of() : List.of(newsNotifyEmail);
 
         for (String recipient : recipients) {
             var payload = Map.of(
-                    "from",            Map.of("email", fromEmail, "name", fromName),
-                    "to",              List.of(Map.of("email", recipient)),
-                    "subject",         postTitle,
-                    "template_id",     newsTemplateId,
+                    "from", Map.of("email", fromEmail, "name", fromName),
+                    "to", List.of(Map.of("email", recipient)),
+                    "subject", postTitle,
+                    "template_id", newsTemplateId,
                     "personalization", List.of(Map.of("email", recipient, "data", personalizationData))
             );
 
@@ -137,21 +137,21 @@ public class MailerSendService {
             return;
         }
         var personalizationData = Map.of(
-                "year",               String.valueOf(Year.now().getValue()),
-                "employee_name",      employeeName,
+                "year", String.valueOf(Year.now().getValue()),
+                "employee_name", employeeName,
                 "employee_job_title", jobTitle,
-                "start_date",         startDate,
-                "end_date",           endDate,
-                "days_count",         String.valueOf(daysCount),
-                "submitted_at",       submittedAt,
-                "portal_url",         siteBaseUrl + "/vacation"
+                "start_date", startDate,
+                "end_date", endDate,
+                "days_count", String.valueOf(daysCount),
+                "submitted_at", submittedAt,
+                "portal_url", siteBaseUrl + "/vacation"
         );
 
         var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              List.of(Map.of("email", vacationNotifyEmail)),
-                "subject",         employeeName + " has submitted a vacation request",
-                "template_id",     vacationRequestedTemplateId,
+                "from", Map.of("email", fromEmail, "name", fromName),
+                "to", List.of(Map.of("email", vacationNotifyEmail)),
+                "subject", employeeName + " has submitted a vacation request",
+                "template_id", vacationRequestedTemplateId,
                 "personalization", List.of(Map.of("email", vacationNotifyEmail, "data", personalizationData))
         );
 
@@ -175,18 +175,18 @@ public class MailerSendService {
         }
 
         var personalizationData = Map.of(
-                "year",          String.valueOf(Year.now().getValue()),
+                "year", String.valueOf(Year.now().getValue()),
                 "employee_name", employeeName,
-                "date_range",    dateRange,
-                "status",        status,
-                "portal_url",    siteBaseUrl + "/vacation"
+                "date_range", dateRange,
+                "status", status,
+                "portal_url", siteBaseUrl + "/vacation"
         );
 
         var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              List.of(Map.of("email", employeeEmail)),
-                "subject",         "Your vacation request has been " + status,
-                "template_id",     vacationReviewedTemplateId,
+                "from", Map.of("email", fromEmail, "name", fromName),
+                "to", List.of(Map.of("email", employeeEmail)),
+                "subject", "Your vacation request has been " + status,
+                "template_id", vacationReviewedTemplateId,
                 "personalization", List.of(Map.of("email", employeeEmail, "data", personalizationData))
         );
 
@@ -210,11 +210,11 @@ public class MailerSendService {
         if (recipientEmails == null || recipientEmails.isEmpty()) return;
 
         var personalizationData = Map.of(
-                "year",        String.valueOf(Year.now().getValue()),
+                "year", String.valueOf(Year.now().getValue()),
                 "event_title", eventTitle,
-                "event_date",  eventDate,
-                "location",    location != null ? location : "",
-                "portal_url",  siteBaseUrl + "/events"
+                "event_date", eventDate,
+                "location", location != null ? location : "",
+                "portal_url", siteBaseUrl + "/events"
         );
 
         var to = recipientEmails.stream()
@@ -226,10 +226,10 @@ public class MailerSendService {
                 .toList();
 
         var payload = Map.of(
-                "from",            Map.of("email", fromEmail, "name", fromName),
-                "to",              to,
-                "subject",         "New event: " + eventTitle,
-                "template_id",     eventCreatedTemplateId,
+                "from", Map.of("email", fromEmail, "name", fromName),
+                "to", to,
+                "subject", "New event: " + eventTitle,
+                "template_id", eventCreatedTemplateId,
                 "personalization", personalizations
         );
 

@@ -5,4 +5,5 @@ public record VacationReviewedEvent(
         String employeeName,
         String dateRange,
         String status   // "approved" or "rejected"
-) {}
+) {
+}

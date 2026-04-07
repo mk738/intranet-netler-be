@@ -33,4 +33,7 @@ public enum Permission {
 
     // ── Skill catalogue ───────────────────────────────────────────────────────
     SKILL_CATALOG_MANAGE,
+
+    // ── Categories ────────────────────────────────────────────────────────────
+    CATEGORY_MANAGE,
 }

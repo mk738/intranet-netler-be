@@ -190,32 +190,32 @@ public class HubService {
     // ── Events ────────────────────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
-    public List<EventDto> getUpcomingEvents(Employee me) {
+    public List<EventDto> getUpcomingEvents(Employee employee) {
         List<Event> events = eventRepository.findByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate.now());
-        return hubMapper.toEventDtos(events, buildRsvpMap(events, me));
+        return hubMapper.toEventDtos(events, buildRsvpMap(events, employee));
     }
 
     @Transactional(readOnly = true)
-    public List<EventDto> getAttendingEvents(Employee me) {
-        List<Event> events = eventRepository.findAttendingEvents(me.getId(), LocalDate.now());
-        return hubMapper.toEventDtos(events, buildRsvpMap(events, me));
+    public List<EventDto> getAttendingEvents(Employee employee) {
+        List<Event> events = eventRepository.findAttendingEvents(employee.getId(), LocalDate.now());
+        return hubMapper.toEventDtos(events, buildRsvpMap(events, employee));
     }
 
     @Transactional(readOnly = true)
-    public EventDto getEventById(UUID id, Employee me) {
+    public EventDto getEventById(UUID id, Employee employee) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
         String myRsvpStatus = eventRsvpRepository
-                .findByEventAndEmployee(id, me.getId())
+                .findByEventAndEmployee(id, employee.getId())
                 .map(r -> r.getStatus().name())
                 .orElse(null);
         return hubMapper.toEventDto(event, myRsvpStatus);
     }
 
-    private Map<UUID, String> buildRsvpMap(List<Event> events, Employee me) {
+    private Map<UUID, String> buildRsvpMap(List<Event> events, Employee employee) {
         if (events.isEmpty()) return Map.of();
         List<UUID> eventIds = events.stream().map(Event::getId).toList();
-        return eventRsvpRepository.findByEmployeeAndEventIds(me.getId(), eventIds)
+        return eventRsvpRepository.findByEmployeeAndEventIds(employee.getId(), eventIds)
                 .stream()
                 .collect(Collectors.toMap(r -> r.getEvent().getId(), r -> r.getStatus().name()));
     }

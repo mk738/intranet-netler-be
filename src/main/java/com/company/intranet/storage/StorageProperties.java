@@ -3,8 +3,8 @@ package com.company.intranet.storage;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "storage")
 @Data
+@ConfigurationProperties(prefix = "storage")
 public class StorageProperties {
 
     private String endpoint;

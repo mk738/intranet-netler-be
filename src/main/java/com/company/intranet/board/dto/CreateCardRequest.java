@@ -7,5 +7,6 @@ public record CreateCardRequest(
         String text,
         String category,
         String assignedTo,
-        int    position
-) {}
+        int position
+) {
+}

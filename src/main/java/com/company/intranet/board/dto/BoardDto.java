@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.UUID;
 
 public record BoardDto(
-        UUID               id,
-        String             name,
-        String             createdBy,
-        String             createdAt,
+        UUID id,
+        String name,
+        String createdBy,
+        String createdAt,
         List<BoardColumnDto> columns
-) {}
+) {
+}

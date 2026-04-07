@@ -8,4 +8,5 @@ public record UpdateNewsRequest(
         boolean pinned,
         String coverImageData,
         String coverImageType
-) {}
+) {
+}
