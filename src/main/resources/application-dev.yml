@@ -1,0 +1,66 @@
+# Spring profile: dev
+# Used in Railway dev environment
+# Schema is dropped and recreated on every startup (ddl-auto=create)
+# dev-data.sql seeds fresh test data after schema creation
+# All secrets injected via Railway environment variables
+# Activate with: SPRING_PROFILES_ACTIVE=dev
+
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  flyway:
+    enabled: false
+
+  jpa:
+    # Hibernate must run first so tables exist before the seed SQL runs
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  sql:
+    init:
+      # Always run dev-data.sql after schema is created — wipes and reseeds on every deploy
+      mode: always
+      data-locations: classpath:db/seed/dev-data.sql
+
+mailersend:
+  login-url: ${MAILERSEND_LOGIN_URL}
+  site-url: ${MAILERSEND_SITE_URL}
+
+cors:
+  allowed-origins: ${CORS_ORIGINS}
+
+storage:
+  endpoint: ${MINIO_ENDPOINT}
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  region: us-east-1
+  bucket:
+    avatars: avatars
+    contracts: contracts
+    cvs: cvs
+    news-covers: news-covers
+    board-attachments: board-attachments
+  signed-url-expiry-minutes: 60
+
+logging:
+  level:
+    com.company.intranet: DEBUG
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
