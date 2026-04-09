@@ -29,14 +29,23 @@ public class OnboardingController {
         return ResponseEntity.ok(ApiResponse.success(onboardingService.getChecklist(employeeId)));
     }
 
-    @PatchMapping("/{itemId}/toggle")
+    @PatchMapping("/complete")
+    @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
+    public ResponseEntity<ApiResponse<Boolean>> completeOnboarding(
+            @PathVariable UUID employeeId,
+            @CurrentUser Employee admin) {
+        log.info("PATCH /api/employees/{}/onboarding/complete adminId={}", employeeId, admin.getId());
+        return ResponseEntity.ok(ApiResponse.success(onboardingService.completeOnboarding(employeeId, admin)));
+    }
+
+    @PatchMapping("/{task}/toggle")
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
     public ResponseEntity<ApiResponse<OnboardingItemDto>> toggleItem(
             @PathVariable UUID employeeId,
-            @PathVariable UUID itemId,
+            @PathVariable String task,
             @CurrentUser Employee admin) {
-        log.info("PATCH /api/employees/{}/onboarding/{}/toggle adminId={}", employeeId, itemId, admin.getId());
-        OnboardingItemDto result = onboardingService.toggleItem(itemId, admin);
+        log.info("PATCH /api/employees/{}/onboarding/{}/toggle adminId={}", employeeId, task, admin.getId());
+        OnboardingItemDto result = onboardingService.toggleItem(employeeId, task, admin);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

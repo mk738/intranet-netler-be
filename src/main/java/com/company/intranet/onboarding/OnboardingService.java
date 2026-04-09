@@ -63,8 +63,9 @@ public class OnboardingService {
     }
 
     @Transactional
-    public OnboardingItemDto toggleItem(UUID itemId, Employee admin) {
-        OnboardingItem item = onboardingItemRepository.findById(itemId)
+    public OnboardingItemDto toggleItem(UUID employeeId, String taskName, Employee admin) {
+        OnboardingTask task = OnboardingTask.valueOf(taskName);
+        OnboardingItem item = onboardingItemRepository.findByEmployeeIdAndTask(employeeId, task)
                 .orElseThrow(() -> new ResourceNotFoundException("Onboarding item not found"));
 
         if (item.isCompleted()) {
@@ -81,11 +82,19 @@ public class OnboardingService {
         return toDto(saved, Map.of(admin.getId(), admin.getFullName()));
     }
 
-    @Transactional(readOnly = true)
-    public boolean isOnboardingComplete(UUID employeeId) {
+    @Transactional
+    public boolean completeOnboarding(UUID employeeId, Employee admin) {
         List<OnboardingItem> items = onboardingItemRepository.findByEmployeeId(employeeId);
-        if (items.size() < OnboardingTask.values().length) return false;
-        return items.stream().allMatch(OnboardingItem::isCompleted);
+        Instant now = Instant.now();
+        items.stream()
+                .filter(item -> !item.isCompleted())
+                .forEach(item -> {
+                    item.setCompleted(true);
+                    item.setCompletedAt(now);
+                    item.setCompletedBy(admin.getId());
+                });
+        onboardingItemRepository.saveAll(items);
+        return true;
     }
 
     // ── Mapper ────────────────────────────────────────────────────────────────
