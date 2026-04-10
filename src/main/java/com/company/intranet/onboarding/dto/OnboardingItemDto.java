@@ -5,7 +5,9 @@ import java.util.UUID;
 
 public record OnboardingItemDto(
         UUID id,
-        String task,
+        String taskKey,
+        String labelSv,
+        int sortOrder,
         boolean completed,
         Instant completedAt,
         String completedByName

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,21 +19,24 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OnboardingService {
 
-    private final OnboardingItemRepository onboardingItemRepository;
-    private final EmployeeRepository       employeeRepository;
+    private final OnboardingItemRepository         onboardingItemRepository;
+    private final OnboardingTemplateItemRepository templateItemRepository;
+    private final EmployeeRepository               employeeRepository;
 
     @Transactional
     public void initializeForEmployee(UUID employeeId) {
-        List<OnboardingItem> existing = onboardingItemRepository.findByEmployeeId(employeeId);
-        Set<OnboardingTask> existingTasks = existing.stream()
-                .map(OnboardingItem::getTask)
+        List<OnboardingItem> existing = onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId);
+        Set<String> existingKeys = existing.stream()
+                .map(OnboardingItem::getTaskKey)
                 .collect(Collectors.toSet());
 
-        List<OnboardingItem> toCreate = Arrays.stream(OnboardingTask.values())
-                .filter(task -> !existingTasks.contains(task))
-                .map(task -> OnboardingItem.builder()
+        List<OnboardingItem> toCreate = templateItemRepository.findByActiveTrueOrderBySortOrder().stream()
+                .filter(template -> !existingKeys.contains(template.getTaskKey()))
+                .map(template -> OnboardingItem.builder()
                         .employeeId(employeeId)
-                        .task(task)
+                        .taskKey(template.getTaskKey())
+                        .labelSv(template.getLabelSv())
+                        .sortOrder(template.getSortOrder())
                         .completed(false)
                         .build())
                 .toList();
@@ -44,10 +46,10 @@ public class OnboardingService {
 
     @Transactional
     public List<OnboardingItemDto> getChecklist(UUID employeeId) {
-        if (onboardingItemRepository.findByEmployeeId(employeeId).isEmpty()) {
+        if (onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId).isEmpty()) {
             initializeForEmployee(employeeId);
         }
-        List<OnboardingItem> items = onboardingItemRepository.findByEmployeeId(employeeId);
+        List<OnboardingItem> items = onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId);
 
         Set<UUID> adminIds = items.stream()
                 .map(OnboardingItem::getCompletedBy)
@@ -63,9 +65,8 @@ public class OnboardingService {
     }
 
     @Transactional
-    public OnboardingItemDto toggleItem(UUID employeeId, String taskName, Employee admin) {
-        OnboardingTask task = OnboardingTask.valueOf(taskName);
-        OnboardingItem item = onboardingItemRepository.findByEmployeeIdAndTask(employeeId, task)
+    public OnboardingItemDto toggleItem(UUID employeeId, UUID itemId, Employee admin) {
+        OnboardingItem item = onboardingItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Onboarding item not found"));
 
         if (item.isCompleted()) {
@@ -84,7 +85,7 @@ public class OnboardingService {
 
     @Transactional
     public boolean completeOnboarding(UUID employeeId, Employee admin) {
-        List<OnboardingItem> items = onboardingItemRepository.findByEmployeeId(employeeId);
+        List<OnboardingItem> items = onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId);
         Instant now = Instant.now();
         items.stream()
                 .filter(item -> !item.isCompleted())
@@ -105,7 +106,9 @@ public class OnboardingService {
                 : null;
         return new OnboardingItemDto(
                 item.getId(),
-                item.getTask().name(),
+                item.getTaskKey(),
+                item.getLabelSv(),
+                item.getSortOrder(),
                 item.isCompleted(),
                 item.getCompletedAt(),
                 completedByName

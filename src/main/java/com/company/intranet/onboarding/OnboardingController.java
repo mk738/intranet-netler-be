@@ -38,14 +38,14 @@ public class OnboardingController {
         return ResponseEntity.ok(ApiResponse.success(onboardingService.completeOnboarding(employeeId, admin)));
     }
 
-    @PatchMapping("/{task}/toggle")
+    @PatchMapping("/{itemId}/toggle")
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
     public ResponseEntity<ApiResponse<OnboardingItemDto>> toggleItem(
             @PathVariable UUID employeeId,
-            @PathVariable String task,
+            @PathVariable UUID itemId,
             @CurrentUser Employee admin) {
-        log.info("PATCH /api/employees/{}/onboarding/{}/toggle adminId={}", employeeId, task, admin.getId());
-        OnboardingItemDto result = onboardingService.toggleItem(employeeId, task, admin);
+        log.info("PATCH /api/employees/{}/onboarding/{}/toggle adminId={}", employeeId, itemId, admin.getId());
+        OnboardingItemDto result = onboardingService.toggleItem(employeeId, itemId, admin);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
