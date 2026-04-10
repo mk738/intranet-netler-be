@@ -3,6 +3,7 @@ package com.company.intranet.onboarding;
 import com.company.intranet.common.exception.ResourceNotFoundException;
 import com.company.intranet.employee.Employee;
 import com.company.intranet.employee.EmployeeRepository;
+import com.company.intranet.onboarding.dto.OnboardingChecklistDto;
 import com.company.intranet.onboarding.dto.OnboardingItemDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +47,7 @@ public class OnboardingService {
     }
 
     @Transactional
-    public List<OnboardingItemDto> getChecklist(UUID employeeId) {
+    public OnboardingChecklistDto getChecklist(UUID employeeId) {
         if (onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId).isEmpty()) {
             initializeForEmployee(employeeId);
         }
@@ -59,13 +61,16 @@ public class OnboardingService {
         Map<UUID, String> adminNames = employeeRepository.findAllById(adminIds).stream()
                 .collect(Collectors.toMap(Employee::getId, Employee::getFullName));
 
-        return items.stream()
+        List<OnboardingItemDto> dtos = items.stream()
                 .map(item -> toDto(item, adminNames))
                 .toList();
+
+        boolean complete = !items.isEmpty() && items.stream().allMatch(OnboardingItem::isCompleted);
+        return new OnboardingChecklistDto(complete, dtos);
     }
 
     @Transactional
-    public OnboardingItemDto toggleItem(UUID employeeId, UUID itemId, Employee admin) {
+    public OnboardingChecklistDto toggleItem(UUID employeeId, UUID itemId, Employee admin) {
         OnboardingItem item = onboardingItemRepository.findById(itemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Onboarding item not found"));
 
@@ -78,13 +83,13 @@ public class OnboardingService {
             item.setCompletedAt(Instant.now());
             item.setCompletedBy(admin.getId());
         }
+        onboardingItemRepository.save(item);
 
-        OnboardingItem saved = onboardingItemRepository.save(item);
-        return toDto(saved, Map.of(admin.getId(), admin.getFullName()));
+        return getChecklist(employeeId);
     }
 
     @Transactional
-    public boolean completeOnboarding(UUID employeeId, Employee admin) {
+    public OnboardingChecklistDto completeOnboarding(UUID employeeId, Employee admin) {
         List<OnboardingItem> items = onboardingItemRepository.findByEmployeeIdOrderBySortOrderAsc(employeeId);
         Instant now = Instant.now();
         items.stream()
@@ -95,7 +100,11 @@ public class OnboardingService {
                     item.setCompletedBy(admin.getId());
                 });
         onboardingItemRepository.saveAll(items);
-        return true;
+
+        List<OnboardingItemDto> dtos = items.stream()
+                .map(item -> toDto(item, Map.of(admin.getId(), admin.getFullName())))
+                .toList();
+        return new OnboardingChecklistDto(true, dtos);
     }
 
     // ── Mapper ────────────────────────────────────────────────────────────────

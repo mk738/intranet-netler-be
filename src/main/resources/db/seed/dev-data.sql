@@ -18,12 +18,6 @@
 -- or you can grab it from the backend log when you first attempt to log in.
 -- =============================================================================
 
-
--- ── Pre-delete recently added employees (FK-safe, idempotent) ───────────────
-DELETE FROM onboarding_items  WHERE employee_id IN ('00000000-0000-0000-0000-000000000010','00000000-0000-0000-0000-000000000011');
-DELETE FROM employee_profiles WHERE employee_id IN ('00000000-0000-0000-0000-000000000010','00000000-0000-0000-0000-000000000011');
-DELETE FROM employees         WHERE id           IN ('00000000-0000-0000-0000-000000000010','00000000-0000-0000-0000-000000000011');
-
 -- ── Delete in FK-safe order (no TRUNCATE CASCADE to avoid surprises) ─────────
 DELETE FROM employee_skills;
 DELETE FROM skills;

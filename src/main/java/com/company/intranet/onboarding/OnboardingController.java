@@ -2,7 +2,7 @@ package com.company.intranet.onboarding;
 
 import com.company.intranet.common.response.ApiResponse;
 import com.company.intranet.employee.Employee;
-import com.company.intranet.onboarding.dto.OnboardingItemDto;
+import com.company.intranet.onboarding.dto.OnboardingChecklistDto;
 import com.company.intranet.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +22,7 @@ public class OnboardingController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
-    public ResponseEntity<ApiResponse<List<OnboardingItemDto>>> getChecklist(
+    public ResponseEntity<ApiResponse<OnboardingChecklistDto>> getChecklist(
             @PathVariable UUID employeeId) {
         log.info("GET /api/employees/{}/onboarding", employeeId);
         return ResponseEntity.ok(ApiResponse.success(onboardingService.getChecklist(employeeId)));
@@ -31,7 +30,7 @@ public class OnboardingController {
 
     @PatchMapping("/complete")
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
-    public ResponseEntity<ApiResponse<Boolean>> completeOnboarding(
+    public ResponseEntity<ApiResponse<OnboardingChecklistDto>> completeOnboarding(
             @PathVariable UUID employeeId,
             @CurrentUser Employee admin) {
         log.info("PATCH /api/employees/{}/onboarding/complete adminId={}", employeeId, admin.getId());
@@ -40,12 +39,11 @@ public class OnboardingController {
 
     @PatchMapping("/{itemId}/toggle")
     @PreAuthorize("hasAuthority('EMPLOYEE_VIEW_ALL')")
-    public ResponseEntity<ApiResponse<OnboardingItemDto>> toggleItem(
+    public ResponseEntity<ApiResponse<OnboardingChecklistDto>> toggleItem(
             @PathVariable UUID employeeId,
             @PathVariable UUID itemId,
             @CurrentUser Employee admin) {
         log.info("PATCH /api/employees/{}/onboarding/{}/toggle adminId={}", employeeId, itemId, admin.getId());
-        OnboardingItemDto result = onboardingService.toggleItem(employeeId, itemId, admin);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        return ResponseEntity.ok(ApiResponse.success(onboardingService.toggleItem(employeeId, itemId, admin)));
     }
 }
