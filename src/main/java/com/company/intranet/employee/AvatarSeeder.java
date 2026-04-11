@@ -25,7 +25,7 @@ import java.util.UUID;
  * Silently skips files if the employee is not found in the database.
  */
 @Component
-@Profile({"default", "test"})
+@Profile({"default", "dev", "test"})
 @Order(200)
 @RequiredArgsConstructor
 @Slf4j

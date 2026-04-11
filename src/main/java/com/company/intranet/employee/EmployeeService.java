@@ -11,6 +11,7 @@ import com.company.intranet.skill.Skill;
 import com.company.intranet.skill.SkillService;
 import com.company.intranet.employee.dto.*;
 import com.company.intranet.notification.events.EmployeeInvitedEvent;
+import com.company.intranet.onboarding.OnboardingService;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
@@ -60,6 +61,7 @@ public class EmployeeService {
     private final EmployeeMapper             employeeMapper;
     private final StorageService             storageService;
     private final StorageProperties          storageProps;
+    private final OnboardingService          onboardingService;
 
     @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
     private String loginUrl;
@@ -157,6 +159,8 @@ public class EmployeeService {
                     userRecord.getUid(), e);
             throw e;
         }
+
+        onboardingService.initializeForEmployee(savedEmployee.getId());
 
         String inviteLink = "";
         try {

@@ -36,4 +36,7 @@ public enum Permission {
 
     // ── Categories ────────────────────────────────────────────────────────────
     CATEGORY_MANAGE,
+
+    // ── Onboarding template ───────────────────────────────────────────────────
+    ONBOARDING_MANAGE,
 }

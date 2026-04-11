@@ -36,6 +36,11 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND,
     CATEGORY_NAME_TAKEN,
 
+    // ── Onboarding template ───────────────────────────────────────────────────
+    ONBOARDING_TEMPLATE_NOT_FOUND,
+    ONBOARDING_TEMPLATE_KEY_TAKEN,
+    ONBOARDING_TEMPLATE_IN_USE,
+
     // ── Assignment ────────────────────────────────────────────────────────────
     ASSIGNMENT_ALREADY_ACTIVE,
     ASSIGNMENT_DATE_INVALID,

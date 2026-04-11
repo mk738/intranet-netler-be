@@ -18,7 +18,6 @@
 -- or you can grab it from the backend log when you first attempt to log in.
 -- =============================================================================
 
-
 -- ── Delete in FK-safe order (no TRUNCATE CASCADE to avoid surprises) ─────────
 DELETE FROM employee_skills;
 DELETE FROM skills;
@@ -40,6 +39,7 @@ DELETE FROM card_attachments;
 DELETE FROM board_cards;
 DELETE FROM board_columns;
 DELETE FROM boards;
+DELETE FROM onboarding_items;
 DELETE FROM employee_profiles;
 DELETE FROM clients;
 DELETE FROM employees;
@@ -62,7 +62,14 @@ VALUES
     ('00000000-0000-0000-0000-000000000006', 'mikael-netler-uid',             'mikael.svensson@netler.com',  'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000007', 'anna-netler-uid',               'anna.johansson@netler.com',   'EMPLOYEE', TRUE),
     ('00000000-0000-0000-0000-000000000008', 'test-employee-uid-placeholder', 'test.employee@netler.com',    'EMPLOYEE', TRUE),
-    ('00000000-0000-0000-0000-000000000009', 'sq3ezUDBzSZ6RV16FJG68OOuC7t2',  'norling.fre@gmail.com',        'EMPLOYEE', TRUE);
+    ('00000000-0000-0000-0000-000000000009', 'sq3ezUDBzSZ6RV16FJG68OOuC7t2',  'norling.fre@gmail.com',        'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000014', 'klara-lindstrom-uid-pending',   'klara.lindstrom@netler.com',   'EMPLOYEE', TRUE),
+    ('00000000-0000-0000-0000-000000000015', 'oscar-hansson-uid-pending',     'oscar.hansson@netler.com',     'EMPLOYEE', TRUE)
+ON CONFLICT (id) DO UPDATE SET
+    firebase_uid = EXCLUDED.firebase_uid,
+    email        = EXCLUDED.email,
+    role         = EXCLUDED.role,
+    is_active    = EXCLUDED.is_active;
 
 
 -- =============================================================================
@@ -158,7 +165,36 @@ VALUES
      '+46 73 456 78 90',
      'Pilgatan 9, 413 13 Göteborg',
      'Lisa Norling – +46 70 234 56 78',
-     '2025-01-15', '1995-08-22');
+     '2025-01-15', '1995-08-22'),
+
+    -- Klara Lindström (recently started, no Firebase login yet)
+    ('00000000-0000-0000-0002-000000000014',
+     '00000000-0000-0000-0000-000000000014',
+     'Klara', 'Lindström',
+     'Frontend Developer',
+     '+46 70 111 22 33',
+     'Linnégatan 14, 413 04 Göteborg',
+     'Mats Lindström – +46 73 111 22 33',
+     '2026-03-24', '1997-06-15'),
+
+    -- Oscar Hansson (recently started, no Firebase login yet)
+    ('00000000-0000-0000-0002-000000000015',
+     '00000000-0000-0000-0000-000000000015',
+     'Oscar', 'Hansson',
+     'Backend Developer',
+     '+46 70 444 55 66',
+     'Dalavägen 8, 753 10 Uppsala',
+     'Karin Hansson – +46 73 444 55 66',
+     '2026-04-01', '1999-02-20')
+ON CONFLICT (id) DO UPDATE SET
+    first_name         = EXCLUDED.first_name,
+    last_name          = EXCLUDED.last_name,
+    job_title          = EXCLUDED.job_title,
+    phone              = EXCLUDED.phone,
+    address            = EXCLUDED.address,
+    emergency_contact  = EXCLUDED.emergency_contact,
+    start_date         = EXCLUDED.start_date,
+    birth_date         = EXCLUDED.birth_date;
 
 
 -- =============================================================================
@@ -1519,3 +1555,192 @@ VALUES
     ('00000000-0000-0000-0013-000000000007', '00000000-0000-0000-0009-000000000027',
      'GitHub-inbjudan skickad. Firebase-länk fungerar. Slack-konto aktivt.', 'Philip Schill',
      'philip.schill@netler.com', 'philip.schill@netler.com', NOW(), NOW());
+
+
+-- =============================================================================
+-- ONBOARDING TEMPLATE
+-- =============================================================================
+
+INSERT INTO onboarding_template_items
+    (id, task_key, label_sv, sort_order, active, created_at, updated_at)
+VALUES
+    (gen_random_uuid(), 'CREATE_CV',             'Skapa CV',                                    1,  true, now(), now()),
+    (gen_random_uuid(), 'NETLER_MAIL',           'Netler-mail via Google Admin',                2,  true, now(), now()),
+    (gen_random_uuid(), 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                  3,  true, now(), now()),
+    (gen_random_uuid(), 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',             4,  true, now(), now()),
+    (gen_random_uuid(), 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',       5,  true, now(), now()),
+    (gen_random_uuid(), 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',          6,  true, now(), now()),
+    (gen_random_uuid(), 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',             7,  true, now(), now()),
+    (gen_random_uuid(), 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                 8,  true, now(), now()),
+    (gen_random_uuid(), 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',        9,  true, now(), now()),
+    (gen_random_uuid(), 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                         10, true, now(), now()),
+    (gen_random_uuid(), 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                     11, true, now(), now()),
+    (gen_random_uuid(), 'SETUP_PENSION',         'Lägg upp pension',                            12, true, now(), now())
+ON CONFLICT (task_key) DO NOTHING;
+
+
+-- =============================================================================
+-- ONBOARDING ITEMS
+-- =============================================================================
+-- Employees 001–009: all 12 tasks complete (completed by Marcus Karlsson)
+-- Employee 010 Klara (started 2026-03-24): tasks 1–6 complete, 7–12 pending
+-- Employee 011 Oscar (started 2026-04-01): tasks 1–3 complete, 4–12 pending
+
+INSERT INTO onboarding_items
+    (id, employee_id, task_key, label_sv, sort_order, completed, completed_at, completed_by,
+     created_at, updated_at, created_by, updated_by)
+VALUES
+
+    -- ── 001 Marcus Karlsson (start 2021-01-15, all complete) ─────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2021-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-15 09:00:00+00', '2021-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000001', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2021-01-18 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2021-01-18 09:00:00+00', '2021-01-18 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 002 Erik Lindqvist (start 2022-08-01, all complete) ──────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2022-08-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-01 09:00:00+00', '2022-08-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000002', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2022-08-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-08-02 09:00:00+00', '2022-08-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 003 Sara Berg (start 2023-03-15, all complete) ───────────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2023-03-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-15 09:00:00+00', '2023-03-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000003', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2023-03-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-03-16 09:00:00+00', '2023-03-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 004 Johan Petersson (start 2023-06-01, all complete) ─────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2023-06-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-01 09:00:00+00', '2023-06-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2023-06-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-06-02 09:00:00+00', '2023-06-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 005 Lina Eriksson (start 2022-11-01, all complete) ───────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2022-11-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-01 09:00:00+00', '2022-11-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000005', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2022-11-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2022-11-02 09:00:00+00', '2022-11-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 006 Mikael Svensson (start 2024-01-10, all complete) ─────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2024-01-10 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-10 09:00:00+00', '2024-01-10 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000006', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2024-01-11 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2024-01-11 09:00:00+00', '2024-01-11 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 007 Anna Johansson (start 2023-09-01, all complete) ──────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2023-09-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-01 09:00:00+00', '2023-09-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000007', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2023-09-04 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2023-09-04 09:00:00+00', '2023-09-04 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 008 Test Employee (start 2026-01-01, all complete) ───────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2026-01-02 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 09:00:00+00', '2026-01-02 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000008', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2026-01-02 14:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-01-02 14:00:00+00', '2026-01-02 14:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 009 Fredrik Norling (start 2025-01-15, all complete) ─────────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'CREATE_CV',             'Skapa CV',                                   1,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true, '2025-01-15 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-15 09:00:00+00', '2025-01-15 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000009', 'SETUP_PENSION',         'Lägg upp pension',                           12, true, '2025-01-16 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2025-01-16 09:00:00+00', '2025-01-16 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 010 Klara Lindström (start 2026-03-24, tasks 1–6 complete) ───────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'CREATE_CV',             'Skapa CV',                                   1,  true,  '2026-03-24 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true,  '2026-03-24 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true,  '2026-03-24 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  true,  '2026-03-24 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  true,  '2026-03-25 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-25 09:00:00+00', '2026-03-25 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  true,  '2026-03-25 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-03-25 09:00:00+00', '2026-03-25 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000014', 'SETUP_PENSION',         'Lägg upp pension',                           12, false, NULL,                     NULL,                                    '2026-03-24 09:00:00+00', '2026-03-24 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+
+    -- ── 011 Oscar Hansson (start 2026-04-01, tasks 1–3 complete) ─────────────
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'CREATE_CV',             'Skapa CV',                                   1,  true,  '2026-04-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'NETLER_MAIL',           'Netler-mail via Google Admin',               2,  true,  '2026-04-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'BIRTHDAY_IN_SLACK',     'Lägg in födelsedag i Slack',                 3,  true,  '2026-04-01 09:00:00+00', '00000000-0000-0000-0000-000000000001', '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'SLACK_INVITATION',      'Slack-inbjudan till Netler-mail',            4,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'FORTNOX_ADD_USER',      'Fortnox: Lägg till i kvitton & utlägg',      5,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'FORTNOX_RECEIPT_GROUP', 'Fortnox: Lägg till i kvittogruppen',         6,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'SLACK_WELCOME_MESSAGE', 'Skriv välkommen i Slack-kanalen',            7,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'SLACK_PROFILE_PHOTO',   'Be om profilbild till Slack',                8,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'SEND_WELCOME_LETTER',   'Skicka välkomstbrev till Netler-mail',       9,  false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'REQUEST_BANK_DETAILS',  'Be om bankuppgifter',                        10, false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'NOTIFY_PAYROLL',        'Meddela löneavdelningen',                    11, false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com'),
+    (gen_random_uuid(), '00000000-0000-0000-0000-000000000015', 'SETUP_PENSION',         'Lägg upp pension',                           12, false, NULL,                     NULL,                                    '2026-04-01 09:00:00+00', '2026-04-01 09:00:00+00', 'marcus.karlsson@netler.com', 'marcus.karlsson@netler.com');
