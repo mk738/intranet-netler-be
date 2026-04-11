@@ -34,9 +34,8 @@ spring:
 
   sql:
     init:
-      # Run on every startup — the script DELETEs then re-INSERTs, so it is idempotent
       mode: always
-      data-locations: classpath:db/seed/dev-data.sql
+      data-locations: classpath:db/seed/test-data.sql
 
 mailersend:
   login-url: ${MAILERSEND_LOGIN_URL}
