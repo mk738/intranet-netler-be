@@ -47,20 +47,20 @@ ON CONFLICT (task_key) DO NOTHING;
 INSERT INTO employees (id, firebase_uid, email, role, is_active)
 VALUES
     ('00000000-0000-0000-0000-000000000001', 'UqhXiWJBfZYSlGZyj34PPaj8jJY2', 'marcus.karlsson@netler.com', 'SUPERADMIN', TRUE),
-    ('aa000000-0000-0000-0000-000000000002', NULL,                             'erik.lindqvist@netler.com',  'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000003', NULL,                             'sara.berg@netler.com',        'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000004', NULL,                             'johan.petersson@netler.com',  'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000005', NULL,                             'lina.eriksson@netler.com',    'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000006', NULL,                             'mikael.svensson@netler.com',  'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000007', NULL,                             'anna.johansson@netler.com',   'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000008', NULL,                             'test.employee@netler.com',    'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000009', NULL,                             'norling.fre@gmail.com',        'EMPLOYEE',  TRUE),
+    ('aa000000-0000-0000-0000-000000000002', 'seed-uid-aa000000-0000-0000-0000-000000000002', 'erik.lindqvist@netler.com',  'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000003', 'seed-uid-aa000000-0000-0000-0000-000000000003', 'sara.berg@netler.com',        'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000004', 'seed-uid-aa000000-0000-0000-0000-000000000004', 'johan.petersson@netler.com',  'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000005', 'seed-uid-aa000000-0000-0000-0000-000000000005', 'lina.eriksson@netler.com',    'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000006', 'seed-uid-aa000000-0000-0000-0000-000000000006', 'mikael.svensson@netler.com',  'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000007', 'seed-uid-aa000000-0000-0000-0000-000000000007', 'anna.johansson@netler.com',   'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000008', 'seed-uid-aa000000-0000-0000-0000-000000000008', 'test.employee@netler.com',    'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000009', 'seed-uid-aa000000-0000-0000-0000-000000000009', 'norling.fre@gmail.com',       'EMPLOYEE',   TRUE),
     ('00000000-0000-0000-0000-000000000010', 'WPFQhIsBrvTG2ve5fplw26sfdbC2', 'philip.olsson@netler.com',  'SUPERADMIN', TRUE),
     ('00000000-0000-0000-0000-000000000011', '1OGSEIXFLoYL063TLgEqZ3zb8rX2', 'philip.schill@netler.com', 'SUPERADMIN', TRUE),
-    ('aa000000-0000-0000-0000-000000000012', NULL,                             'emma.holmgren@netler.com',    'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000012', 'seed-uid-aa000000-0000-0000-0000-000000000012', 'emma.holmgren@netler.com',    'EMPLOYEE',   TRUE),
     ('00000000-0000-0000-0000-000000000013', 'jdMOkk4CJzXWVB0qPvmICLRrink1',  'petra@netler.com',           'ADMIN',      TRUE),
-    ('aa000000-0000-0000-0000-000000000014', NULL,                             'klara.lindstrom@netler.com',  'EMPLOYEE',   TRUE),
-    ('aa000000-0000-0000-0000-000000000015', NULL,                             'oscar.hansson@netler.com',    'EMPLOYEE',   TRUE)
+    ('aa000000-0000-0000-0000-000000000014', 'seed-uid-aa000000-0000-0000-0000-000000000014', 'klara.lindstrom@netler.com',  'EMPLOYEE',   TRUE),
+    ('aa000000-0000-0000-0000-000000000015', 'seed-uid-aa000000-0000-0000-0000-000000000015', 'oscar.hansson@netler.com',    'EMPLOYEE',   TRUE)
 ON CONFLICT (id) DO NOTHING;
 
 
