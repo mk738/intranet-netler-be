@@ -40,7 +40,7 @@ public class EmailEventListener {
                     e.daysCount(), e.submittedAt(),
                     e.adminEmails());
         } catch (Exception ex) {
-            log.error("Failed to send vacation-requested emails for {}: {}",
+            log.error("=requested emails for {}: {}",
                     e.employeeName(), ex.getMessage(), ex);
         }
     }
@@ -52,7 +52,7 @@ public class EmailEventListener {
             mailerSendService.sendVacationReviewed(
                     e.employeeEmail(), e.employeeName(), e.dateRange(), e.status());
         } catch (Exception ex) {
-            log.error("Failed to send vacation-reviewed email to {}: {}",
+            log.error("=-reviewed email to {}: {}",
                     e.employeeEmail(), ex.getMessage(), ex);
         }
     }
