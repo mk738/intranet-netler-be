@@ -17,13 +17,13 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class EmailEventListener {
 
-    private final MailerSendService mailerSendService;
+    private final ResendService resendService;
 
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(EmployeeInvitedEvent e) {
         try {
-            mailerSendService.sendInvite(
+            resendService.sendInvite(
                     e.recipientEmail(), e.recipientName(), e.inviteLink(), e.invitedByName());
         } catch (Exception ex) {
             log.error("Failed to send invite email to {}: {}", e.recipientEmail(), ex.getMessage(), ex);
@@ -34,7 +34,7 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(VacationRequestedEvent e) {
         try {
-            mailerSendService.sendVacationRequested(
+            resendService.sendVacationRequested(
                     e.employeeName(), e.jobTitle(),
                     e.startDate(), e.endDate(),
                     e.daysCount(), e.submittedAt(),
@@ -49,7 +49,7 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(VacationReviewedEvent e) {
         try {
-            mailerSendService.sendVacationReviewed(
+            resendService.sendVacationReviewed(
                     e.employeeEmail(), e.employeeName(), e.dateRange(), e.status());
         } catch (Exception ex) {
             log.error("=-reviewed email to {}: {}",
@@ -61,7 +61,7 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(EventCreatedEvent e) {
         try {
-            mailerSendService.sendEventCreated(
+            resendService.sendEventCreated(
                     e.eventTitle(), e.eventDate(), e.location(), e.recipientEmails());
         } catch (Exception ex) {
             log.error("Failed to send event-created emails for '{}': {}",
@@ -73,7 +73,7 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void on(NewsPublishedEvent e) {
         try {
-            mailerSendService.sendNewsPublished(
+            resendService.sendNewsPublished(
                     e.postId(), e.newsTitle(), e.authorName(),
                     e.publishedDate(), e.excerpt(), e.recipientEmails());
         } catch (Exception ex) {
