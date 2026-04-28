@@ -104,13 +104,18 @@ public class HubService {
             String stripped = rawBody.replaceAll("<[^>]*>", "").strip();
             String excerpt  = stripped.length() > 200 ? stripped.substring(0, 200) + "…" : stripped;
 
+            String coverImageUrl = saved.getCoverImagePath() != null
+                    ? storageService.getSignedUrl(storageProps.getBucket().getNewsCovers(), saved.getCoverImagePath())
+                    : "";
             eventPublisher.publishEvent(new NewsPublishedEvent(
                     saved.getId(),
                     saved.getTitle(),
                     saved.getAuthor().getFullName(),
+                    saved.getAuthor().getInitials(),
+                    coverImageUrl,
                     publishedDate,
                     excerpt,
-                    employeeRepository.findAll().stream().map(Employee::getEmail).toList()));
+                    employeeRepository.findAllActiveEmails()));
         }
 
         return hubMapper.toDetailDto(saved);
@@ -154,24 +159,25 @@ public class HubService {
         NewsPost saved = newsPostRepository.save(post);
 
         if (publish && wasUnpublished) {
-            List<String> allEmails = employeeRepository.findAll().stream()
-                    .map(Employee::getEmail)
-                    .toList();
-
             String publishedDate = saved.getPublishedAt()
                     .atZone(ZoneOffset.UTC)
                     .format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));
             String rawBody  = post.getBody() == null ? "" : post.getBody();
             String stripped = rawBody.replaceAll("<[^>]*>", "").strip();
             String excerpt  = stripped.length() > 200 ? stripped.substring(0, 200) + "…" : stripped;
+            String coverImageUrl = saved.getCoverImagePath() != null
+                    ? storageService.getSignedUrl(storageProps.getBucket().getNewsCovers(), saved.getCoverImagePath())
+                    : "";
 
             eventPublisher.publishEvent(new NewsPublishedEvent(
-                    post.getId(),
-                    post.getTitle(),
-                    post.getAuthor().getFullName(),
+                    saved.getId(),
+                    saved.getTitle(),
+                    saved.getAuthor().getFullName(),
+                    saved.getAuthor().getInitials(),
+                    coverImageUrl,
                     publishedDate,
                     excerpt,
-                    allEmails));
+                    employeeRepository.findAllActiveEmails()));
         }
 
         return hubMapper.toDetailDto(saved);
@@ -241,8 +247,15 @@ public class HubService {
         List<String> allEmails = employeeRepository.findAllActiveEmails();
         String formattedDate = saved.getEventDate()
                 .format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH));
-        eventPublisher.publishEvent(
-                new EventCreatedEvent(saved.getTitle(), formattedDate, saved.getLocation(), allEmails));
+        eventPublisher.publishEvent(new EventCreatedEvent(
+                saved.getTitle(),
+                formattedDate,
+                saved.getStartTime() != null ? saved.getStartTime() : "",
+                saved.getEndTime() != null ? saved.getEndTime() : "",
+                saved.getLocation() != null ? saved.getLocation() : "",
+                saved.getDescription() != null ? saved.getDescription() : "",
+                author.getFullName(),
+                allEmails));
 
         return hubMapper.toEventDto(saved, null);
     }

@@ -63,7 +63,7 @@ public class EmployeeService {
     private final StorageProperties          storageProps;
     private final OnboardingService          onboardingService;
 
-    @Value("${mailersend.login-url:https://intranet.yourcompany.com/login}")
+    @Value("${resend.login-url}")
     private String loginUrl;
 
     // ── Admin ─────────────────────────────────────────────────────────────────

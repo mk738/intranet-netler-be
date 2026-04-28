@@ -62,7 +62,10 @@ public class EmailEventListener {
     public void on(EventCreatedEvent e) {
         try {
             resendService.sendEventCreated(
-                    e.eventTitle(), e.eventDate(), e.location(), e.recipientEmails());
+                    e.eventTitle(), e.eventDate(),
+                    e.startTime(), e.endTime(),
+                    e.location(), e.description(),
+                    e.authorName(), e.recipientEmails());
         } catch (Exception ex) {
             log.error("Failed to send event-created emails for '{}': {}",
                     e.eventTitle(), ex.getMessage(), ex);
@@ -75,6 +78,7 @@ public class EmailEventListener {
         try {
             resendService.sendNewsPublished(
                     e.postId(), e.newsTitle(), e.authorName(),
+                    e.authorInitials(), e.coverImageUrl(),
                     e.publishedDate(), e.excerpt(), e.recipientEmails());
         } catch (Exception ex) {
             log.error("Failed to send news-published emails for '{}': {}",

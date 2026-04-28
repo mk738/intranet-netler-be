@@ -22,8 +22,6 @@ public class ResendService {
     private final String fromName;
     private final String loginBaseUrl;
     private final String siteBaseUrl;
-    private final String vacationNotifyEmail;
-    private final String newsNotifyEmail;
     private final String inviteTemplateId;
     private final String newsTemplateId;
     private final String vacationRequestedTemplateId;
@@ -35,10 +33,8 @@ public class ResendService {
             @Value("${resend.api-token}") String apiToken,
             @Value("${resend.from-email}") String fromEmail,
             @Value("${resend.from-name:Intranet}") String fromName,
-            @Value("${resend.login-url:https://intranet.yourcompany.com/login}") String loginBaseUrl,
-            @Value("${resend.site-url:https://intranet.yourcompany.com}") String siteBaseUrl,
-            @Value("${resend.vacation-notify-email:}") String vacationNotifyEmail,
-            @Value("${resend.news-notify-email:}") String newsNotifyEmail,
+            @Value("${resend.login-url}") String loginBaseUrl,
+            @Value("${resend.site-url}") String siteBaseUrl,
             @Value("${resend.templates.invite:}") String inviteTemplateId,
             @Value("${resend.templates.news:}") String newsTemplateId,
             @Value("${resend.templates.vacation-requested:}") String vacationRequestedTemplateId,
@@ -49,8 +45,6 @@ public class ResendService {
         this.fromName = fromName;
         this.loginBaseUrl = loginBaseUrl;
         this.siteBaseUrl = siteBaseUrl;
-        this.vacationNotifyEmail = vacationNotifyEmail;
-        this.newsNotifyEmail = newsNotifyEmail;
         this.inviteTemplateId = inviteTemplateId;
         this.newsTemplateId = newsTemplateId;
         this.vacationRequestedTemplateId = vacationRequestedTemplateId;
@@ -102,25 +96,34 @@ public class ResendService {
     }
 
     public void sendNewsPublished(UUID postId, String postTitle, String authorName,
+                                  String authorInitials, String coverImageUrl,
                                   String publishedDate, String excerpt,
                                   List<String> recipientEmails) {
-        if (newsNotifyEmail.isBlank()) return;
+        if (newsTemplateId.isBlank()) {
+            log.warn("sendNewsPublished skipped — resend.templates.news not configured");
+            return;
+        }
+        if (recipientEmails == null || recipientEmails.isEmpty()) return;
 
-        var variables = Map.<String, Object>of(
-                "year", String.valueOf(Year.now().getValue()),
-                "post_title", postTitle,
-                "author_name", authorName,
-                "published_date", publishedDate,
-                "excerpt", excerpt,
-                "post_url", siteBaseUrl + "/news/" + postId,
-                "teaser_text", excerpt,
-                "category", ""
+        var variables = Map.<String, Object>ofEntries(
+                Map.entry("year", String.valueOf(Year.now().getValue())),
+                Map.entry("post_title", postTitle),
+                Map.entry("author_name", authorName),
+                Map.entry("author_initials", authorInitials),
+                Map.entry("cover_image_url", coverImageUrl),
+                Map.entry("published_date", publishedDate),
+                Map.entry("excerpt", excerpt),
+                Map.entry("post_url", siteBaseUrl + "/news/" + postId),
+                Map.entry("teaser_text", excerpt),
+                Map.entry("category", "")
         );
 
-        send(buildPayload(newsNotifyEmail, postTitle, newsTemplateId, variables));
+        for (String recipient : recipientEmails) {
+            send(buildPayload(recipient, postTitle, newsTemplateId, variables));
+        }
 
-        log.info("News published email sent via Resend to {} for post '{}'",
-                newsNotifyEmail, postTitle);
+        log.info("News published email sent via Resend to {} recipients for post '{}'",
+                recipientEmails.size(), postTitle);
     }
 
     public void sendVacationRequested(String employeeName, String jobTitle,
@@ -143,12 +146,14 @@ public class ResendService {
                 "portal_url", siteBaseUrl + "/vacation"
         );
 
-        send(buildPayload(vacationNotifyEmail,
-                employeeName + " has submitted a vacation request",
-                vacationRequestedTemplateId, variables));
+        for (String admin : adminEmails) {
+            send(buildPayload(admin,
+                    employeeName + " has submitted a vacation request",
+                    vacationRequestedTemplateId, variables));
+        }
 
-        log.info("Vacation request email sent via Resend to {} for '{}'",
-                vacationNotifyEmail, employeeName);
+        log.info("Vacation request email sent via Resend to {} admins for '{}'",
+                adminEmails.size(), employeeName);
     }
 
     public void sendVacationReviewed(String employeeEmail, String employeeName,
@@ -174,19 +179,25 @@ public class ResendService {
     }
 
     public void sendEventCreated(String eventTitle, String eventDate,
-                                 String location, List<String> recipientEmails) {
+                                 String startTime, String endTime,
+                                 String location, String description,
+                                 String authorName, List<String> recipientEmails) {
         if (eventCreatedTemplateId.isBlank()) {
             log.warn("sendEventCreated skipped — resend.templates.event-created not configured");
             return;
         }
         if (recipientEmails == null || recipientEmails.isEmpty()) return;
 
-        var variables = Map.<String, Object>of(
-                "year", String.valueOf(Year.now().getValue()),
-                "event_title", eventTitle,
-                "event_date", eventDate,
-                "location", location != null ? location : "",
-                "portal_url", siteBaseUrl + "/events"
+        var variables = Map.<String, Object>ofEntries(
+                Map.entry("year", String.valueOf(Year.now().getValue())),
+                Map.entry("event_title", eventTitle),
+                Map.entry("event_date", eventDate),
+                Map.entry("start_time", startTime),
+                Map.entry("end_time", endTime),
+                Map.entry("location", location),
+                Map.entry("description", description),
+                Map.entry("author_name", authorName),
+                Map.entry("portal_url", siteBaseUrl + "/events")
         );
 
         for (String recipient : recipientEmails) {

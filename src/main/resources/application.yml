@@ -44,20 +44,18 @@ jasypt:
     password: ${JASYPT_PASSWORD}
     algorithm: PBEWithMD5AndTripleDES
 
-mailersend:
-  api-token: ${MAILERSEND_API_TOKEN}
-  from-email: ${MAILERSEND_FROM_EMAIL:no-reply@yourcompany.com}
-  from-name: ${MAILERSEND_FROM_NAME:Intranet}
-  login-url: ${MAILERSEND_LOGIN_URL:https://intranet.yourcompany.com/login}
-  site-url: ${MAILERSEND_SITE_URL:https://intranet.yourcompany.com}
-  vacation-notify-email: ${MAILERSEND_VACATION_NOTIFY_EMAIL:}
-  news-notify-email: ${MAILERSEND_NEWS_NOTIFY_EMAIL:}
+resend:
+  api-token: ${RESEND_API_TOKEN}
+  from-email: ${RESEND_FROM_EMAIL:no-reply@yourcompany.com}
+  from-name: ${RESEND_FROM_NAME:Intranet}
+  login-url: ${RESEND_LOGIN_URL}
+  site-url: ${RESEND_SITE_URL}
   templates:
-    invite: ${MAILERSEND_TEMPLATE_INVITE:vywj2lpy71jl7oqz}
-    news: ${MAILERSEND_TEMPLATE_NEWS:k68zxl2613egj905}
-    vacation-requested: ${MAILERSEND_TEMPLATE_VACATION_REQUESTED:pxkjn41wpn5lz781}
-    vacation-reviewed: ${MAILERSEND_TEMPLATE_VACATION_REVIEWED:}
-    event-created: ${MAILERSEND_TEMPLATE_EVENT_CREATED:}
+    invite: ${RESEND_TEMPLATE_INVITE:}
+    news: ${RESEND_TEMPLATE_NEWS:}
+    vacation-requested: ${RESEND_TEMPLATE_VACATION_REQUESTED:}
+    vacation-reviewed: ${RESEND_TEMPLATE_VACATION_REVIEWED:}
+    event-created: ${RESEND_TEMPLATE_EVENT_CREATED:}
 
 firebase:
   credentials:
