@@ -39,10 +39,6 @@ spring:
       mode: always
       data-locations: classpath:db/seed/dev-data.sql
 
-mailersend:
-  login-url: ${MAILERSEND_LOGIN_URL}
-  site-url: ${MAILERSEND_SITE_URL}
-
 cors:
   allowed-origins: ${CORS_ORIGINS}
 
