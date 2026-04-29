@@ -124,7 +124,7 @@ class HubServiceTest {
 
         when(newsPostRepository.findById(post.getId())).thenReturn(Optional.of(post));
         when(newsPostRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        when(employeeRepository.findAll()).thenReturn(List.of(author));
+        when(employeeRepository.findAllActiveEmails()).thenReturn(List.of("admin@x.com"));
         when(hubMapper.toDetailDto(any())).thenReturn(
                 new NewsPostDetailDto(post.getId(), "Test Post", "Body text",
                         "Anna Admin", "AA", Instant.now(), false, null, null, null));
